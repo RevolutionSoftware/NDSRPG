@@ -1,6 +1,6 @@
 #ifndef MACROS_H
 #define MACROS_H
-/* aux_macros.c
+/* File: aux_macros.c
  * Authors: Chickendude, add
  * Description:
  * Helper macros for knowing what the static does at that point. */

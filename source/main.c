@@ -1,5 +1,6 @@
-/* main.c
- * Authors: Chickendude, add */
+/* File: main.c
+ * Authors: Chickendude, add
+ * Description: VOID */
 
 // Includes NDS
 #include <nds.h>	// Main NDS equates

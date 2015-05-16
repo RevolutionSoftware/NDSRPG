@@ -1,8 +1,7 @@
 #include <nds.h>
 
 int main() {
-
-    /* This program doesn't do very much, yet. */
-
+	/*  Turn on the 2D graphics core. */
+	powerOn(POWER_ALL_2D);
 	return 0;
 }

@@ -48,10 +48,10 @@ int main(void) {
 	iprintf("NDSRPG:\n");
 	iprintf("4-bit color tilemap");
 
-/* NDS has nine memory banks, banks 0-4
- *  Use mode 0. Mode 0 is for tilebased sprites, called "text" mode
- * Other modes have options for rotation, scaling, and bitmap display
- * You have access to 4 backgrounds in mode 0 */
+    /* NDS has nine memory banks, banks 0-4
+     *  Use mode 0. Mode 0 is for tilebased sprites, called "text" mode
+     * Other modes have options for rotation, scaling,
+     * and bitmap display. You have access to 4 backgrounds in mode 0 */
 	videoSetMode(MODE_0_2D | DISPLAY_BG0_ACTIVE);   // Set mode 0 in 2D mode (not 3D)
     vramSetBankA(VRAM_A_MAIN_BG);					// There are nine memory banks, use memory bank A
     /* Initializes the background:
@@ -63,9 +63,9 @@ int main(void) {
      * I think that's what we'll use for scrolling our maps */
 	bg0 = bgInit(0, BgType_Text4bpp, BgSize_T_256x256, 0,1);
 
-/* use DMA to copy data over
- * bgGetGfxPtr gets the uses the id from bgInit
- * (or bgInitSub, which works with the bottom screen) */
+    /* use DMA to copy data over
+     * bgGetGfxPtr gets the uses the id from bgInit
+     * (or bgInitSub, which works with the bottom screen) */
 	dmaCopy(tilesTiles, bgGetGfxPtr(bg0), tilesTilesLen);
 	dmaCopy(map, bgGetMapPtr(bg0), sizeof(map));
 	dmaCopy(tilesPal, BG_PALETTE, 256*2);

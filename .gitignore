@@ -2,3 +2,4 @@ build/
 *.nds
 *.elf
 *.arm9
+*.proj

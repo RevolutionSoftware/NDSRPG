@@ -5,7 +5,6 @@
 // Includes NDS
 #include <nds.h>	// Main NDS equates
 #include <stdio.h>	// For console stuff
-#include <stdint.h>
 #include "font.h"
 #include "tiles.h"
 
@@ -14,7 +13,7 @@
 /* Each map entry is apparently 2 bytes, since a tileset can hold up
  * to 1024 tiles. Map is currently exactly same size as screen,
  * 32 8x8 tiles wide, 24 tiles tall. */
-global_variable uint16_t map[] = {
+global_variable u16 map[] = {
     0,1,4,5,0,1,0,1,0,1,0,1,0,1,0,1,0,1,4,5,0,1,0,1,0,1,0,1,0,1,0,1,
 	2,3,6,7,2,3,2,3,2,3,2,3,2,3,2,3,2,3,6,7,2,3,2,3,2,3,2,3,2,3,2,3,
 	0,1,4,5,0,1,0,1,0,1,0,1,0,1,0,1,0,1,4,5,0,1,0,1,0,1,0,1,0,1,0,1,

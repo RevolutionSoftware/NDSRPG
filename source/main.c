@@ -2,12 +2,16 @@
  * Authors: Chickendude, add
  * Description: VOID */
 
+#define DEBUG
+
 // Includes NDS
 #include <nds.h>	// Main NDS equates
 #include <stdio.h>	// For console stuff
+#include "tilemap.h"
 #include "font.h"
 #include "tiles.h"
 #include "aux_macros.h"
+
 
 // Equates
 #define M_BASE0 0
@@ -69,12 +73,22 @@ int main(void) {
      * I think that's what we'll use for scrolling our maps */
 	bg0 = bgInit(0, BgType_Text4bpp, BgSize_T_256x256, M_BASE0, T_BASE1);
 
+	char str[4];
+	sprintf(str,"%d",bg0);
+	iprintf(str);
+
+
     /* use DMA to copy data over
      * bgGetGfxPtr gets the uses the id from bgInit
      * (or bgInitSub, which works with the bottom screen) */
 	dmaCopy(tilesTiles, bgGetGfxPtr(bg0), tilesTilesLen);
-	dmaCopy(map, bgGetMapPtr(bg0), sizeof(map));
+//	dmaCopy(map, bgGetMapPtr(bg0), sizeof(map));
 	dmaCopy(tilesPal, BG_PALETTE, 256*2);
+
+	int x = 0;
+	int y = 0;
+
+	tilemap(map, sizeof(map), bg0, x, y);
 	
 	while(1) {
         swiWaitForVBlank();

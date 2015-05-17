@@ -7,8 +7,15 @@
 #include <stdio.h>	// For console stuff
 #include "font.h"
 #include "tiles.h"
-
 #include "aux_macros.h"
+
+// Equates
+#define M_BASE0 0
+#define M_BASE1 1
+#define M_BASE2 2
+#define M_BASE3 3
+#define T_BASE0 0
+#define T_BASE1 1
 
 /* Each map entry is apparently 2 bytes, since a tileset can hold up
  * to 1024 tiles. Map is currently exactly same size as screen,
@@ -60,7 +67,7 @@ int main(void) {
      *                    int mapBase (2kb offset in VRAM), int tileBase (16kb offset in VRAM))
      * There are other sizes available other than 256x256, eg. 512x256 and 512x512
      * I think that's what we'll use for scrolling our maps */
-	bg0 = bgInit(0, BgType_Text4bpp, BgSize_T_256x256, 0,1);
+	bg0 = bgInit(0, BgType_Text4bpp, BgSize_T_256x256, M_BASE0, T_BASE1);
 
     /* use DMA to copy data over
      * bgGetGfxPtr gets the uses the id from bgInit
@@ -68,6 +75,7 @@ int main(void) {
 	dmaCopy(tilesTiles, bgGetGfxPtr(bg0), tilesTilesLen);
 	dmaCopy(map, bgGetMapPtr(bg0), sizeof(map));
 	dmaCopy(tilesPal, BG_PALETTE, 256*2);
+	
 	while(1) {
         swiWaitForVBlank();
 		scanKeys();

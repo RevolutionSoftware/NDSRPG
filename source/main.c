@@ -11,6 +11,7 @@
 #include "tilemap.h"
 #include "font.h"
 #include "tiles.h"
+#include "player.h"
 #include "objects.h"
 #include "movement.h"
 

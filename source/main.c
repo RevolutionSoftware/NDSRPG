@@ -1,25 +1,40 @@
 /* File: main.c
  * Authors: Chickendude, add
- * Description: VOID */
+ * Description: File containing main */
 
 #define DEBUG
 
 // Includes NDS
 #include <nds.h>	// Main NDS equates
 #include <stdio.h>	// For console stuff
+#include "aux_macros.h"
 #include "tilemap.h"
 #include "font.h"
 #include "tiles.h"
-#include "aux_macros.h"
+#include "objects.h"
+#include "movement.h"
 
+#define FRAMES_PER_ANIMATION 3
 
 // Equates
-#define M_BASE0 0
-#define M_BASE1 1
-#define M_BASE2 2
-#define M_BASE3 3
-#define T_BASE0 0
-#define T_BASE1 1
+enum {
+    SCREEN_TOP = 0,
+    SCREEN_BOTTOM = 192,
+
+    SCREEN_LEFT = 0,
+    SCREEN_RIGHT = 256
+};
+
+enum {
+    M_BASE0 = 0,
+    M_BASE1 = 1,
+    M_BASE2 = 2,
+    M_BASE3 = 3,
+
+    T_BASE0 = 0,
+    T_BASE1 = 1
+};
+
 
 /* Each map entry is apparently 2 bytes, since a tileset can hold up
  * to 1024 tiles. Map is currently exactly same size as screen,
@@ -92,7 +107,8 @@ global_variable u16 map2[] = {
 };
 
 int main(void) {
-	int i;
+    PC player = {0,0};
+
 	consoleDemoInit();
 	iprintf("NDSRPG:\n");
 	iprintf("4-bit color tilemap");
@@ -103,6 +119,14 @@ int main(void) {
      * and bitmap display. You have access to 4 backgrounds in mode 0 */
 	videoSetMode(MODE_0_2D | DISPLAY_BG0_ACTIVE);   // Set mode 0 in 2D mode (not 3D)
     vramSetBankA(VRAM_A_MAIN_BG);					// There are nine memory banks, use memory bank A
+
+    vramSetBankB(VRAM_B_MAIN_SPRITE);
+
+    oamInit(&oamMain, SpriteMapping_1D_128, false);
+
+	init_PC(&player, (u8 *)playerTiles);
+	dmaCopy(playerPal, SPRITE_PALETTE, 512);
+
     /* Initializes the background:
      * 	"Text" essentially means the same thing as "Tile"
      * Text4bpp means our tiles are 4bpp
@@ -136,6 +160,7 @@ int main(void) {
         swiWaitForVBlank();
 		// Check for keys now
 		scanKeys();
+		int keys = keysHeld();
 		// Exit if Start was pressed
 		if (keysDown()&KEY_START)
             break;
@@ -143,21 +168,47 @@ int main(void) {
 //			iprintf("\nYou pressed A");
 //		if (keysUp()&KEY_A)
 //			iprintf("\nYou released A");
-		i = keysHeld();
-		if (i&KEY_RIGHT && x<w*16-16*16)	// w*tile_width - tile_width*tiles_per_row
-			x++;
-		if (i & KEY_LEFT && x>0)
+		if (keys & KEY_RIGHT && x<w*16-16*16)	// w*tile_width - tile_width*tiles_per_row
+        {
+            x++;
+            player.x++;
+            player.state = W_RIGHT;
+        }
+		if (keys & KEY_LEFT && x>0)
+        {
 			x--;
-		if (i&KEY_DOWN && y<h*16-16*12)		// w*tile_height - tile_height*tiles_per_column
+            player.x--;
+            player.state = W_LEFT;
+        }
+		if (keys & KEY_DOWN && y<h*16-16*12)		// w*tile_height - tile_height*tiles_per_column
+        {
 			y++;
-		if (i & KEY_UP && y>0)
-			y--;
-		if (i) {
+            player.y++;
+            player.state = W_DOWN;
+        }
+		if (keys & KEY_UP && y>0)
+        {
+            y--;
+            player.y--;
+            player.state = W_UP;
+        }
+		if (keys) {
 			REG_BG0HOFS = (x+16)%16;
 			REG_BG0VOFS = (y+16)%16;
-		}
+            player.anim_frame++;
 
+            if (player.anim_frame >= FRAMES_PER_ANIMATION) {
+                player.anim_frame = 0;
+            }
+		}
+        animate_PC(&player);
+        oamSet(&oamMain, 0, player.x, player.y, 0, 0, SpriteSize_32x32, SpriteColorFormat_256Color,
+               player.sprite_gfx_mem, -1, false, false, false, false, false);
+		swiWaitForVBlank();
+		oamUpdate(&oamMain);
 	}
 
 	return 0;
 }
+#undef DEBUG
+#undef FRAMES_PER_ANIMATION

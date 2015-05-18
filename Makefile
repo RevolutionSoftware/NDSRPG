@@ -25,7 +25,7 @@ include $(DEVKITARM)/ds_rules
 TARGET		:=	$(notdir $(CURDIR))
 BUILD		:=	build
 SOURCES		:=	source
-DATA		:=	
+DATA		:=
 INCLUDES	:=	include
 GRAPHICS	:=	graphics
 AUDIO		:=	audio
@@ -37,7 +37,7 @@ SOUNDBANK_NAME  :=	soundbank
 ARCH	:=	-mthumb -mthumb-interwork
 
 CFLAGS	:=	-g -Wall -O2\
- 		-march=armv5te -mtune=arm946e-s -fomit-frame-pointer\
+		-march=armv5te -mtune=arm946e-s -fomit-frame-pointer\
 		-ffast-math \
 		$(ARCH)
 
@@ -52,7 +52,7 @@ LDFLAGS	=	-specs=ds_arm9.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
 LIBS	:= -lmm9 -lfat -lnds9
- 
+
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -66,9 +66,9 @@ LIBDIRS	:=	$(LIBNDS)
 #---------------------------------------------------------------------------------
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
- 
+
 export OUTPUT	:=	$(CURDIR)/$(TARGET)
- 
+
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 			$(foreach dir,$(DATA),$(CURDIR)/$(dir)) \
 			$(foreach dir,$(GRAPHICS),$(CURDIR)/$(dir)) \
@@ -103,30 +103,30 @@ export OFILES		:=	$(addsuffix .o,$(BINFILES)) \
 				$(SFILES:.s=.o) \
 
 export AUDIOFILES	:=	$(foreach dir,$(AUDIO),$(notdir $(wildcard $(dir)/*)))
- 
+
 export INCLUDE		:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 				$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
 				$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
 				-I$(CURDIR)/$(BUILD)
- 
+
 export LIBPATHS		:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 
 .PHONY: $(BUILD) clean
- 
+
 #---------------------------------------------------------------------------------
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 	@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
- 
+
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
 	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nds $(TARGET).arm9
- 
- 
+
+
 #---------------------------------------------------------------------------------
 else
- 
+
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
@@ -167,9 +167,9 @@ $(SOUNDBANK_NAME).bin : $(AUDIOFILES)
 	@echo $(notdir $^)
 	@mmutil -d $^ -o$(SOUNDBANK_NAME).bin -h$(SOUNDBANK_NAME).h
 
- 
+
 -include $(DEPSDIR)/*.d
- 
+
 #---------------------------------------------------------------------------------------
 endif
 #---------------------------------------------------------------------------------------

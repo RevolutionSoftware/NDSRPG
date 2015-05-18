@@ -196,7 +196,7 @@ int main(void) {
 	int y = 0;
 
 	tilemap(map, sizeof(map), x, y);
-	
+
 	while(1) {
         swiWaitForVBlank();
 		// Check for keys now
@@ -204,14 +204,21 @@ int main(void) {
 		// Exit if Start was pressed
 		if (keysDown()&KEY_START)
             break;
-		if (keysDown()&KEY_A) iprintf("\nYou pressed A");
-		if (keysUp()&KEY_A) iprintf("\nYou released A");
+		if (keysDown()&KEY_A)
+            iprintf("\nYou pressed A");
+		if (keysUp()&KEY_A)
+            iprintf("\nYou released A");
 		i = keysHeld();
 		if (i) {
-			if (i&KEY_RIGHT) x++;
-			if (i&KEY_LEFT) x--;
-			if (i&KEY_DOWN) y++;
-			if (i&KEY_UP) y--;
+			if (i&KEY_RIGHT)
+                x++;
+			if (i&KEY_LEFT)
+                x--;
+			if (i&KEY_DOWN)
+                y++;
+			if (i&KEY_UP)
+                y--;
+
 			REG_BG0HOFS = x;
 			REG_BG0VOFS = y;
 		}

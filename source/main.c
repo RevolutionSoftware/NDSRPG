@@ -7,19 +7,22 @@
 // Includes NDS
 #include <nds.h>	// Main NDS equates
 #include <stdio.h>	// For console stuff
+#include "aux_macros.h"
 #include "tilemap.h"
 #include "font.h"
 #include "tiles.h"
-#include "aux_macros.h"
-
+#include "objecttypes.h"
+#include "movement.h"
 
 // Equates
-#define M_BASE0 0
-#define M_BASE1 1
-#define M_BASE2 2
-#define M_BASE3 3
-#define T_BASE0 0
-#define T_BASE1 1
+// We are currently not using these, commented to avoid clutter in
+// the namespace.
+/* #define M_BASE0 0
+   #define M_BASE1 1
+   #define M_BASE2 2
+   #define M_BASE3 3
+   #define T_BASE0 0
+   #define T_BASE1 1 */
 
 /* Each map entry is apparently 2 bytes, since a tileset can hold up
  * to 1024 tiles. Map is currently exactly same size as screen,
@@ -161,3 +164,4 @@ int main(void) {
 
 	return 0;
 }
+#undef DEBUG

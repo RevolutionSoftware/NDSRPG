@@ -11,16 +11,21 @@ char* toString(int i) {
 #endif
 
 void tilemap(u16 map[], int size, int x, int y) {
-//	REG_BG0CNT = BG_32x32 | BG_COLOR_16 | BG_MAP_BASE(0) | BG_TILE_BASE(1);
 	// Our map will get stored at map base 0
 	u16 *tilemap = BG_MAP_RAM(0);
 	int i;
 
-	for(i = 0; i < size; i++) {
-		*tilemap = map[i];
+	for(i = 0; i < 16; i++) {
+		
+		*tilemap = map[i]*4;
 		tilemap += 1;
+		*tilemap = map[i]*4+1;
+		tilemap += 31;
+		*tilemap = map[i]*4+2;
+		tilemap += 1;
+		*tilemap = map[i]*4+3;
+		tilemap -= 30;
 	}
-
 
 //	dmaCopy(map, bgGetMapPtr(bgid), size);
 /* I finally got things figured out, arrays get passed as a pointer to

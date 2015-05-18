@@ -1,6 +1,6 @@
 /* File: main.c
  * Authors: Chickendude, add
- * Description: VOID */
+ * Description: File containing main */
 
 #define DEBUG
 
@@ -11,18 +11,28 @@
 #include "tilemap.h"
 #include "font.h"
 #include "tiles.h"
-#include "objecttypes.h"
+#include "objects.h"
 #include "movement.h"
 
 // Equates
-// We are currently not using these, commented to avoid clutter in
-// the namespace.
-/* #define M_BASE0 0
-   #define M_BASE1 1
-   #define M_BASE2 2
-   #define M_BASE3 3
-   #define T_BASE0 0
-   #define T_BASE1 1 */
+enum {
+    SCREEN_TOP = 0,
+    SCREEN_BOTTOM = 192,
+
+    SCREEN_LEFT = 0,
+    SCREEN_RIGHT = 256
+};
+
+enum {
+    M_BASE0 = 0,
+    M_BASE1 = 1,
+    M_BASE2 = 2,
+    M_BASE3 = 3,
+
+    T_BASE0 = 0,
+    T_BASE1 = 1
+};
+
 
 /* Each map entry is apparently 2 bytes, since a tileset can hold up
  * to 1024 tiles. Map is currently exactly same size as screen,

@@ -43,7 +43,7 @@ void tilemap(u16 map[], int w, int h, int x, int y) {
 	}
 
 	// Jump to map_base 1 to draw last column of sprites (just off screen)
-	*tilemap = BG_MAP_RAM(1);
+	tilemap = BG_MAP_RAM(1);
 
 	start = x+y*w+16;
 	for(row = 0; row < 16; row++) {

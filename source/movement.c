@@ -2,6 +2,7 @@
  * Authors: Chickendude, add
  * Description: Movement of characters and objects */
 #include <nds.h>
+#include "player.h"
 #include "objects.h"
 #include "movement.h"
 
@@ -10,9 +11,9 @@
 void animate_PC(PC *sprite)
 {
 	int frame = sprite->anim_frame + sprite->state * FRAMES_PER_ANIMATION;
-	u8 *offset = sprite->frame_gfx + frame * 32*32;
+	u8 *offset = sprite->frame_gfx + frame * 32*32; // 32 * 32
 
-	dmaCopy(offset, sprite->sprite_gfx_mem, 32*32);
+	dmaCopy(offset, sprite->sprite_gfx_mem, 32*32); // 32 * 32
 }
 
 void init_PC(PC *sprite, u8 *gfx)

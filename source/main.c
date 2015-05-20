@@ -40,7 +40,7 @@ enum {
 /* Each map entry is apparently 2 bytes, since a tileset can hold up
  * to 1024 tiles. Map is currently exactly same size as screen,
  * 32 8x8 tiles wide, 24 tiles tall. */
-global_variable u16 map2[] = {
+global_variable u16 map[] = {
 	5,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,2,0,3,0,4,0,5,0,1,0,0,0,0,1,1,0,0,2,2,0,0,0,3,3,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,1,
 	2,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,1,0,2,0,2,0,3,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,1,
 	1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,1,0,2,0,2,0,3,0,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,1,
@@ -108,7 +108,8 @@ global_variable u16 map2[] = {
 };
 
 int main(void) {
-    PC player = {0,0};
+    PC_t player = {16,32};
+    tile_t tile[] = {{true},{true},{false},{false},{false},{false},{false},{false},{false},{false}};
 
 	consoleDemoInit();
 	iprintf("NDSRPG:\n");
@@ -118,7 +119,8 @@ int main(void) {
      *  Use mode 0. Mode 0 is for tilebased sprites, called "text" mode
      * Other modes have options for rotation, scaling,
      * and bitmap display. You have access to 4 backgrounds in mode 0 */
-	videoSetMode(MODE_0_2D | DISPLAY_BG0_ACTIVE);   // Set mode 0 in 2D mode (not 3D)
+//	videoSetMode(MODE_0_2D | DISPLAY_BG0_ACTIVE);
+	REG_DISPCNT = MODE_0_2D | DISPLAY_BG0_ACTIVE;   // Set mode 0 in 2D mode and enable background 0
     vramSetBankA(VRAM_A_MAIN_BG);					// There are nine memory banks, use memory bank A
 
     vramSetBankB(VRAM_B_MAIN_SPRITE);
@@ -158,7 +160,7 @@ int main(void) {
 	while(1) {
 //        swiWaitForVBlank();
 		// 		map, w,h,x,y
-//		tilemap(map2, h, w, x>>4, y>>4);
+//		tilemap(map, h, w, x>>4, y>>4);
 		// Check for keys now
 		scanKeys();
 		int keys = keysHeld();
@@ -171,9 +173,15 @@ int main(void) {
 //			iprintf("\nYou released A");
 		if (keys & KEY_RIGHT)
         {
+			int mapOffset = (player.y + 12)/16*w+(player.x + PLAYER_WIDTH + SPEED)/16;
+			int tileId = map[mapOffset];
+			int tileId2 = tileId;
+			if (player.y % 16 != 0)
+				tileId2 = map[mapOffset+w];	// move down one row in map
 			// Make sure player isn't at edge of screen
 			if (player.x < w*16-PLAYER_WIDTH)
-				player.x+=SPEED;
+				if(tile[tileId].isPassable && tile[tileId2].isPassable)
+					player.x+=SPEED;
 			// Make sure map isn't at edge of screen
 			if ((player.x-x > SCREEN_RIGHT/2 - PLAYER_WIDTH/2) && x<w*16-16*16)
 				x+=SPEED;
@@ -181,29 +189,47 @@ int main(void) {
         }
 		if (keys & KEY_LEFT)
         {
+			int mapOffset = (player.y+12)/16*w+(player.x-SPEED)/16;
+			int tileId = map[mapOffset];
+			int tileId2 = tileId;
+			if (player.y % 16 != 0)
+				tileId2 = map[mapOffset+w];	// move down one row in map
 			if (player.x > 0)
-				player.x-=SPEED;
+				if(tile[tileId].isPassable && tile[tileId2].isPassable)
+					player.x-=SPEED;
 			if ((player.x-x < SCREEN_RIGHT/2 - PLAYER_WIDTH/2) && x>0)
 				x-=SPEED;
 			player.state = W_LEFT;
         }
 		if (keys & KEY_DOWN)		// w*tile_height - tile_height*tiles_per_column
         {
+			int mapOffset = (player.y+PLAYER_HEIGHT+SPEED)/16*w+player.x/16;
+			int tileId = map[mapOffset];
+			int tileId2 = tileId;
+			if (player.x % 16 != 0)
+				tileId2 = map[mapOffset+1];
 			if (player.y < h*16 - PLAYER_HEIGHT)
-				player.y+=SPEED;
+				if(tile[tileId].isPassable && tile[tileId2].isPassable)
+					player.y+=SPEED;
 			if ((player.y-y > SCREEN_BOTTOM/2 - PLAYER_HEIGHT/2) && y<h*16-12*16)
 				y+=SPEED;
 			player.state = W_DOWN;
         }
 		if (keys & KEY_UP)
         {
+			int mapOffset = (player.y+12-SPEED)/16*w+player.x/16;
+			int tileId = map[mapOffset];
+			int tileId2 = tileId;
+			if (player.x % 16 != 0)
+				tileId2 = map[mapOffset+1];
 			if (player.y > 0)
-				player.y -= SPEED;
+				if(tile[tileId].isPassable && tile[tileId2].isPassable)
+					player.y -= SPEED;
 			if ((player.y-y < SCREEN_BOTTOM/2 - PLAYER_HEIGHT/2) && y>0)
 				y-=SPEED;
 			player.state = W_UP;
         }
-		tilemap(map2, h, w, x>>4, y>>4);
+		tilemap(map, h, w, x>>4, y>>4);
 		if (keys) {
 			REG_BG0HOFS = (x)%16;
 			REG_BG0VOFS = (y)%16;

@@ -11,6 +11,6 @@ typedef struct {
 
 	int state;
 	int anim_frame;
-}PC;
+}PC_t;
 
 #endif /* OBJECTS_H */

@@ -17,7 +17,7 @@
 #ifndef GRIT_PLAYER_H
 #define GRIT_PLAYER_H
 
-#define PLAYER_WIDTH 16
+#define PLAYER_WIDTH 17
 #define PLAYER_HEIGHT 24
 #define SPEED 2
 #define ANIMATION_SPEED 8

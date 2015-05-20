@@ -180,7 +180,7 @@ int main(void) {
         }
 		if (keys & KEY_LEFT)
         {
-			if (player.x > -4)
+			if (player.x > 0)
 				player.x-=SPEED;
 			if ((player.x-x < SCREEN_RIGHT/2 - PLAYER_WIDTH/2) && x>0)
 				x-=SPEED;

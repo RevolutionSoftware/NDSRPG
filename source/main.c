@@ -40,18 +40,18 @@ enum {
 /* Each map entry is apparently 2 bytes, since a tileset can hold up
  * to 1024 tiles. Map is currently exactly same size as screen,
  * 32 8x8 tiles wide, 24 tiles tall. */
-global_variable u16 map2[] = {
-	0,1,2,3,0,4,0,1,2,3,4,5,6,7,8,9,1,0,1,0,1,0,1,0,2,0,3,0,4,0,5,0,1,0,0,0,0,1,1,0,0,2,2,0,0,0,3,3,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,1,
-	1,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,1,0,2,0,2,0,3,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,1,
-	0,1,3,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,1,0,2,0,2,0,3,0,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,1,
-	1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,1,0,0,2,2,0,0,3,0,0,0,0,0,0,0,0,0,7,0,0,0,0,0,0,0,1,
-	0,1,0,0,0,0,0,0,0,0,6,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,1,0,2,0,0,0,3,0,3,0,0,0,0,0,0,0,0,8,0,0,0,0,0,0,1,
-	1,0,0,5,0,2,0,0,0,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,1,0,2,0,0,0,0,3,3,0,0,0,0,0,0,0,0,0,9,0,0,0,0,0,1,
-	0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-	1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-	0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-	1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-	0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+global_variable u16 map[] = {
+	5,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,2,0,3,0,4,0,5,0,1,0,0,0,0,1,1,0,0,2,2,0,0,0,3,3,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,1,
+	2,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,1,0,2,0,2,0,3,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,1,
+	1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,1,0,2,0,2,0,3,0,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,1,
+	1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,1,0,0,2,2,0,0,3,0,0,0,0,0,0,0,0,0,7,0,0,0,0,0,0,0,1,
+	1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,1,0,2,0,0,0,3,0,3,0,0,0,0,0,0,0,0,8,0,0,0,0,0,0,1,
+	1,1,0,5,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,1,0,2,0,0,0,0,3,3,0,0,0,0,0,0,0,0,0,9,0,0,0,0,0,1,
+	1,1,0,2,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+	1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+	1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+	1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+	1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 	8,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 	7,7,7,7,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -108,7 +108,8 @@ global_variable u16 map2[] = {
 };
 
 int main(void) {
-    PC player = {0,0};
+    PC_t player = {16,32};
+    tile_t tile[] = {{true},{true},{false},{false},{false},{false},{false},{false},{false},{false}};
 
 	consoleDemoInit();
 	iprintf("NDSRPG:\n");
@@ -118,12 +119,14 @@ int main(void) {
      *  Use mode 0. Mode 0 is for tilebased sprites, called "text" mode
      * Other modes have options for rotation, scaling,
      * and bitmap display. You have access to 4 backgrounds in mode 0 */
-	videoSetMode(MODE_0_2D | DISPLAY_BG0_ACTIVE);   // Set mode 0 in 2D mode (not 3D)
+//	videoSetMode(MODE_0_2D | DISPLAY_BG0_ACTIVE);
+	REG_DISPCNT = MODE_0_2D | DISPLAY_BG0_ACTIVE;   // Set mode 0 in 2D mode and enable background 0
     vramSetBankA(VRAM_A_MAIN_BG);					// There are nine memory banks, use memory bank A
 
     vramSetBankB(VRAM_B_MAIN_SPRITE);
 
     oamInit(&oamMain, SpriteMapping_1D_128, false);
+
 
 	init_PC(&player, (u8 *)playerTiles);
 	dmaCopy(playerPal, SPRITE_PALETTE, 512);
@@ -136,7 +139,7 @@ int main(void) {
      * There are other sizes available other than 256x256, eg. 512x256 and 512x512
      * I think that's what we'll use for scrolling our maps
      *		 layer, bg type,		 bg size,		   mapbase, tilebase */
-	REG_BG0CNT = BG_PRIORITY_0 | BG_64x32 | BG_COLOR_16 | BG_MAP_BASE(0) | BG_TILE_BASE(1);
+	REG_BG0CNT = BG_PRIORITY_0 | BG_64x32 | BG_COLOR_256 | BG_MAP_BASE(0) | BG_TILE_BASE(1);
 //	bg0 = bgInit(0, BgType_Text4bpp, BgSize_T_512x512, M_BASE0, T_BASE1);
 
     /* use DMA to copy data over
@@ -144,7 +147,6 @@ int main(void) {
      * (or bgInitSub, which works with the bottom screen) */
     // tile_ram is divided into blocks of 16kb, tileram(1) = tile_ram + 16kb
 	dmaCopy(tilesTiles, BG_TILE_RAM(1), tilesTilesLen);
-//	dmaCopy(map, bgGetMapPtr(bg0), sizeof(map));
 	dmaCopy(tilesPal, BG_PALETTE, 256*2);
 
 	int h = 64;
@@ -156,9 +158,9 @@ int main(void) {
 
 
 	while(1) {
+//        swiWaitForVBlank();
 		// 		map, w,h,x,y
-		tilemap(map2, h, w, x>>4, y>>4);
-        swiWaitForVBlank();
+//		tilemap(map, h, w, x>>4, y>>4);
 		// Check for keys now
 		scanKeys();
 		int keys = keysHeld();
@@ -169,42 +171,78 @@ int main(void) {
 //			iprintf("\nYou pressed A");
 //		if (keysUp()&KEY_A)
 //			iprintf("\nYou released A");
-		if (keys & KEY_RIGHT && x<w*16-16*16)	// w*tile_width - tile_width*tiles_per_row
+		if (keys & KEY_RIGHT)
         {
-            x++;
-            player.x++;
+			int mapOffset = (player.y + 12)/16*w+(player.x + PLAYER_WIDTH + SPEED)/16;
+			int tileId = map[mapOffset];
+			int tileId2 = tileId;
+			if (player.y % 16 != 0)
+				tileId2 = map[mapOffset+w];	// move down one row in map
+			// Make sure player isn't at edge of screen
+			if (player.x < w*16-PLAYER_WIDTH)
+				if(tile[tileId].isPassable && tile[tileId2].isPassable)
+					player.x+=SPEED;
+			// Make sure map isn't at edge of screen
+			if ((player.x-x > SCREEN_RIGHT/2 - PLAYER_WIDTH/2) && x<w*16-16*16)
+				x+=SPEED;
             player.state = W_RIGHT;
         }
-		if (keys & KEY_LEFT && x>0)
+		if (keys & KEY_LEFT)
         {
-			x--;
-            player.x--;
-            player.state = W_LEFT;
+			int mapOffset = (player.y+12)/16*w+(player.x-SPEED)/16;
+			int tileId = map[mapOffset];
+			int tileId2 = tileId;
+			if (player.y % 16 != 0)
+				tileId2 = map[mapOffset+w];	// move down one row in map
+			if (player.x > 0)
+				if(tile[tileId].isPassable && tile[tileId2].isPassable)
+					player.x-=SPEED;
+			if ((player.x-x < SCREEN_RIGHT/2 - PLAYER_WIDTH/2) && x>0)
+				x-=SPEED;
+			player.state = W_LEFT;
         }
-		if (keys & KEY_DOWN && y<h*16-16*12)		// w*tile_height - tile_height*tiles_per_column
+		if (keys & KEY_DOWN)		// w*tile_height - tile_height*tiles_per_column
         {
-			y++;
-            player.y++;
-            player.state = W_DOWN;
+			int mapOffset = (player.y+PLAYER_HEIGHT+SPEED)/16*w+player.x/16;
+			int tileId = map[mapOffset];
+			int tileId2 = tileId;
+			if (player.x % 16 != 0)
+				tileId2 = map[mapOffset+1];
+			if (player.y < h*16 - PLAYER_HEIGHT)
+				if(tile[tileId].isPassable && tile[tileId2].isPassable)
+					player.y+=SPEED;
+			if ((player.y-y > SCREEN_BOTTOM/2 - PLAYER_HEIGHT/2) && y<h*16-12*16)
+				y+=SPEED;
+			player.state = W_DOWN;
         }
-		if (keys & KEY_UP && y>0)
+		if (keys & KEY_UP)
         {
-            y--;
-            player.y--;
-            player.state = W_UP;
+			int mapOffset = (player.y+12-SPEED)/16*w+player.x/16;
+			int tileId = map[mapOffset];
+			int tileId2 = tileId;
+			if (player.x % 16 != 0)
+				tileId2 = map[mapOffset+1];
+			if (player.y > 0)
+				if(tile[tileId].isPassable && tile[tileId2].isPassable)
+					player.y -= SPEED;
+			if ((player.y-y < SCREEN_BOTTOM/2 - PLAYER_HEIGHT/2) && y>0)
+				y-=SPEED;
+			player.state = W_UP;
         }
+		tilemap(map, h, w, x>>4, y>>4);
 		if (keys) {
-			REG_BG0HOFS = (x+16)%16;
-			REG_BG0VOFS = (y+16)%16;
-            player.anim_frame++;
+			REG_BG0HOFS = (x)%16;
+			REG_BG0VOFS = (y)%16;
+			player.anim_frame++;
+			player.anim_frame %= FRAMES_PER_ANIMATION*ANIMATION_SPEED;
 
-            if (player.anim_frame >= FRAMES_PER_ANIMATION) {
-                player.anim_frame = 0;
-            }
+//            if (player.anim_frame >= FRAMES_PER_ANIMATION*ANIMATION_SPEED) {
+//                player.anim_frame = 0;
+//            }
 		}
-        animate_PC(&player);
-        oamSet(&oamMain, 0, player.x, player.y, 0, 0, SpriteSize_32x32, SpriteColorFormat_256Color,
-               player.sprite_gfx_mem, -1, false, false, false, false, false);
+		animate_PC(&player);
+		oamSet(&oamMain, 0, player.x-x, player.y-y, 0, 0, SpriteSize_32x32, SpriteColorFormat_256Color,
+			player.sprite_gfx_mem, -1, false, false, false, false, false);
 		swiWaitForVBlank();
 		oamUpdate(&oamMain);
 	}

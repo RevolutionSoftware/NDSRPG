@@ -137,7 +137,7 @@ int main(void) {
      * There are other sizes available other than 256x256, eg. 512x256 and 512x512
      * I think that's what we'll use for scrolling our maps
      *		 layer, bg type,		 bg size,		   mapbase, tilebase */
-	REG_BG0CNT = BG_PRIORITY_0 | BG_64x32 | BG_COLOR_16 | BG_MAP_BASE(0) | BG_TILE_BASE(1);
+	REG_BG0CNT = BG_PRIORITY_0 | BG_64x32 | BG_COLOR_256 | BG_MAP_BASE(0) | BG_TILE_BASE(1);
 //	bg0 = bgInit(0, BgType_Text4bpp, BgSize_T_512x512, M_BASE0, T_BASE1);
 
     /* use DMA to copy data over

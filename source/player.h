@@ -17,6 +17,11 @@
 #ifndef GRIT_PLAYER_H
 #define GRIT_PLAYER_H
 
+#define PLAYER_WIDTH 24
+#define PLAYER_HEIGHT 32
+#define SPEED 2
+#define ANIMATION_SPEED 8
+
 #define playerTilesLen 12288
 extern const unsigned int playerTiles[3072];
 

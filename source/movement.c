@@ -10,7 +10,7 @@
 
 void animate_PC(PC *sprite)
 {
-	int frame = sprite->anim_frame + sprite->state * FRAMES_PER_ANIMATION;
+	int frame = sprite->anim_frame/ANIMATION_SPEED + sprite->state * FRAMES_PER_ANIMATION;
 	u8 *offset = sprite->frame_gfx + frame * 32*32; // 32 * 32
 
 	dmaCopy(offset, sprite->sprite_gfx_mem, 32*32); // 32 * 32

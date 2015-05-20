@@ -144,7 +144,6 @@ int main(void) {
      * (or bgInitSub, which works with the bottom screen) */
     // tile_ram is divided into blocks of 16kb, tileram(1) = tile_ram + 16kb
 	dmaCopy(tilesTiles, BG_TILE_RAM(1), tilesTilesLen);
-//	dmaCopy(map, bgGetMapPtr(bg0), sizeof(map));
 	dmaCopy(tilesPal, BG_PALETTE, 256*2);
 
 	int h = 64;
@@ -156,9 +155,9 @@ int main(void) {
 
 
 	while(1) {
+//        swiWaitForVBlank();
 		// 		map, w,h,x,y
-		tilemap(map2, h, w, x>>4, y>>4);
-        swiWaitForVBlank();
+//		tilemap(map2, h, w, x>>4, y>>4);
 		// Check for keys now
 		scanKeys();
 		int keys = keysHeld();
@@ -169,42 +168,54 @@ int main(void) {
 //			iprintf("\nYou pressed A");
 //		if (keysUp()&KEY_A)
 //			iprintf("\nYou released A");
-		if (keys & KEY_RIGHT && x<w*16-16*16)	// w*tile_width - tile_width*tiles_per_row
+		if (keys & KEY_RIGHT)
         {
-            x++;
-            player.x++;
+			// Make sure player isn't at edge of screen
+			if (player.x < w*16-PLAYER_WIDTH)
+				player.x+=SPEED;
+			// Make sure map isn't at edge of screen
+			if ((player.x-x > SCREEN_RIGHT/2 - PLAYER_WIDTH/2) && x<w*16-16*16)
+				x+=SPEED;
             player.state = W_RIGHT;
         }
-		if (keys & KEY_LEFT && x>0)
+		if (keys & KEY_LEFT)
         {
-			x--;
-            player.x--;
-            player.state = W_LEFT;
+			if (player.x > -4)
+				player.x-=SPEED;
+			if ((player.x-x < SCREEN_RIGHT/2 - PLAYER_WIDTH/2) && x>0)
+				x-=SPEED;
+			player.state = W_LEFT;
         }
-		if (keys & KEY_DOWN && y<h*16-16*12)		// w*tile_height - tile_height*tiles_per_column
+		if (keys & KEY_DOWN)		// w*tile_height - tile_height*tiles_per_column
         {
-			y++;
-            player.y++;
-            player.state = W_DOWN;
+			if (player.y < h*16 - PLAYER_HEIGHT)
+				player.y+=SPEED;
+			if ((player.y-y > SCREEN_BOTTOM/2 - PLAYER_HEIGHT/2) && y<h*16-12*16)
+				y+=SPEED;
+			player.state = W_DOWN;
         }
-		if (keys & KEY_UP && y>0)
+		if (keys & KEY_UP)
         {
-            y--;
-            player.y--;
-            player.state = W_UP;
+			if (player.y > 0)
+				player.y -= SPEED;
+			if ((player.y-y < SCREEN_BOTTOM/2 - PLAYER_HEIGHT/2) && y>0)
+				y-=SPEED;
+			player.state = W_UP;
         }
+		tilemap(map2, h, w, x>>4, y>>4);
 		if (keys) {
-			REG_BG0HOFS = (x+16)%16;
-			REG_BG0VOFS = (y+16)%16;
-            player.anim_frame++;
+			REG_BG0HOFS = (x)%16;
+			REG_BG0VOFS = (y)%16;
+			player.anim_frame++;
+			player.anim_frame %= FRAMES_PER_ANIMATION*ANIMATION_SPEED;
 
-            if (player.anim_frame >= FRAMES_PER_ANIMATION) {
-                player.anim_frame = 0;
-            }
+//            if (player.anim_frame >= FRAMES_PER_ANIMATION*ANIMATION_SPEED) {
+//                player.anim_frame = 0;
+//            }
 		}
-        animate_PC(&player);
-        oamSet(&oamMain, 0, player.x, player.y, 0, 0, SpriteSize_32x32, SpriteColorFormat_256Color,
-               player.sprite_gfx_mem, -1, false, false, false, false, false);
+		animate_PC(&player);
+		oamSet(&oamMain, 0, player.x-x, player.y-y, 0, 0, SpriteSize_32x32, SpriteColorFormat_256Color,
+			player.sprite_gfx_mem, -1, false, false, false, false, false);
 		swiWaitForVBlank();
 		oamUpdate(&oamMain);
 	}

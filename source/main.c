@@ -167,7 +167,8 @@ int main(void) {
     while(1) {
         // ############# DEBUG ################
         char debugStr[100];
-        sprintf(debugStr,"X: %d, Y: %d        \nX TILE: %d, Y TILE: %d          ",player.x,player.y,(player.x + PLAYER_WIDTH)/16,(player.y + 16)/16);
+        sprintf(debugStr,"X: %d, Y: %d        \nX TILE: %d, Y TILE: %d          ",
+                player.x, player.y, (player.x + PLAYER_WIDTH)/16, (player.y + 16)/16);
         putString(debugStr);
         // ####################################
 

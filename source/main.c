@@ -156,9 +156,6 @@ int main(void) {
 // **********************************************************************************************
 
 
-	char msg[] = "Hello Add, this is the first string to test the text routine.\n\nOh yeah, and a little more.";
-	putString(msg);
-
 	int maph = 64;
 	int mapw = 64;
 	int mapx = 0;
@@ -168,9 +165,12 @@ int main(void) {
 
 
 	while(1) {
-//        swiWaitForVBlank();
-		// 		map, w,h,x,y
-//		tilemap(map, h, w, x>>4, y>>4);
+		// ############# DEBUG ################
+		char debugStr[100];
+		sprintf(debugStr,"X: %d, Y: %d        \nX TILE: %d, Y TILE: %d          ",player.x,player.y,(player.x + PLAYER_WIDTH)/16,(player.y + 16)/16);
+		putString(debugStr);
+		// ####################################
+
 		// Check for keys now
 		scanKeys();
 		int keys = keysHeld();
@@ -183,10 +183,10 @@ int main(void) {
 //			iprintf("\nYou released A");
 		if (keys & KEY_RIGHT)
         {
-			int mapOffset = (player.y + 12)/16*mapw+(player.x + PLAYER_WIDTH + SPEED)/16;
+			int mapOffset = (player.y + 16)/16*mapw+(player.x + PLAYER_WIDTH + SPEED)/16;
 			int tileId = map[mapOffset];
 			int tileId2 = tileId;
-			if (player.y % 16 != 0)
+			if (((player.y+16) % 16) >= 8)
 				tileId2 = map[mapOffset+mapw];	// move down one row in map
 			// Make sure player isn't at edge of screen
 			if (player.x < mapw*16-PLAYER_WIDTH)
@@ -199,10 +199,10 @@ int main(void) {
         }
 		if (keys & KEY_LEFT)
         {
-			int mapOffset = (player.y+12)/16*mapw+(player.x-SPEED)/16;
+			int mapOffset = (player.y+16)/16*mapw+(player.x-SPEED)/16;
 			int tileId = map[mapOffset];
 			int tileId2 = tileId;
-			if (player.y % 16 != 0)
+			if ((player.y + 16) % 16 >= 8)
 				tileId2 = map[mapOffset+mapw];	// move down one row in map
 			if (player.x > 0)
 				if(tile[tileId].isPassable && tile[tileId2].isPassable)
@@ -227,7 +227,7 @@ int main(void) {
         }
 		if (keys & KEY_UP)
         {
-			int mapOffset = (player.y+12-SPEED)/16*mapw+player.x/16;
+			int mapOffset = (player.y+16-SPEED)/16*mapw+player.x/16;
 			int tileId = map[mapOffset];
 			int tileId2 = tileId;
 			if (player.x % 16 != 0)
@@ -249,7 +249,8 @@ int main(void) {
 //            if (player.anim_frame >= FRAMES_PER_ANIMATION*ANIMATION_SPEED) {
 //                player.anim_frame = 0;
 //            }
-		}
+		} else
+			player.anim_frame = ANIMATION_SPEED;	// reset animation when not moving
 		animate_PC(&player);
 		oamSet(&oamMain, 0, player.x-mapx, player.y-mapy, 0, 0, SpriteSize_32x32, SpriteColorFormat_256Color,
 			player.sprite_gfx_mem, -1, false, false, false, false, false);

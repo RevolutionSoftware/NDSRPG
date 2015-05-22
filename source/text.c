@@ -1,39 +1,54 @@
 #include <nds.h>	// Main NDS equates
-#include "font.h"
+
+#ifdef USE_STRLEN
+#include <string.h> // strlen()
+#endif // USE_STRLEN
+
+#include "text.h"
 
 // text is defined as a tilemap
 void putString(char *text) {
-    int i,size=0;
+    int i;
 
+#ifndef USE_STRLEN
+    int size = 0;
     // get size of string (sizeof won't work for pointers)
-    while(text[size] != '\0')
-        size++;
+    while(text[size] != '\0') {
+       size++;
+    }
+#endif
+
+#ifdef USE_STRLEN
+    size_t text_length = strlen(text); // string.h
+#endif // USE_STRLEN
 
     // address of tilemap
     u16 *sub_map = BG_MAP_RAM_SUB(0);
 
     // Draw the message on the screen.
-    int x,y;
-    x = 0;
-    y = 0;
+    int x = 0, y = 0;
+
+#ifdef USE_STRLEN
+    for (i = 0; i < text_length; i++) {
+#else
     for(i = 0; i < size; i++) {
+#endif // USE_STRLEN
+
         // Check for special characters (\n, etc.)
-        switch(text[i]) {
-        case '\n':
+        if (text[i] == '\n') {
             x = 0;
             y++;
-            continue;			// *is this bad practice?*
         }
-        // text wrapping
-        if(text[i] == ' ') {
-            int j = i+1;
+        else if (text[i] == ' ') {
+            int j = i++;
+
             while(text[j] != ' ' && text[j] != '\0') {
                 j++;
             }
             if(j-i+x > 32) {		// j-i = number of characters to next space
-                // .. x + characters to next space
-                i++;				// skip the space
-                x = 0;				// and move to a new line
+                                        // .. x + characters to next space
+                i++;			// skip the space
+                x = 0;			// and move to a new line
                 y++;
             }
         }

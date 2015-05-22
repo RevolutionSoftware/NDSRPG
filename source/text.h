@@ -1,0 +1,1 @@
+void putString(char *text);

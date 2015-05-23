@@ -3,6 +3,5 @@
 
 int stringLength(const char *str);
 void putString(const char *text);
-char *stringExploder(char *str, const char *delim);
 
 #endif // TEXT_H

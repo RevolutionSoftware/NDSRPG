@@ -16,7 +16,7 @@ int stringLength(const char *str) {
 void putString(const char *text) {
     int i;
 
-    //int text_length = stringLength(text);
+    int text_length = stringLength(text);
     // get size of string (sizeof won't work for pointers)
 
     // address of tilemap
@@ -54,34 +54,4 @@ void putString(const char *text) {
         if(!x)
             y++;
     }
-}
-// String Exploder
-char *stringExploder(char *str, const char* delim) {
-    local_persist char* _buffer;
-
-    if(str != NULL) {
-        _buffer = str;
-    }
-    if(_buffer[0] == '\0') {
-        return NULL;
-    }
-
-    char *ret = _buffer, *b;
-    const char *d;
-
-    for(b = _buffer; *b !='\0'; b++) {
-        for(d = delim; *d != '\0'; d++) {
-            if(*b == *d) {
-                *b = '\0';
-                _buffer = b+1;
-
-                if(b == ret) {
-                    ret++;
-                    continue;
-                }
-                return ret;
-            }
-        }
-    }
-    return ret;
 }

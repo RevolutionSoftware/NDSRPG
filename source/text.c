@@ -4,7 +4,7 @@
 #include <string.h> // strlen()
 #endif // USE_STRLEN
 
-#include "text.h"
+#include "font.h"
 
 // text is defined as a tilemap
 void putString(char *text) {

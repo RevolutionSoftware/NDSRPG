@@ -1,6 +1,5 @@
 #include <nds.h>	// Main NDS equates
 
-#include "aux_macros.h"
 #include "text.h"
 #include "font.h"
 

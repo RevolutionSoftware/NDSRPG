@@ -106,6 +106,7 @@ class Level:
 			self.map.append([])
 			for x in range(MAX_WIDTH):
 				self.map[y].append(0)
+		print(self.filename)
 		if self.filename != '':
 			with open(self.filename,"r") as f:
 				# first line is width and height
@@ -149,6 +150,8 @@ def openFile():
 	root = tk.Tk()
 	root.withdraw()
 	level.filename = tk.filedialog.askopenfilename(title = "Load a map",filetypes = (("map files","*.map"),("all files","*.*")),defaultextension=".map")
+	if not level.filename:
+		level.filename = ''
 	root.destroy()
 	level.loadMap()
 	statusbar.set("Map loaded")
@@ -441,9 +444,12 @@ def main():
 
 		# 60 Mhz
 		clock.tick(60)
+	print('closing')
 	pygame.quit()
+	print('closed')
 
 mouse = Mouse()
 level = Level()
 statusbar = StatusBar()
 main()
+print('end of main')

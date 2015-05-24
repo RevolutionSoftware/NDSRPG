@@ -2,8 +2,6 @@ import pygame
 import tkinter as tk
 import time, random, os
 
-import file
-
 # constants
 K_LEFT = pygame.K_LEFT
 K_RIGHT = pygame.K_RIGHT
@@ -302,8 +300,10 @@ def main():
 				if keys[pygame.K_LCTRL] or keys[pygame.K_RCTRL]:
 					if event.key == pygame.K_s:
 						saveFile()
-				if event.key == K_o:
-					openFile()
+					if event.key == K_o:
+						openFile()
+					if event.key == pygame.K_n:
+						newFile()
 				if event.key == K_ESCAPE:
 					if mouse.w_or_h == '':
 						running = False

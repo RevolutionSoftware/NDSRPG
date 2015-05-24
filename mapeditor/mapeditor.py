@@ -167,11 +167,12 @@ def exportFile():
 	if level.filename != '':
 		filename,ext = os.path.basename(level.filename).split('.')
 		with open(filename+'.h',"wt") as header:
-			f.write("global_variable u16 {}[] = \{\n".format(filename))
+			header.write("//Width: {}\t Height: {}\nglobal_variable u16 {}[] = {{".format(level.width,level.height,filename))
 			for y in range(level.height):
+				header.write('\n\t')
 				for x in range(level.width):
-					f.write(str(level.map[y][x])+',')
-				f.write('\n')
+					header.write(str(level.map[y][x])+',')
+			header.write('\n}')
 
 def drawMenu(buttons, width, height):
 	pygame.font.init()

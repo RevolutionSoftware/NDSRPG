@@ -27,6 +27,8 @@ TILE_ROWS = 4
 MAX_WIDTH = 300
 MAX_HEIGHT = 300
 STATUS_Y = DISPLAY_H-TILE_SIZE+2
+EDIT_X = 200
+EDIT_Y = 200
 
 TITLE = 'Map Editor'
 
@@ -39,15 +41,6 @@ screen = pygame.display.set_mode((DISPLAY_W,DISPLAY_H))
 pygame.display.set_caption(TITLE)
 clock = pygame.time.Clock()
 
-# load sprites
-tiles = []
-directory = 'tiles/'
-NUMTILES = 0
-for filename in sorted(os.listdir(directory)):
-	tiles.append(pygame.image.load(directory+filename).convert())
-	NUMTILES += 1
-tiles.append(pygame.image.load('cursor.bmp').convert())
-
 # width and height boxes
 BOX_W = 40
 WIDTH_XY = (400,0)
@@ -55,6 +48,7 @@ WIDTH_RECT = (WIDTH_XY[0]+56,0,BOX_W,17)
 HEIGHT_XY = (WIDTH_RECT[0]+BOX_W+10,0,BOX_W,17)
 HEIGHT_RECT = (HEIGHT_XY[0]+66,0,BOX_W,17)
 
+## Classes ##############################
 class StatusBar:
 	def __init__(self,message='',counter=0):
 		self.message = message
@@ -62,6 +56,17 @@ class StatusBar:
 	def set(self,message,counter = 60):
 		self.message = message
 		self.counter = counter
+
+class Tile:
+	def __init__(self,sprite,passable=True,textid='',mapid='',mapx='',mapy='',playerx='',playery=''):
+		self.sprite = sprite
+		self.passable=passable
+		self.textid=textid
+		self.mapid=mapid
+		self.mapx=mapx
+		self.mapy=mapy
+		self.playerx=playerx
+		self.playery=playery
 
 class Mouse:
 	def __init__(self,spriteL=-1,spriteR=0,x=0,y=0):
@@ -133,8 +138,10 @@ class Level:
 			width = WIDTH
 		for y in range(height):
 			for x in range(width):
-				blitSprite(tiles[self.map[y+self.y][x+self.x]],x*TILE_SIZE+1,y*TILE_SIZE+TILE_SIZE+1)
+				blitSprite(tiles[self.map[y+self.y][x+self.x]].sprite,x*TILE_SIZE+1,y*TILE_SIZE+TILE_SIZE+1)
+#########################################
 
+#### File functions #####################
 def newFile():
 	level.map = []
 	level.width = 32
@@ -188,6 +195,70 @@ def exportFile():
 					header.write(str(level.map[y][x])+',')
 			header.write('\n}')
 		statusbar.set("Map exported")
+#############################################
+
+def editTile(tileid):
+	# create edit surface
+	editbox = pygame.Surface((150,150),depth=24)
+	tile = tiles[tileid]
+	edit_tile = -1
+	waiting = True
+	while waiting:
+		editbox.fill(GREY)
+		for event in pygame.event.get():
+			if event.type == pygame.KEYDOWN:
+				if event.key == K_ESCAPE:
+					waiting = False
+			if event.type == pygame.MOUSEMOTION:
+				mousePos = pygame.mouse.get_pos()
+				mouse.x = mousePos[0]-EDIT_X
+				mouse.y = mousePos[1]-EDIT_Y
+			if event.type == pygame.MOUSEBUTTONDOWN:
+				# right click quit
+				if event.button == 3:
+					waiting = False
+				if event.button == 1:
+					if 18 < mouse.y < 36:
+						tile.passable = tile.passable == False
+					if 18*2 < mouse.y < 18*8:
+						edit_tile = ((mouse.y-18)//18)
+					# list of tiles at bottom
+					if mouse.y > DISPLAY_H-TILE_ROWS*TILE_SIZE-EDIT_Y:
+						y = (mouse.y - (DISPLAY_H-TILE_ROWS*TILE_SIZE-EDIT_Y))//TILE_SIZE 
+						x = (mouse.x+EDIT_X)//TILE_SIZE
+						tid = y*WIDTH + x
+						if len(tiles)-1 > tid:
+							keys = pygame.key.get_pressed()
+							if keys[pygame.K_LCTRL]:
+								tiles[tileid] = tile
+								tileid = tid
+								tile = tiles[tileid]
+		fontobject = pygame.font.Font(None,25)
+		# blit sprite to box
+		editbox.blit(tile.sprite,(65,1))
+		y = 18
+		i = 0
+		for text in (("Passable?",tile.passable),
+						("Text ID:",tile.textid),
+						("Map ID:",tile.mapid),
+						("Map X:",tile.mapx),
+						("Map Y:",tile.mapy),
+						("Player X:",tile.playerx),
+						("Player Y:",tile.playery)):
+			# check if we are editing this box
+			if i == edit_tile:
+				pygame.draw.rect(editbox, (154,125,254),(100,y,40,18), 1)
+			editbox.blit(fontobject.render(text[0], 0, BLACK),(0,y))
+			editbox.blit(fontobject.render(str(text[1]), 0, BLACK),(100,18))
+			i += 1
+			y += 18
+
+		# draw box to screen
+		screen.blit(editbox,(EDIT_X,EDIT_Y))
+		pygame.display.flip()
+	mouse.y = -1
+	tiles[tileid] = tile
+
 
 def drawMenu(buttons, width, height):
 	fontobject = pygame.font.Font(None,25)
@@ -229,17 +300,17 @@ def drawStatusBar():
 		string = "Mouse - {},{}".format(str(mouse.x//TILE_SIZE+level.x),str(mouse.y//TILE_SIZE-1+level.y))
 		screen.blit(fontobject.render(string, 0, BLACK),(DISPLAY_W//2,STATUS_Y))
 	# draw currently selected tiles
-	blitSprite(tiles[mouse.spriteL],160,STATUS_Y-1)
-	blitSprite(tiles[mouse.spriteR],180,STATUS_Y-1)
+	blitSprite(tiles[mouse.spriteL].sprite,160,STATUS_Y-1)
+	blitSprite(tiles[mouse.spriteR].sprite,180,STATUS_Y-1)
 
 def blitSprite(sprite,x,y):
 	screen.blit(sprite,(x,y))
 
 def drawMouse():
 	if mouse.y < DISPLAY_H-TILE_SIZE:
-		sprite = tiles[mouse.spriteL]
+		sprite = tiles[mouse.spriteL].sprite
 		if mouse.y > DISPLAY_H-TILE_ROWS*TILE_SIZE:
-			sprite = tiles[-1]						# if cursor is over tiles, switch to main cursor sprite
+			sprite = tiles[-1].sprite					# if cursor is over tiles, switch to main cursor sprite
 		surface = pygame.Surface((16,16), depth=24)
 		surface.set_alpha(255)
 		surface.set_colorkey((255,255,255))
@@ -250,7 +321,7 @@ def drawTileList():
 	x = 1
 	y = (HEIGHT-TILE_ROWS)*TILE_SIZE+1
 	for tile in tiles[:-1]:
-		blitSprite(tile,x,y)
+		blitSprite(tile.sprite,x,y)
 		x += TILE_SIZE
 
 def drawGrid():
@@ -286,16 +357,20 @@ def checkMouse(buttons):
 		if mouse.y > DISPLAY_H-TILE_ROWS*TILE_SIZE:
 			y = (mouse.y - (DISPLAY_H-TILE_ROWS*TILE_SIZE))//TILE_SIZE 
 			x = mouse.x//TILE_SIZE
-			if len(tiles)-1 > y*WIDTH + x:
-				if mouseClick[0] == 1:
-					mouse.spriteL = y*WIDTH + x
+			tileid = y*WIDTH + x
+			if len(tiles)-1 > tileid:
+				keys = pygame.key.get_pressed()
+				if keys[pygame.K_LCTRL]:
+					editTile(tileid)
+				elif mouseClick[0] == 1:
+					mouse.spriteL = tileid
 				else:
-					mouse.spriteR = y*WIDTH + x
+					mouse.spriteR = tileid
 		# tilemap
-		if mouse.onMap() and mouse.spriteL != -1:
+		if mouse.onMap():
 			y = (mouse.y-TILE_SIZE) // TILE_SIZE			# don't forget top row is the menu
 			x = mouse.x // TILE_SIZE
-			if mouseClick[0] == 1:
+			if mouseClick[0] == 1 and mouse.spriteL != -1:
 				level.map[y+level.y][x+level.x] = mouse.spriteL
 			else:
 				level.map[y+level.y][x+level.x] = mouse.spriteR
@@ -452,6 +527,15 @@ def main():
 		# 60 Mhz
 		clock.tick(60)
 	pygame.quit()
+
+# load sprites
+tiles = []
+directory = 'tiles/'
+NUMTILES = 0
+for filename in sorted(os.listdir(directory)):
+	tiles.append(Tile(pygame.image.load(directory+filename).convert()))
+	NUMTILES += 1
+tiles.append(Tile(pygame.image.load('cursor.bmp').convert()))
 
 mouse = Mouse()
 level = Level()

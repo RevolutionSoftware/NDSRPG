@@ -1,5 +1,6 @@
 import pygame
 import tkinter as tk
+import tkinter.filedialog
 import time, random, os
 
 # constants
@@ -160,10 +161,13 @@ def saveFile():
 		level.filename = ''
 
 def exportFile():
+	if level.filename == '':
+		saveFile()
+	
 	if level.filename != '':
 		filename,ext = os.path.basename(level.filename).split('.')
 		with open(filename+'.h',"wt") as header:
-			f.write("global_variable u16 {} {}\n".format(level.width,level.height))
+			f.write("global_variable u16 {}[] = \{\n".format(filename))
 			for y in range(level.height):
 				for x in range(level.width):
 					f.write(str(level.map[y][x])+',')
@@ -273,7 +277,7 @@ def checkMouse(buttons):
 BUTTONS = [	('New',0,0,50,16,newFile),
 			('Load',50,0,50,16,openFile),
 			('Save',100,0,50,16,saveFile),
-			('Export',150,0,60,16,openFile)]
+			('Export',150,0,60,16,exportFile)]
 
 def main():
 #	level.loadMap()
@@ -304,6 +308,8 @@ def main():
 						openFile()
 					if event.key == pygame.K_n:
 						newFile()
+					if event.key == pygame.K_e:
+						exportFile()
 				if event.key == K_ESCAPE:
 					if mouse.w_or_h == '':
 						running = False
@@ -367,7 +373,7 @@ def main():
 					mouse.w_or_h = ''
 				elif len(height_str) < 3:
 					height_str += chr(key)
-		else:
+		elif mouse.w_or_h == '':
 			width_str = str(level.width)
 			height_str = str(level.height)
 		if keys[K_LEFT]:

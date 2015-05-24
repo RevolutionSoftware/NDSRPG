@@ -64,13 +64,13 @@ class StatusBar:
 		self.counter = counter
 
 class Mouse:
-	def __init__(self,sprite=tiles[-1],x=0,y=0):
+	def __init__(self,spriteL=-1,spriteR=0,x=0,y=0):
 		self.x = x
 		self.y = y
-		self.sprite = sprite
-		self.spriteid = -1
+		self.spriteL = spriteL
+		self.spriteR = spriteR
 		self.w_or_h = ''
-	def onMap(self):					# Check if mouse is on map area
+	def onMap(self):						# Check if mouse is on map area
 		height = level.height
 		if height > HEIGHT-TILE_ROWS-1:
 			height = HEIGHT-TILE_ROWS-1		# - 1 because the top row is the menu
@@ -228,19 +228,23 @@ def drawStatusBar():
 	if mouse.onMap():
 		string = "Mouse - {},{}".format(str(mouse.x//TILE_SIZE+level.x),str(mouse.y//TILE_SIZE-1+level.y))
 		screen.blit(fontobject.render(string, 0, BLACK),(DISPLAY_W//2,STATUS_Y))
+	# draw currently selected tiles
+	blitSprite(tiles[mouse.spriteL],160,STATUS_Y-1)
+	blitSprite(tiles[mouse.spriteR],180,STATUS_Y-1)
 
 def blitSprite(sprite,x,y):
 	screen.blit(sprite,(x,y))
 
 def drawMouse():
-	sprite = mouse.sprite
-	if mouse.y > DISPLAY_H-TILE_ROWS*TILE_SIZE:
-		sprite = tiles[-1]						# if cursor is over tiles, switch to main cursor sprite
-	surface = pygame.Surface((16,16), depth=24)
-	surface.set_alpha(255)
-	surface.set_colorkey((255,255,255))
-	surface.blit(sprite,(0,0))
-	screen.blit(surface,(mouse.x,mouse.y))
+	if mouse.y < DISPLAY_H-TILE_SIZE:
+		sprite = tiles[mouse.spriteL]
+		if mouse.y > DISPLAY_H-TILE_ROWS*TILE_SIZE:
+			sprite = tiles[-1]						# if cursor is over tiles, switch to main cursor sprite
+		surface = pygame.Surface((16,16), depth=24)
+		surface.set_alpha(255)
+		surface.set_colorkey((255,255,255))
+		surface.blit(sprite,(0,0))
+		screen.blit(surface,(mouse.x,mouse.y))
 
 def drawTileList():
 	x = 1
@@ -270,7 +274,7 @@ def checkMouse(buttons):
 		else:
 			b.hover = False
 	mouseClick = pygame.mouse.get_pressed()
-	if mouseClick[0] == 1:
+	if mouseClick[0] == 1 or mouseClick[2] == 1:
 		# buttons up top
 		if mouse.y < TILE_SIZE:
 			if WIDTH_RECT[0]+BOX_W > mouse.x > WIDTH_RECT[0]:
@@ -283,13 +287,18 @@ def checkMouse(buttons):
 			y = (mouse.y - (DISPLAY_H-TILE_ROWS*TILE_SIZE))//TILE_SIZE 
 			x = mouse.x//TILE_SIZE
 			if len(tiles)-1 > y*WIDTH + x:
-				mouse.spriteid = y*WIDTH + x
-				mouse.sprite = tiles[mouse.spriteid]
+				if mouseClick[0] == 1:
+					mouse.spriteL = y*WIDTH + x
+				else:
+					mouse.spriteR = y*WIDTH + x
 		# tilemap
-		if mouse.onMap() and mouse.spriteid != -1:
+		if mouse.onMap() and mouse.spriteL != -1:
 			y = (mouse.y-TILE_SIZE) // TILE_SIZE			# don't forget top row is the menu
 			x = mouse.x // TILE_SIZE
-			level.map[y+level.y][x+level.x] = mouse.spriteid
+			if mouseClick[0] == 1:
+				level.map[y+level.y][x+level.x] = mouse.spriteL
+			else:
+				level.map[y+level.y][x+level.x] = mouse.spriteR
 			level.saved = False
 
 BUTTONS = [	('New',0,0,50,16,newFile),
@@ -368,13 +377,11 @@ def main():
 							b.action()
 				# check for scroll wheel
 				if event.button == 4:				# middle mouse down
-					if mouse.spriteid > -1:
-						mouse.spriteid -= 1
-						mouse.sprite = tiles[mouse.spriteid]
+					if mouse.spriteL > -1:
+						mouse.spriteL -= 1
 				if event.button == 5:				# middle mouse down
-					if -1 <= mouse.spriteid < NUMTILES -1:
-						mouse.spriteid += 1
-						mouse.sprite = tiles[mouse.spriteid]
+					if -1 <= mouse.spriteL < NUMTILES -1:
+						mouse.spriteL += 1
 		if mouse.w_or_h != '' and key != 0:
 			# fill out width/height box
 			if mouse.w_or_h == 'w':
@@ -444,12 +451,9 @@ def main():
 
 		# 60 Mhz
 		clock.tick(60)
-	print('closing')
 	pygame.quit()
-	print('closed')
 
 mouse = Mouse()
 level = Level()
 statusbar = StatusBar()
 main()
-print('end of main')

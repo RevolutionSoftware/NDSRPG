@@ -26,11 +26,13 @@ DISPLAY_H = TILE_SIZE*HEIGHT
 TILE_ROWS = 4
 MAX_WIDTH = 300
 MAX_HEIGHT = 300
+STATUS_Y = DISPLAY_H-TILE_SIZE+2
 
 TITLE = 'Map Editor'
 
 # set up pygame
 pygame.init()
+pygame.font.init()
 # create our surface
 screen = pygame.display.set_mode((DISPLAY_W,DISPLAY_H))
 # set title
@@ -52,6 +54,14 @@ WIDTH_XY = (400,0)
 WIDTH_RECT = (WIDTH_XY[0]+56,0,BOX_W,17)
 HEIGHT_XY = (WIDTH_RECT[0]+BOX_W+10,0,BOX_W,17)
 HEIGHT_RECT = (HEIGHT_XY[0]+66,0,BOX_W,17)
+
+class StatusBar:
+	def __init__(self,message='',counter=0):
+		self.message = message
+		self.counter = counter
+	def set(self,message,counter = 60):
+		self.message = message
+		self.counter = counter
 
 class Mouse:
 	def __init__(self,sprite=tiles[-1],x=0,y=0):
@@ -97,25 +107,21 @@ class Level:
 			for x in range(MAX_WIDTH):
 				self.map[y].append(0)
 		if self.filename != '':
-			print(level.filename)
-			with open(level.filename,"r") as f:
+			with open(self.filename,"r") as f:
 				# first line is width and height
 				line = f.readline().rstrip('\n')
 				w,h = line.split(' ')
-				level.width = int(w)
-				level.height = int(h)
-				print("{},{}".format(level.width,level.height))
+				self.width = int(w)
+				self.height = int(h)
 				y = 0
 				for line in f:
 					x = 0
 					line = line[:-2]
 					for tile in line.split(','):
-						print(tile,end=' ')
-						level.map[y][x] = int(tile)
+						self.map[y][x] = int(tile)
 						x += 1
-					print()
 					y += 1
-			level.saved = True
+			self.saved = True
 	def drawMap(self):
 		# make sure map doesn't get drawn past screen limits
 		height = self.height
@@ -137,6 +143,7 @@ def newFile():
 	level.filename = ''
 	level.saved = False
 	level.loadMap()
+	statusbar.set("New map")
 
 def openFile():
 	root = tk.Tk()
@@ -144,6 +151,7 @@ def openFile():
 	level.filename = tk.filedialog.askopenfilename(title = "Load a map",filetypes = (("map files","*.map"),("all files","*.*")),defaultextension=".map")
 	root.destroy()
 	level.loadMap()
+	statusbar.set("Map loaded")
 
 def saveFile():
 	if level.filename == '':
@@ -159,6 +167,7 @@ def saveFile():
 					f.write(str(level.map[y][x])+',')
 				f.write('\n')
 		level.saved = True
+		statusbar.set("File saved")
 	else:
 		level.filename = ''
 
@@ -175,9 +184,9 @@ def exportFile():
 				for x in range(level.width):
 					header.write(str(level.map[y][x])+',')
 			header.write('\n}')
+		statusbar.set("Map exported")
 
 def drawMenu(buttons, width, height):
-	pygame.font.init()
 	fontobject = pygame.font.Font(None,25)
 
 	# menu buttons
@@ -203,17 +212,19 @@ def drawMenu(buttons, width, height):
 	screen.blit(fontobject.render(width, 0, BLACK),(WIDTH_RECT[0]+2,2))
 	screen.blit(fontobject.render(height, 0, BLACK),(HEIGHT_RECT[0]+2,2))
 
-def drawCoords():
-	pygame.font.init()
-	fontobject = pygame.font.Font(None,23)
+def drawStatusBar():
+	fontobject = pygame.font.Font(None,21)
+	# check if there's a status message to display
+	if statusbar.counter > 0:
+		screen.blit(fontobject.render(statusbar.message, 0, BLACK),(10,STATUS_Y))
+		statusbar.counter -= 1
 	# draw map coords
 	string = "Map - {},{}".format(str(level.x),str(level.y))
-	screen.blit(fontobject.render(string, 0, BLACK),(DISPLAY_W//2-100,DISPLAY_H-TILE_SIZE))
-	
-
+	screen.blit(fontobject.render(string, 0, BLACK),(DISPLAY_W//2-100,STATUS_Y))
+	# draw the mouse coords if the mouse is on top of the map
 	if mouse.onMap():
 		string = "Mouse - {},{}".format(str(mouse.x//TILE_SIZE+level.x),str(mouse.y//TILE_SIZE-1+level.y))
-		screen.blit(fontobject.render(string, 0, BLACK),(DISPLAY_W//2,DISPLAY_H-TILE_SIZE))
+		screen.blit(fontobject.render(string, 0, BLACK),(DISPLAY_W//2,STATUS_Y))
 
 def blitSprite(sprite,x,y):
 	screen.blit(sprite,(x,y))
@@ -246,6 +257,7 @@ def drawGrid():
 		pygame.draw.line(screen,BLACK,(x*TILE_SIZE,TILE_SIZE),(x*TILE_SIZE,(height+1)*TILE_SIZE))
 	for y in range(1,height+2):
 		pygame.draw.line(screen,BLACK,(0,y*TILE_SIZE),(width*TILE_SIZE,y*TILE_SIZE))
+	pygame.draw.line(screen,BLACK,(0,DISPLAY_H-TILE_SIZE),(DISPLAY_W,DISPLAY_H-TILE_SIZE))
 
 
 def checkMouse(buttons):
@@ -351,12 +363,13 @@ def main():
 					for b in buttons:
 						if mouse.y < TILE_SIZE and b.x < mouse.x < b.x+b.width:
 							b.action()
+				# check for scroll wheel
 				if event.button == 4:				# middle mouse down
-					if mouse.spriteid > 0:
+					if mouse.spriteid > -1:
 						mouse.spriteid -= 1
 						mouse.sprite = tiles[mouse.spriteid]
 				if event.button == 5:				# middle mouse down
-					if -1 < mouse.spriteid < NUMTILES -1:
+					if -1 <= mouse.spriteid < NUMTILES -1:
 						mouse.spriteid += 1
 						mouse.sprite = tiles[mouse.spriteid]
 		if mouse.w_or_h != '' and key != 0:
@@ -421,7 +434,7 @@ def main():
 			drawMouse()
 		checkMouse(buttons)	# check for mouse clicks
 
-		drawCoords()
+		drawStatusBar()
 
 		# update screen
 		pygame.display.update()
@@ -432,4 +445,5 @@ def main():
 
 mouse = Mouse()
 level = Level()
+statusbar = StatusBar()
 main()

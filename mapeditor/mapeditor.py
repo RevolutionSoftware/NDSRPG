@@ -31,7 +31,7 @@ STATUS_Y = DISPLAY_H-TILE_SIZE+2
 TITLE = 'Map Editor'
 
 # set up pygame
-pygame.init()
+pygame.display.init()
 pygame.font.init()
 # create our surface
 screen = pygame.display.set_mode((DISPLAY_W,DISPLAY_H))

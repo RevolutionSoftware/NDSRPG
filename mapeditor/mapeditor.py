@@ -40,8 +40,10 @@ clock = pygame.time.Clock()
 # load sprites
 tiles = []
 directory = 'tiles/'
+NUMTILES = 0
 for filename in sorted(os.listdir(directory)):
 	tiles.append(pygame.image.load(directory+filename).convert())
+	NUMTILES += 1
 tiles.append(pygame.image.load('cursor.bmp').convert())
 
 # width and height boxes
@@ -345,9 +347,18 @@ def main():
 					mouse.x = (mousePos[0]//TILE_SIZE)*TILE_SIZE+1
 			# check for mouseclick on menu buttons
 			if event.type == pygame.MOUSEBUTTONDOWN:
-				for b in buttons:
-					if mouse.y < TILE_SIZE and b.x < mouse.x < b.x+b.width:
-						b.action()
+				if event.button < 4:
+					for b in buttons:
+						if mouse.y < TILE_SIZE and b.x < mouse.x < b.x+b.width:
+							b.action()
+				if event.button == 4:				# middle mouse down
+					if mouse.spriteid > 0:
+						mouse.spriteid -= 1
+						mouse.sprite = tiles[mouse.spriteid]
+				if event.button == 5:				# middle mouse down
+					if -1 < mouse.spriteid < NUMTILES -1:
+						mouse.spriteid += 1
+						mouse.sprite = tiles[mouse.spriteid]
 		if mouse.w_or_h != '' and key != 0:
 			# fill out width/height box
 			if mouse.w_or_h == 'w':

@@ -197,10 +197,61 @@ def exportFile():
 		statusbar.set("Map exported")
 #############################################
 
+
+TF = 0
+DD_TEXT = 1
+INPUT = 3
+
 def editTile(tileid):
+	tile = tiles[tileid]
+	TILE_PROPERTIES = (("Passable?",tile.passable,TF),
+					("Text ID:",tile.textid,DD_TEXT),
+					("Map ID:",tile.mapid,INPUT),
+					("Map X:",tile.mapx,INPUT),
+					("Map Y:",tile.mapy,INPUT),
+					("Player X:",tile.playerx,INPUT),
+					("Player Y:",tile.playery,INPUT))
+	with open("texts.txt","r") as texts:
+		text_array = [line.rstrip('\n') for line in texts.readlines()]
+
+	def updateTile():
+		i = 0
+		tile.passable = item_input[0].get()
+		tile.textid = item_input[1].get()
+		tile.mapid = item_input[2].get()
+		tile.mapx = item_input[3].get()
+		tile.mapy = item_input[4].get()
+		tile.playerx = item_input[5].get()
+		tile.playery = item_input[6].get()
+		root.destroy()
+
+	root = tk.Tk()
+	root.wm_title("Tile "+str(tileid))
+	item_input = list()
+	for item in TILE_PROPERTIES:
+		item_label = tk.Label(root,text=item[0])
+		item_label.pack()
+		if item[2] == TF:
+			item_input.append(tk.Checkbutton(root))
+		elif item[2] == DD_TEXT:
+			item_input.append(tk.Listbox(root))
+			for line in text_array:
+				item_input[-1].insert(tk.END,line)
+		elif item[2] == INPUT:
+			item_input.append(tk.Entry(root,width=3))
+			item_input[-1].insert(0,str(item[1]))
+		
+		item_input[-1].pack()
+	button = tk.Button(root, text="Update", width=10, command=updateTile)
+	button.pack()
+	root.mainloop()
+	tiles[tileid] = tile
+
+	return
+	
+	
 	# create edit surface
 	editbox = pygame.Surface((150,150),depth=24)
-	tile = tiles[tileid]
 	edit_tile = -1
 	waiting = True
 	while waiting:
@@ -238,13 +289,7 @@ def editTile(tileid):
 		editbox.blit(tile.sprite,(65,1))
 		y = 18
 		i = 0
-		for text in (("Passable?",tile.passable),
-						("Text ID:",tile.textid),
-						("Map ID:",tile.mapid),
-						("Map X:",tile.mapx),
-						("Map Y:",tile.mapy),
-						("Player X:",tile.playerx),
-						("Player Y:",tile.playery)):
+		for text in TILE_PROPERTIES:
 			# check if we are editing this box
 			if i == edit_tile:
 				pygame.draw.rect(editbox, (154,125,254),(100,y,40,18), 1)

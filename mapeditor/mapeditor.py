@@ -214,96 +214,73 @@ def editTile(tileid):
 	with open("texts.txt","r") as texts:
 		text_array = [line.rstrip('\n') for line in texts.readlines()]
 
+	text_array.insert(0,"--Please Choose--")
+
 	def updateTile():
-		i = 0
-		tile.passable = item_input[0].get()
-		tile.textid = item_input[1].get()
-		tile.mapid = item_input[2].get()
-		tile.mapx = item_input[3].get()
-		tile.mapy = item_input[4].get()
-		tile.playerx = item_input[5].get()
-		tile.playery = item_input[6].get()
+		# save values and quit
+		tile.passable = var[0].get()
+		tile.textid = text_array.index(var[1].get())-1
+		tile.mapid = var[2].get()
+		tile.mapx = var[3].get()
+		tile.mapy = var[4].get()
+		tile.playerx = var[5].get()
+		tile.playery = var[6].get()
+		root.destroy()
+	def cancelTile(event=''):
+		# quit without saving values
 		root.destroy()
 
 	root = tk.Tk()
+	root.bind('<Escape>',cancelTile)
 	root.wm_title("Tile "+str(tileid))
+	mainframe = tk.Frame(root)
+	# create grid: columns
+	mainframe.columnconfigure(0,pad=1)
+	mainframe.columnconfigure(1,pad=1)
+	# grid: rows
+	for i in range(len(TILE_PROPERTIES)+1):
+		mainframe.rowconfigure(i,pad=1)
 	item_input = list()
+	var = list()
+	i=0
 	for item in TILE_PROPERTIES:
-		item_label = tk.Label(root,text=item[0])
-		item_label.pack()
+		item_label = tk.Label(mainframe,text=item[0])
+		item_label.grid(column=0,row=i)
+		# True or False box
 		if item[2] == TF:
-			item_input.append(tk.Checkbutton(root))
+			var.append(tk.IntVar())
+			var[i].set(item[1])
+			item_input = tk.Checkbutton(mainframe,variable=var[i])
+		# text dropdown box
 		elif item[2] == DD_TEXT:
-			item_input.append(tk.Listbox(root))
-			for line in text_array:
-				item_input[-1].insert(tk.END,line)
+			# add an IntVar to the var list
+			var.append(tk.StringVar())
+			# find the currently selected textid, if any
+			index = item[1]
+			if index == '':
+				index = -1
+			index += 1
+			var[i].set('')
+			var[i].set(text_array[index])
+
+			item_input = tk.OptionMenu(mainframe,var[i],*text_array)
+			item_input.config(width=20,anchor=tk.W)
+		# number input box
 		elif item[2] == INPUT:
-			item_input.append(tk.Entry(root,width=3))
-			item_input[-1].insert(0,str(item[1]))
-		
-		item_input[-1].pack()
-	button = tk.Button(root, text="Update", width=10, command=updateTile)
-	button.pack()
+			var.append(tk.StringVar())
+			value = item[1]
+			var[i].set(value)
+			item_input = tk.Entry(mainframe,width=3,textvariable=var[i])
+		item_input.grid(column=1,row=i,sticky=tk.W)
+		i+=1
+	# draw two buttons at the bottom
+	update_button = tk.Button(mainframe, text="Update", command=updateTile)
+	update_button.grid(row=i,column=0)
+	cancel_button = tk.Button(mainframe, text="Cancel", command=cancelTile)
+	cancel_button.grid(row=i,column=1,sticky=tk.W)
+	mainframe.pack(side=tk.LEFT)
 	root.mainloop()
 	tiles[tileid] = tile
-
-	return
-	
-	
-	# create edit surface
-	editbox = pygame.Surface((150,150),depth=24)
-	edit_tile = -1
-	waiting = True
-	while waiting:
-		editbox.fill(GREY)
-		for event in pygame.event.get():
-			if event.type == pygame.KEYDOWN:
-				if event.key == K_ESCAPE:
-					waiting = False
-			if event.type == pygame.MOUSEMOTION:
-				mousePos = pygame.mouse.get_pos()
-				mouse.x = mousePos[0]-EDIT_X
-				mouse.y = mousePos[1]-EDIT_Y
-			if event.type == pygame.MOUSEBUTTONDOWN:
-				# right click quit
-				if event.button == 3:
-					waiting = False
-				if event.button == 1:
-					if 18 < mouse.y < 36:
-						tile.passable = tile.passable == False
-					if 18*2 < mouse.y < 18*8:
-						edit_tile = ((mouse.y-18)//18)
-					# list of tiles at bottom
-					if mouse.y > DISPLAY_H-TILE_ROWS*TILE_SIZE-EDIT_Y:
-						y = (mouse.y - (DISPLAY_H-TILE_ROWS*TILE_SIZE-EDIT_Y))//TILE_SIZE 
-						x = (mouse.x+EDIT_X)//TILE_SIZE
-						tid = y*WIDTH + x
-						if len(tiles)-1 > tid:
-							keys = pygame.key.get_pressed()
-							if keys[pygame.K_LCTRL]:
-								tiles[tileid] = tile
-								tileid = tid
-								tile = tiles[tileid]
-		fontobject = pygame.font.Font(None,25)
-		# blit sprite to box
-		editbox.blit(tile.sprite,(65,1))
-		y = 18
-		i = 0
-		for text in TILE_PROPERTIES:
-			# check if we are editing this box
-			if i == edit_tile:
-				pygame.draw.rect(editbox, (154,125,254),(100,y,40,18), 1)
-			editbox.blit(fontobject.render(text[0], 0, BLACK),(0,y))
-			editbox.blit(fontobject.render(str(text[1]), 0, BLACK),(100,18))
-			i += 1
-			y += 18
-
-		# draw box to screen
-		screen.blit(editbox,(EDIT_X,EDIT_Y))
-		pygame.display.flip()
-	mouse.y = -1
-	tiles[tileid] = tile
-
 
 def drawMenu(buttons, width, height):
 	fontobject = pygame.font.Font(None,25)

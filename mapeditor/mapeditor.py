@@ -188,6 +188,10 @@ def exportFile():
 	if level.filename != '':
 		filename,ext = os.path.basename(level.filename).split('.')
 		with open(filename+'.h',"wt") as header:
+			header.write("tile_t {}_tiledata[] = {{".format(filename))
+			for t in tiles:
+				header.write("{{{},{},{},{},{},{},{}}},\n\t\t".format(str(t.passable),t.textid,t.mapid,t.mapx,t.mapy,t.playerx,t.playery))
+			header.write("};\n")
 			header.write("//Width: {}\t Height: {}\nglobal_variable u16 {}[] = {{".format(level.width,level.height,filename))
 			for y in range(level.height):
 				header.write('\n\t')

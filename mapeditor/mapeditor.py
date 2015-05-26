@@ -16,6 +16,7 @@ K_h = pygame.K_h
 # create some colors
 BLACK = (0,0,0)
 GREY = (200,200,200)
+RED = (255,0,0)
 white = (255,255,255)
 # object data
 TILE_SIZE = 16+1
@@ -102,14 +103,14 @@ class Level:
 		self.filename = filename
 		self.loadMap()
 	def loadMap(self):
+		objects.clear()
 		for y in range(MAX_HEIGHT):
 			self.map.append([])
 			for x in range(MAX_WIDTH):
 				self.map[y].append(0)
-		print(self.filename)
 		if self.filename != '':
 			with open(self.filename,"r") as f:
-				# first line is width and height
+				# first line tile data (whether passable or not)
 				line = f.readline().rstrip(',\n')
 				i = 0
 				for item in line.split(','):
@@ -117,6 +118,13 @@ class Level:
 					tiles[i].passable = (passable == 'True')
 					tiles[i].bg = bg
 					i += 1
+				# next line is object data (actions assigned to a tile)
+				line = f.readline().rstrip('/\n')
+				if not line == '':
+					for item in line.split('/'):
+						key,action,data = item.split(' ')
+						objects[key] = {'action': int(action),'data': int(data)}
+				# next line is width and height
 				line = f.readline().rstrip('\n')
 				w,h = line.split(' ')
 				self.width = int(w)
@@ -140,6 +148,9 @@ class Level:
 			width = WIDTH
 		for y in range(height):
 			for x in range(width):
+				obj_name = str(x+self.x)+','+str(y+self.y)
+				if obj_name in objects:
+					pygame.draw.rect(screen,RED,(x*TILE_SIZE,(y+1)*TILE_SIZE,TILE_SIZE+1,TILE_SIZE+1),1)
 				blitSprite(tiles[self.map[y+self.y][x+self.x]].sprite,x*TILE_SIZE+1,y*TILE_SIZE+TILE_SIZE+1)
 #########################################
 
@@ -173,10 +184,15 @@ def saveFile():
 		root.destroy()
 	if level.filename:
 		with open(level.filename,"wt") as f:
-			# first save the tiles into the map
+			# first save the tile data into the map
 			for tile in tiles:
 				f.write("{} {},".format(str(tile.passable),tile.bg))
 			f.write("\n")
+			# next save object data
+			for key in objects.keys():
+				f.write("{} {} {}/".format(key,objects[key]['action'],objects[key]['data']))
+			f.write("\n")
+			# next the width and height
 			f.write("{} {}\n".format(level.width,level.height))
 			for y in range(level.height):
 				for x in range(level.width):
@@ -194,10 +210,17 @@ def exportFile():
 	if level.filename != '':
 		filename,ext = os.path.basename(level.filename).split('.')
 		with open(filename+'.h',"wt") as header:
+			# export tile data
 			header.write("tile_t {}_tiledata[] = {{".format(filename))
 			for t in tiles:
 				header.write("{{{},{}}},\n\t\t".format(str(t.passable),t.bg))
 			header.write("};\n")
+			# export object data
+			header.write("u16 {}_obj_data[] = {{".format(filename))
+			for key in objects.keys():
+				header.write("{{{},{},{}}},\n\t\t".format(key,objects[key]['action'],objects[key]['data']))
+			header.write("};\n")
+			# export map data
 			header.write("//Width: {}\t Height: {}\nglobal_variable u16 {}[] = {{".format(level.width,level.height,filename))
 			for y in range(level.height):
 				header.write('\n\t')
@@ -207,6 +230,66 @@ def exportFile():
 		statusbar.set("Map exported")
 #############################################
 
+ACTIONS = ('--Pick Action--','New Map','Display Text')
+
+def editObject(x,y):
+	name = str(x)+','+str(y)
+	# build object if it doesn't exist
+	if not name in objects:
+		objects[name] = {'action': -1,'data': ''}
+
+	def updateTile():
+		# save values and quit
+		objects[name]['action'] = ACTIONS.index(action.get())-1
+		objects[name]['data'] = data.get()
+		if ACTIONS.index(action.get()) == 0:
+			del objects[name]
+		root.destroy()
+
+	def cancelTile(event=''):
+		# quit without saving values
+		if objects[name]['action'] == -1:	# delete object if it was empty
+			del objects[name]
+		root.destroy()
+
+	root = tk.Tk()
+	root.bind('<Escape>',cancelTile)
+	root.wm_title("Tile {x},{y}".format(**locals()))
+	# create frame and build grid
+	mainframe = tk.Frame(root)
+	mainframe.columnconfigure(0,pad=1)
+	mainframe.columnconfigure(1,pad=1)
+
+	# fill out frame
+	action_txt = tk.Label(mainframe,text="Action:")
+	action_txt.grid(column=0,row=0)
+
+
+	# find the currently selected textid, if any
+	action = tk.StringVar()
+	i = objects[name]['action']+1
+	action.set(ACTIONS[i])
+
+	action_input = tk.OptionMenu(mainframe,action,*ACTIONS)
+	action_input.config(width=10,anchor=tk.W)
+	action_input.grid(column=1,row=0,sticky=tk.W)
+
+	data_txt = tk.Label(mainframe,text="Data:")
+	data_txt.grid(column=0,row=1)
+
+	data = tk.IntVar()
+	data.set(objects[name]['data'])
+	data_input = tk.Entry(mainframe,width=3,textvariable=data)
+	data_input.grid(column=1,row=1,sticky=tk.W)
+
+	# draw buttons
+	update_button = tk.Button(mainframe, text="Update", command=updateTile)
+	update_button.grid(row=2,column=0)
+	cancel_button = tk.Button(mainframe, text="Cancel", command=cancelTile)
+	cancel_button.grid(row=2,column=1,sticky=tk.W)
+	mainframe.pack(side=tk.LEFT)
+	root.mainloop()
+	
 
 TF = 0
 INPUT = 1
@@ -350,6 +433,7 @@ def checkMouse(buttons):
 			b.hover = False
 	mouseClick = pygame.mouse.get_pressed()
 	if mouseClick[0] == 1 or mouseClick[2] == 1:
+		keys = pygame.key.get_pressed()
 		# buttons up top
 		if mouse.y < TILE_SIZE:
 			if WIDTH_RECT[0]+BOX_W > mouse.x > WIDTH_RECT[0]:
@@ -363,7 +447,6 @@ def checkMouse(buttons):
 			x = mouse.x//TILE_SIZE
 			tileid = y*WIDTH + x
 			if len(tiles)-1 > tileid:
-				keys = pygame.key.get_pressed()
 				if keys[pygame.K_LCTRL]:
 					editTile(tileid)
 				elif mouseClick[0] == 1:
@@ -374,6 +457,11 @@ def checkMouse(buttons):
 		if mouse.onMap():
 			y = (mouse.y-TILE_SIZE) // TILE_SIZE			# don't forget top row is the menu
 			x = mouse.x // TILE_SIZE
+			# if CTRL is pressed, edit that tile's action data
+			if keys[pygame.K_LCTRL]:
+				editObject(x+level.x,y+level.y)
+				return
+			# otherwise, load the tile into the map
 			if mouseClick[0] == 1 and mouse.spriteL != -1:
 				level.map[y+level.y][x+level.x] = mouse.spriteL
 			else:
@@ -385,6 +473,7 @@ BUTTONS = [	('New',0,0,50,16,newFile),
 			('Save',100,0,50,16,saveFile),
 			('Export',150,0,60,16,exportFile)]
 
+### Main ################################################
 def main():
 #	level.loadMap()
 	buttons = []
@@ -534,6 +623,8 @@ def main():
 
 # load sprites
 tiles = []
+# these are the tiles with actions assigned to them
+objects = {}
 directory = os.path.dirname(os.path.realpath(sys.argv[0]))+'/'
 NUMTILES = 0
 for filename in sorted(os.listdir(directory+'tiles/')):

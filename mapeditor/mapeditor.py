@@ -120,9 +120,10 @@ class Level:
 					i += 1
 				# next line is object data (actions assigned to a tile)
 				line = f.readline().rstrip('/\n')
-				for item in line.split('/'):
-					key,action,data = item.split(' ')
-					objects[key] = {'action': int(action),'data': int(data)}
+				if not line == '':
+					for item in line.split('/'):
+						key,action,data = item.split(' ')
+						objects[key] = {'action': int(action),'data': int(data)}
 				# next line is width and height
 				line = f.readline().rstrip('\n')
 				w,h = line.split(' ')

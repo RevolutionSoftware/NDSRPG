@@ -209,17 +209,11 @@ def exportFile():
 
 
 TF = 0
-<<<<<<< HEAD
 INPUT = 1
-=======
-DD_TEXT = 1
-INPUT = 3
->>>>>>> 5c39b1194017226c8e6e3ac031241e6b1e7641f9
 
 def editTile(tileid):
 	tile = tiles[tileid]
 	TILE_PROPERTIES = (("Passable?",tile.passable,TF),
-<<<<<<< HEAD
 					("Map BGX:",tile.bg,INPUT))
 
 	def updateTile():
@@ -232,33 +226,6 @@ def editTile(tileid):
 		# quit without saving values
 		root.destroy()
 
-=======
-					("Text ID:",tile.textid,DD_TEXT),
-					("Map ID:",tile.mapid,INPUT),
-					("Map X:",tile.mapx,INPUT),
-					("Map Y:",tile.mapy,INPUT),
-					("Player X:",tile.playerx,INPUT),
-					("Player Y:",tile.playery,INPUT))
-	with open("texts.txt","r") as texts:
-		text_array = [line.rstrip('\n') for line in texts.readlines()]
-
-	text_array.insert(0,"--Please Choose--")
-
-	def updateTile():
-		# save values and quit
-		tile.passable = var[0].get()
-		tile.textid = text_array.index(var[1].get())-1
-		tile.mapid = var[2].get()
-		tile.mapx = var[3].get()
-		tile.mapy = var[4].get()
-		tile.playerx = var[5].get()
-		tile.playery = var[6].get()
-		root.destroy()
-	def cancelTile(event=''):
-		# quit without saving values
-		root.destroy()
-
->>>>>>> 5c39b1194017226c8e6e3ac031241e6b1e7641f9
 	root = tk.Tk()
 	root.bind('<Escape>',cancelTile)
 	root.wm_title("Tile "+str(tileid))
@@ -280,29 +247,9 @@ def editTile(tileid):
 			var.append(tk.IntVar())
 			var[i].set(item[1])
 			item_input = tk.Checkbutton(mainframe,variable=var[i])
-<<<<<<< HEAD
 		# number input box
 		elif item[2] == INPUT:
 			var.append(tk.IntVar())
-=======
-		# text dropdown box
-		elif item[2] == DD_TEXT:
-			# add an IntVar to the var list
-			var.append(tk.StringVar())
-			# find the currently selected textid, if any
-			index = item[1]
-			if index == '':
-				index = -1
-			index += 1
-			var[i].set('')
-			var[i].set(text_array[index])
-
-			item_input = tk.OptionMenu(mainframe,var[i],*text_array)
-			item_input.config(width=20,anchor=tk.W)
-		# number input box
-		elif item[2] == INPUT:
-			var.append(tk.StringVar())
->>>>>>> 5c39b1194017226c8e6e3ac031241e6b1e7641f9
 			value = item[1]
 			var[i].set(value)
 			item_input = tk.Entry(mainframe,width=3,textvariable=var[i])

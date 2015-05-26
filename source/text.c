@@ -4,17 +4,7 @@
 #include "text.h"
 #include "font.h"
 
-
-int stringLength(const char *text) {
-    int text_length = 0;
-    while(text[text_length] != '\0') {
-        text_length++;
-    }
-    return text_length;
-}
-
 // text is defined as a tilemap.
-// if speed is 0, no delay is used.
 void putString(const char *text, unsigned int flag) {
     int text_length = stringLength(text);
     // address of tilemap
@@ -34,9 +24,9 @@ void putString(const char *text, unsigned int flag) {
         if (text[i] == '\n') {
             x = 0;
             y++;
-            continue;
+            i++;
         }
-        else if (text[i] == ' ') {
+        if (text[i] == ' ') {
             int j = i+1;
 
             while(text[j] != ' ' && text[j] != '\0') {
@@ -58,4 +48,9 @@ void putString(const char *text, unsigned int flag) {
         if(!x)
             y++;
     }
+}
+
+// How wide/high does the box have to be?
+// Where do we want it aligned (centered? To the left or right?)
+void drawBox(int width, int height, coord_t alignment) {
 }

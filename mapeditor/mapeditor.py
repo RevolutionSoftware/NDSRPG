@@ -1,7 +1,7 @@
 import pygame
 import tkinter as tk
 import tkinter.filedialog
-import time, random, os
+import time, random, os, sys
 
 # constants
 K_LEFT = pygame.K_LEFT
@@ -110,6 +110,13 @@ class Level:
 		if self.filename != '':
 			with open(self.filename,"r") as f:
 				# first line is width and height
+				line = f.readline().rstrip(',\n')
+				i = 0
+				for item in line.split(','):
+					passable,bg = item.split(' ')
+					tiles[i].passable = (passable == 'True')
+					tiles[i].bg = bg
+					i += 1
 				line = f.readline().rstrip('\n')
 				w,h = line.split(' ')
 				self.width = int(w)
@@ -166,6 +173,10 @@ def saveFile():
 		root.destroy()
 	if level.filename:
 		with open(level.filename,"wt") as f:
+			# first save the tiles into the map
+			for tile in tiles:
+				f.write("{} {},".format(str(tile.passable),tile.bg))
+			f.write("\n")
 			f.write("{} {}\n".format(level.width,level.height))
 			for y in range(level.height):
 				for x in range(level.width):
@@ -523,12 +534,12 @@ def main():
 
 # load sprites
 tiles = []
-directory = 'tiles/'
+directory = os.path.dirname(os.path.realpath(sys.argv[0]))+'/'
 NUMTILES = 0
-for filename in sorted(os.listdir(directory)):
-	tiles.append(Tile(pygame.image.load(directory+filename).convert()))
+for filename in sorted(os.listdir(directory+'tiles/')):
+	tiles.append(Tile(pygame.image.load(directory+'tiles/'+filename).convert()))
 	NUMTILES += 1
-tiles.append(Tile(pygame.image.load('cursor.bmp').convert()))
+tiles.append(Tile(pygame.image.load(directory+'cursor.bmp').convert()))
 
 mouse = Mouse()
 level = Level()

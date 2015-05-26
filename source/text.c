@@ -3,7 +3,7 @@
 #include "utilities.h"
 #include "text.h"
 #include "font.h"
-#define DELAY_MAX 3
+
 
 int stringLength(const char *text) {
     int text_length = 0;
@@ -15,17 +15,21 @@ int stringLength(const char *text) {
 
 // text is defined as a tilemap.
 // if speed is 0, no delay is used.
-void putString(char *text) {
-    int i;
+void putString(const char *text, unsigned int flag) {
     int text_length = stringLength(text);
-
     // address of tilemap
     u16 *sub_map = BG_MAP_RAM_SUB(0);
 
     // Draw the message on the screen.
     int x = 0, y = 0;
+    int i;
+
+    if (flag > DELAY_MAX) {
+        flag = DELAY_MAX;
+    }
 
     for (i = 0; i < text_length; i++) {
+        delay(flag);
         // Check for special characters (\n, etc.)
         if (text[i] == '\n') {
             x = 0;
@@ -55,6 +59,3 @@ void putString(char *text) {
             y++;
     }
 }
-
-#undef DELAY_MAX
-#undef USE_DELAY

@@ -1,7 +1,7 @@
 import pygame
 import tkinter as tk
 import tkinter.filedialog
-import time, random, os
+import time, random, os, sys
 
 # constants
 K_LEFT = pygame.K_LEFT
@@ -58,15 +58,10 @@ class StatusBar:
 		self.counter = counter
 
 class Tile:
-	def __init__(self,sprite,passable=True,textid='',mapid='',mapx='',mapy='',playerx='',playery=''):
+	def __init__(self,sprite,passable=True,bg=0):
 		self.sprite = sprite
 		self.passable=passable
-		self.textid=textid
-		self.mapid=mapid
-		self.mapx=mapx
-		self.mapy=mapy
-		self.playerx=playerx
-		self.playery=playery
+		self.bg=bg
 
 class Mouse:
 	def __init__(self,spriteL=-1,spriteR=0,x=0,y=0):
@@ -115,6 +110,13 @@ class Level:
 		if self.filename != '':
 			with open(self.filename,"r") as f:
 				# first line is width and height
+				line = f.readline().rstrip(',\n')
+				i = 0
+				for item in line.split(','):
+					passable,bg = item.split(' ')
+					tiles[i].passable = (passable == 'True')
+					tiles[i].bg = bg
+					i += 1
 				line = f.readline().rstrip('\n')
 				w,h = line.split(' ')
 				self.width = int(w)
@@ -171,6 +173,10 @@ def saveFile():
 		root.destroy()
 	if level.filename:
 		with open(level.filename,"wt") as f:
+			# first save the tiles into the map
+			for tile in tiles:
+				f.write("{} {},".format(str(tile.passable),tile.bg))
+			f.write("\n")
 			f.write("{} {}\n".format(level.width,level.height))
 			for y in range(level.height):
 				for x in range(level.width):
@@ -188,6 +194,10 @@ def exportFile():
 	if level.filename != '':
 		filename,ext = os.path.basename(level.filename).split('.')
 		with open(filename+'.h',"wt") as header:
+			header.write("tile_t {}_tiledata[] = {{".format(filename))
+			for t in tiles:
+				header.write("{{{},{}}},\n\t\t".format(str(t.passable),t.bg))
+			header.write("};\n")
 			header.write("//Width: {}\t Height: {}\nglobal_variable u16 {}[] = {{".format(level.width,level.height,filename))
 			for y in range(level.height):
 				header.write('\n\t')
@@ -199,33 +209,19 @@ def exportFile():
 
 
 TF = 0
-DD_TEXT = 1
-INPUT = 3
+INPUT = 1
 
 def editTile(tileid):
 	tile = tiles[tileid]
 	TILE_PROPERTIES = (("Passable?",tile.passable,TF),
-					("Text ID:",tile.textid,DD_TEXT),
-					("Map ID:",tile.mapid,INPUT),
-					("Map X:",tile.mapx,INPUT),
-					("Map Y:",tile.mapy,INPUT),
-					("Player X:",tile.playerx,INPUT),
-					("Player Y:",tile.playery,INPUT))
-	with open("texts.txt","r") as texts:
-		text_array = [line.rstrip('\n') for line in texts.readlines()]
-
-	text_array.insert(0,"--Please Choose--")
+					("Map BGX:",tile.bg,INPUT))
 
 	def updateTile():
 		# save values and quit
-		tile.passable = var[0].get()
-		tile.textid = text_array.index(var[1].get())-1
-		tile.mapid = var[2].get()
-		tile.mapx = var[3].get()
-		tile.mapy = var[4].get()
-		tile.playerx = var[5].get()
-		tile.playery = var[6].get()
+		tile.passable = str(var[0].get() == 1)
+		tile.bg = var[1].get()
 		root.destroy()
+
 	def cancelTile(event=''):
 		# quit without saving values
 		root.destroy()
@@ -251,23 +247,9 @@ def editTile(tileid):
 			var.append(tk.IntVar())
 			var[i].set(item[1])
 			item_input = tk.Checkbutton(mainframe,variable=var[i])
-		# text dropdown box
-		elif item[2] == DD_TEXT:
-			# add an IntVar to the var list
-			var.append(tk.StringVar())
-			# find the currently selected textid, if any
-			index = item[1]
-			if index == '':
-				index = -1
-			index += 1
-			var[i].set('')
-			var[i].set(text_array[index])
-
-			item_input = tk.OptionMenu(mainframe,var[i],*text_array)
-			item_input.config(width=20,anchor=tk.W)
 		# number input box
 		elif item[2] == INPUT:
-			var.append(tk.StringVar())
+			var.append(tk.IntVar())
 			value = item[1]
 			var[i].set(value)
 			item_input = tk.Entry(mainframe,width=3,textvariable=var[i])
@@ -552,12 +534,12 @@ def main():
 
 # load sprites
 tiles = []
-directory = 'tiles/'
+directory = os.path.dirname(os.path.realpath(sys.argv[0]))+'/'
 NUMTILES = 0
-for filename in sorted(os.listdir(directory)):
-	tiles.append(Tile(pygame.image.load(directory+filename).convert()))
+for filename in sorted(os.listdir(directory+'tiles/')):
+	tiles.append(Tile(pygame.image.load(directory+'tiles/'+filename).convert()))
 	NUMTILES += 1
-tiles.append(Tile(pygame.image.load('cursor.bmp').convert()))
+tiles.append(Tile(pygame.image.load(directory+'cursor.bmp').convert()))
 
 mouse = Mouse()
 level = Level()

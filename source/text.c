@@ -24,8 +24,8 @@ void putString(const char *text, unsigned int flag) {
     int x = 0, y = 0;
     int i;
 
-    if (flag > DELAY_MAX) {
-        flag = DELAY_MAX;
+    if (flag > SLOW) {
+        flag = SLOW;
     }
 
     for (i = 0; i < text_length; i++) {

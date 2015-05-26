@@ -1,7 +1,7 @@
 import pygame
 import tkinter as tk
 import tkinter.filedialog
-import time, random, os
+import time, random, os, sys
 
 # constants
 K_LEFT = pygame.K_LEFT
@@ -58,15 +58,10 @@ class StatusBar:
 		self.counter = counter
 
 class Tile:
-	def __init__(self,sprite,passable=True,textid='',mapid='',mapx='',mapy='',playerx='',playery=''):
+	def __init__(self,sprite,passable=True,bg=0):
 		self.sprite = sprite
 		self.passable=passable
-		self.textid=textid
-		self.mapid=mapid
-		self.mapx=mapx
-		self.mapy=mapy
-		self.playerx=playerx
-		self.playery=playery
+		self.bg=bg
 
 class Mouse:
 	def __init__(self,spriteL=-1,spriteR=0,x=0,y=0):
@@ -115,6 +110,13 @@ class Level:
 		if self.filename != '':
 			with open(self.filename,"r") as f:
 				# first line is width and height
+				line = f.readline().rstrip(',\n')
+				i = 0
+				for item in line.split(','):
+					passable,bg = item.split(' ')
+					tiles[i].passable = (passable == 'True')
+					tiles[i].bg = bg
+					i += 1
 				line = f.readline().rstrip('\n')
 				w,h = line.split(' ')
 				self.width = int(w)
@@ -171,6 +173,10 @@ def saveFile():
 		root.destroy()
 	if level.filename:
 		with open(level.filename,"wt") as f:
+			# first save the tiles into the map
+			for tile in tiles:
+				f.write("{} {},".format(str(tile.passable),tile.bg))
+			f.write("\n")
 			f.write("{} {}\n".format(level.width,level.height))
 			for y in range(level.height):
 				for x in range(level.width):
@@ -188,6 +194,10 @@ def exportFile():
 	if level.filename != '':
 		filename,ext = os.path.basename(level.filename).split('.')
 		with open(filename+'.h',"wt") as header:
+			header.write("tile_t {}_tiledata[] = {{".format(filename))
+			for t in tiles:
+				header.write("{{{},{}}},\n\t\t".format(str(t.passable),t.bg))
+			header.write("};\n")
 			header.write("//Width: {}\t Height: {}\nglobal_variable u16 {}[] = {{".format(level.width,level.height,filename))
 			for y in range(level.height):
 				header.write('\n\t')
@@ -197,68 +207,62 @@ def exportFile():
 		statusbar.set("Map exported")
 #############################################
 
+
+TF = 0
+INPUT = 1
+
 def editTile(tileid):
-	# create edit surface
-	editbox = pygame.Surface((150,150),depth=24)
 	tile = tiles[tileid]
-	edit_tile = -1
-	waiting = True
-	while waiting:
-		editbox.fill(GREY)
-		for event in pygame.event.get():
-			if event.type == pygame.KEYDOWN:
-				if event.key == K_ESCAPE:
-					waiting = False
-			if event.type == pygame.MOUSEMOTION:
-				mousePos = pygame.mouse.get_pos()
-				mouse.x = mousePos[0]-EDIT_X
-				mouse.y = mousePos[1]-EDIT_Y
-			if event.type == pygame.MOUSEBUTTONDOWN:
-				# right click quit
-				if event.button == 3:
-					waiting = False
-				if event.button == 1:
-					if 18 < mouse.y < 36:
-						tile.passable = tile.passable == False
-					if 18*2 < mouse.y < 18*8:
-						edit_tile = ((mouse.y-18)//18)
-					# list of tiles at bottom
-					if mouse.y > DISPLAY_H-TILE_ROWS*TILE_SIZE-EDIT_Y:
-						y = (mouse.y - (DISPLAY_H-TILE_ROWS*TILE_SIZE-EDIT_Y))//TILE_SIZE 
-						x = (mouse.x+EDIT_X)//TILE_SIZE
-						tid = y*WIDTH + x
-						if len(tiles)-1 > tid:
-							keys = pygame.key.get_pressed()
-							if keys[pygame.K_LCTRL]:
-								tiles[tileid] = tile
-								tileid = tid
-								tile = tiles[tileid]
-		fontobject = pygame.font.Font(None,25)
-		# blit sprite to box
-		editbox.blit(tile.sprite,(65,1))
-		y = 18
-		i = 0
-		for text in (("Passable?",tile.passable),
-						("Text ID:",tile.textid),
-						("Map ID:",tile.mapid),
-						("Map X:",tile.mapx),
-						("Map Y:",tile.mapy),
-						("Player X:",tile.playerx),
-						("Player Y:",tile.playery)):
-			# check if we are editing this box
-			if i == edit_tile:
-				pygame.draw.rect(editbox, (154,125,254),(100,y,40,18), 1)
-			editbox.blit(fontobject.render(text[0], 0, BLACK),(0,y))
-			editbox.blit(fontobject.render(str(text[1]), 0, BLACK),(100,18))
-			i += 1
-			y += 18
+	TILE_PROPERTIES = (("Passable?",tile.passable,TF),
+					("Map BGX:",tile.bg,INPUT))
 
-		# draw box to screen
-		screen.blit(editbox,(EDIT_X,EDIT_Y))
-		pygame.display.flip()
-	mouse.y = -1
+	def updateTile():
+		# save values and quit
+		tile.passable = str(var[0].get() == 1)
+		tile.bg = var[1].get()
+		root.destroy()
+
+	def cancelTile(event=''):
+		# quit without saving values
+		root.destroy()
+
+	root = tk.Tk()
+	root.bind('<Escape>',cancelTile)
+	root.wm_title("Tile "+str(tileid))
+	mainframe = tk.Frame(root)
+	# create grid: columns
+	mainframe.columnconfigure(0,pad=1)
+	mainframe.columnconfigure(1,pad=1)
+	# grid: rows
+	for i in range(len(TILE_PROPERTIES)+1):
+		mainframe.rowconfigure(i,pad=1)
+	item_input = list()
+	var = list()
+	i=0
+	for item in TILE_PROPERTIES:
+		item_label = tk.Label(mainframe,text=item[0])
+		item_label.grid(column=0,row=i)
+		# True or False box
+		if item[2] == TF:
+			var.append(tk.IntVar())
+			var[i].set(item[1])
+			item_input = tk.Checkbutton(mainframe,variable=var[i])
+		# number input box
+		elif item[2] == INPUT:
+			var.append(tk.IntVar())
+			value = item[1]
+			var[i].set(value)
+			item_input = tk.Entry(mainframe,width=3,textvariable=var[i])
+		item_input.grid(column=1,row=i,sticky=tk.W)
+		i+=1
+	# draw two buttons at the bottom
+	update_button = tk.Button(mainframe, text="Update", command=updateTile)
+	update_button.grid(row=i,column=0)
+	cancel_button = tk.Button(mainframe, text="Cancel", command=cancelTile)
+	cancel_button.grid(row=i,column=1,sticky=tk.W)
+	mainframe.pack(side=tk.LEFT)
+	root.mainloop()
 	tiles[tileid] = tile
-
 
 def drawMenu(buttons, width, height):
 	fontobject = pygame.font.Font(None,25)
@@ -530,12 +534,12 @@ def main():
 
 # load sprites
 tiles = []
-directory = 'tiles/'
+directory = os.path.dirname(os.path.realpath(sys.argv[0]))+'/'
 NUMTILES = 0
-for filename in sorted(os.listdir(directory)):
-	tiles.append(Tile(pygame.image.load(directory+filename).convert()))
+for filename in sorted(os.listdir(directory+'tiles/')):
+	tiles.append(Tile(pygame.image.load(directory+'tiles/'+filename).convert()))
 	NUMTILES += 1
-tiles.append(Tile(pygame.image.load('cursor.bmp').convert()))
+tiles.append(Tile(pygame.image.load(directory+'cursor.bmp').convert()))
 
 mouse = Mouse()
 level = Level()

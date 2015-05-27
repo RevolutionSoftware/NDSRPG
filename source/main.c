@@ -15,6 +15,8 @@
 #include "objects.h"
 #include "movement.h"
 #include "text.h"
+// map data
+#include "maps.h"
 
 #define FRAMES_PER_ANIMATION 3
 
@@ -111,10 +113,13 @@ global_variable u16 map[] = {
 int main(void) {
 	PC_t player = {16,32};
 	tile_t tile[] = {{true},{true},{false},{false},{false},{false},{false},{false},{false},{false}};
+	map_t Level = {map,tile,map_obj_data};
+	Level = map0_struct;
 
-	consoleDemoInit();
-	iprintf("NDSRPG:\n");
-	iprintf("4-bit color tilemap");
+//	consoleDemoInit();
+//	iprintf("NDSRPG:\n");
+//	iprintf("4-bit color tilemap\n");
+
 
 	/* NDS has nine memory banks, banks 0-4
 	 *  Use mode 0. Mode 0 is for tilebased sprites, called "text" mode
@@ -156,10 +161,10 @@ int main(void) {
 // **********************************************************************************************
 
 
-	int maph = 64;
-	int mapw = 64;
-	int mapx = 0;
-	int mapy = 0;
+//	int maph = 64;
+//	int Level.w = 64;
+//	int Level.x = 0;
+//	int Level.y = 0;
 	REG_BG0HOFS = 0;
 	REG_BG0VOFS = 0;
 
@@ -184,72 +189,73 @@ int main(void) {
 //			iprintf("\nYou released A");
 		if (keys & KEY_RIGHT)
 		{
-			int mapOffset = (player.y + 16)/16*mapw+(player.x + PLAYER_WIDTH + SPEED)/16;
-			int tileId = map[mapOffset];
+			int mapOffset = (player.y + 16)/16*Level.w+(player.x + PLAYER_WIDTH + SPEED)/16;
+			int tileId = Level.map[mapOffset];
 			int tileId2 = tileId;
 			if (((player.y+16) % 16) >= 8)
-				tileId2 = map[mapOffset+mapw];	// move down one row in map
+				tileId2 = Level.map[mapOffset+Level.w];	// move down one row in map
 			// Make sure player isn't at edge of screen
-			if (player.x < mapw*16-PLAYER_WIDTH)
-				if(tile[tileId].isPassable && tile[tileId2].isPassable)
+			if (player.x < Level.w*16-PLAYER_WIDTH)
+				if(Level.tiles[tileId*2].isPassable && Level.tiles[tileId2*2].isPassable)
 					player.x+=SPEED;
 			// Make sure map isn't at edge of screen
-			if ((player.x-mapx > SCREEN_RIGHT/2 - PLAYER_WIDTH/2) && mapx < mapw*16-16*16)
-				mapx+=SPEED;
+			if ((player.x-Level.x > SCREEN_RIGHT/2 - PLAYER_WIDTH/2) && Level.x < Level.w*16-16*16)
+				Level.x+=SPEED;
 			player.state = W_RIGHT;
 		}
 		if (keys & KEY_LEFT)
 		{
-			int mapOffset = (player.y+16)/16*mapw+(player.x-SPEED)/16;
-			int tileId = map[mapOffset];
+			int mapOffset = (player.y+16)/16*Level.w+(player.x-SPEED)/16;
+			int tileId = Level.map[mapOffset];
 			int tileId2 = tileId;
 			if ((player.y + 16) % 16 >= 8)
-				tileId2 = map[mapOffset+mapw];	// move down one row in map
+				tileId2 = Level.map[mapOffset+Level.w];	// move down one row in map
 			if (player.x > 0)
-				if(tile[tileId].isPassable && tile[tileId2].isPassable)
+				if(Level.tiles[tileId*2].isPassable && Level.tiles[tileId2*2].isPassable)
 					player.x-=SPEED;
-			if ((player.x-mapx < SCREEN_RIGHT/2 - PLAYER_WIDTH/2) && mapx>0)
-				mapx-=SPEED;
+			if ((player.x-Level.x < SCREEN_RIGHT/2 - PLAYER_WIDTH/2) && Level.x>0)
+				Level.x-=SPEED;
 			player.state = W_LEFT;
 		}
 		if (keys & KEY_DOWN)		// w*tile_height - tile_height*tiles_per_column
 		{
-			int mapOffset = (player.y+PLAYER_HEIGHT+SPEED)/16*mapw+player.x/16;
-			int tileId = map[mapOffset];
+			int mapOffset = (player.y+PLAYER_HEIGHT+SPEED)/16*Level.w+player.x/16;
+			int tileId = Level.map[mapOffset];
 			int tileId2 = tileId;
 			if (player.x % 16 != 0)
-				tileId2 = map[mapOffset+1];
-			if (player.y < maph*16 - PLAYER_HEIGHT)
-				if(tile[tileId].isPassable && tile[tileId2].isPassable)
+				tileId2 = Level.map[mapOffset+1];
+			if (player.y < Level.h*16 - PLAYER_HEIGHT)
+				if(Level.tiles[tileId*2].isPassable && Level.tiles[tileId2*2].isPassable)
 					player.y+=SPEED;
-			if ((player.y-mapy > SCREEN_BOTTOM/2 - PLAYER_HEIGHT/2) && mapy < maph*16-12*16)
-				mapy+=SPEED;
+			if ((player.y-Level.y > SCREEN_BOTTOM/2 - PLAYER_HEIGHT/2) && Level.y < Level.h*16-12*16)
+				Level.y+=SPEED;
 			player.state = W_DOWN;
 		}
 		if (keys & KEY_UP)
 		{
-			int mapOffset = (player.y+16-SPEED)/16*mapw+player.x/16;
-			int tileId = map[mapOffset];
+			int mapOffset = (player.y+16-SPEED)/16*Level.w+player.x/16;
+			int tileId = Level.map[mapOffset];
 			int tileId2 = tileId;
 			if (player.x % 16 != 0)
-				tileId2 = map[mapOffset+1];
+				tileId2 = Level.map[mapOffset+1];
 			if (player.y > 0)
-				if(tile[tileId].isPassable && tile[tileId2].isPassable)
+				if(Level.tiles[tileId*2].isPassable && Level.tiles[tileId2*2].isPassable)
 					player.y -= SPEED;
-			if ((player.y-mapy < SCREEN_BOTTOM/2 - PLAYER_HEIGHT/2) && mapy > 0)
-				mapy-=SPEED;
+			if ((player.y-Level.y < SCREEN_BOTTOM/2 - PLAYER_HEIGHT/2) && Level.y > 0)
+				Level.y-=SPEED;
 			player.state = W_UP;
 		}
-		tilemap(map, maph, mapw, mapx>>4, mapy>>4);
+		// draw tilemap
+		tilemap(&Level);
 		if (keys) {
-			REG_BG0HOFS = (mapx)%16;
-			REG_BG0VOFS = (mapy)%16;
+			REG_BG0HOFS = (Level.x)%16;
+			REG_BG0VOFS = (Level.y)%16;
 			player.anim_frame++;
 			player.anim_frame %= (FRAMES_PER_ANIMATION+1)*ANIMATION_SPEED;
 		} else
 			player.anim_frame = 0;	// reset animation when not moving
 		animate_PC(&player);
-		oamSet(&oamMain, 0, player.x-mapx, player.y-mapy, 0, 0, SpriteSize_32x32, SpriteColorFormat_256Color,
+		oamSet(&oamMain, 0, player.x-Level.x, player.y-Level.y, 0, 0, SpriteSize_32x32, SpriteColorFormat_256Color,
 			   player.sprite_gfx_mem, -1, false, false, false, false, false);
 		swiWaitForVBlank();
 		oamUpdate(&oamMain);

@@ -5,7 +5,7 @@
 #include "font.h"
 
 // text is defined as a tilemap.
-void putString(const char *text, unsigned int flag) {
+void putString(const char *text, speed flag) {
     int text_length = stringLength(text);
     // address of tilemap
     u16 *sub_map = BG_MAP_RAM_SUB(0);
@@ -14,8 +14,8 @@ void putString(const char *text, unsigned int flag) {
     int x = 0, y = 0;
     int i;
 
-    if (flag > SLOW) {
-        flag = SLOW;
+    if (flag > D_SLOW) {
+        flag = D_SLOW;
     }
 
     for (i = 0; i < text_length; i++) {
@@ -49,8 +49,26 @@ void putString(const char *text, unsigned int flag) {
             y++;
     }
 }
+/*
+  How wide/high does the box have to be?
+  Where do we want it aligned (centered? To the left or right?)
+  Some good standard alignment values:
+  ------------ Down - Central ------------
+  Xstart = Xmin + 20pix -> Xmax - 20pix
+  Ystart = Ymax - 20pix -> Ymax
+  ----------- Middle - Central -----------
+  X.1 = Xstart \ Y.1 = Ystart
+  X.2 = Xend   \ Y.2 = Yend
 
-// How wide/high does the box have to be?
-// Where do we want it aligned (centered? To the left or right?)
-void drawBox(int width, int height, coord_t alignment) {
+  Xd (delta) = X.2 - X.1
+  Yd (delta) = Y.2 - Y.1
+
+  X.1 = (Xmax/2)-Zpixels
+  X.2 = (Xmax/2)+Zpixels
+  Y.1 = (Ymax/2)-Ipixels
+  Y.2 = (Ymax/2)+Ipixels
+  ----------------------------------------
+*/
+void drawBox(int width, int height, alignment algn) {
+
 }

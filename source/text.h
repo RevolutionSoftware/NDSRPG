@@ -1,11 +1,17 @@
 #ifndef TEXT_H
 #define TEXT_H
 
-typedef enum {
-    NONE = 0,
-    FAST = 1,
-    SLOW = 2,
-};
+typedef enum speed {
+    D_NONE,
+    D_FAST,
+    D_SLOW
+} speed;
+
+typedef enum alignment {
+    A_NONE,
+    A_CENTER,
+    A_BOTTOM
+} alignment;
 
 typedef struct {
     int x;
@@ -13,8 +19,8 @@ typedef struct {
     int layer;
 } coord_t;
 
-void drawBox(int, int, coord_t);
-void putString(const char *text, unsigned int flag);
+void drawBox(int, int, alignment);
+void putString(const char *text, speed flag);
 int stringLength(const char *text);
 
 #endif // TEXT_H

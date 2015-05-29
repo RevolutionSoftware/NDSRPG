@@ -138,30 +138,16 @@ int main(void) {
 
 // Font stuff for bottom screen
 // Sub screen uses bg1, sub map base 0 and sub tile base 1.
-	REG_DISPCNT_SUB = MODE_0_2D | DISPLAY_BG0_ACTIVE | DISPLAY_BG1_ACTIVE;   // bottom screen, use bg0 and bg1
-	REG_BG0CNT_SUB = BG_PRIORITY_0 | BG_32x32 | BG_COLOR_16 | BG_MAP_BASE(0) | BG_TILE_BASE(1);
+	REG_DISPCNT_SUB = MODE_0_2D | DISPLAY_BG0_ACTIVE| DISPLAY_BG1_ACTIVE;   // bottom screen, use bg0 and bg1
+	REG_BG0CNT_SUB = BG_PRIORITY_2 | BG_32x32 | BG_COLOR_16 | BG_MAP_BASE(0) | BG_TILE_BASE(1);
 	REG_BG1CNT_SUB = BG_PRIORITY_3 | BG_32x32 | BG_COLOR_16 | BG_MAP_BASE(1) | BG_TILE_BASE(1);
-
-	u16 *bg1map = BG_MAP_RAM_SUB(1);
-	*bg1map = 1;
-	int i;
-	for(i = 0; i<127-' '; i++) {
-		*bg1map = i;
-		bg1map++;
-	}
-	bg1map = BG_MAP_RAM_SUB(1);
-	*bg1map = 1;
-
-	REG_BG1HOFS_SUB = Level.x;
-	REG_BG1VOFS_SUB = Level.y;
 
 // Copy font data (sprites and palette)
 	dmaCopy(fontTiles, BG_TILE_RAM_SUB(1), fontTilesLen);
 	dmaCopy(fontPal, BG_PALETTE_SUB, fontPalLen);
 
-//	BG_PALETTE_SUB[0] = RGB15(5, 10, 10);
-//	BG_PALETTE_SUB[1] = RGB15(0, 31, 0);
-
+//	BG_PALETTE_SUB[0] = RGB15(31, 0, 31);
+//	BG_PALETTE_SUB[1] = RGB15(31, 31, 31);
 
 	oamInit(&oamMain, SpriteMapping_1D_128, false);
 
@@ -176,13 +162,20 @@ int main(void) {
 	dmaCopy(tilesPal, BG_PALETTE, 256*2);
 // **********************************************************************************************
 
-//	int maph = 64;
-//	int Level.w = 64;
-//	int Level.x = 0;
-//	int Level.y = 0;
 	REG_BG0HOFS = 0;
 	REG_BG0VOFS = 0;
 
+	// shift the text a few pixels down and to the right to not collide with the box border
+	REG_BG0HOFS_SUB = -4;
+	REG_BG0VOFS_SUB = -5;
+
+	// ############# Box drawn around debug values ##################
+	drawBox(0,0,32,3);
+	drawBox(0,3,32,21);
+	putString("\n\n\nHere we can put some other stats and information, or menus, or options, or bananas, or...\n\nI guess there are still a couple bugs in the text routine. We also need border detection (a width value for how far the text can be drawn without going outside the box).", D_SLOW);
+
+//	delBox(0,0,32,3);
+	// ##############################################################
 
 	while(1) {
 		// ############# DEBUG ################

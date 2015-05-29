@@ -4,6 +4,9 @@
 # Tell grit to include a palette (the first index in it will be transparent)
 -p
 
+# Tell grit to treat FF0000 as transparent
+-gT ff0000
+
 # Tile the image
 -gt
 

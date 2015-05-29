@@ -24,29 +24,29 @@ void putString(const char *text, speed flag) {
         if (text[i] == '\n') {
             x = 0;
             y++;
-            i++;
-        }
-        if (text[i] == ' ') {
-            int j = i+1;
+        } else {
+			if (text[i] == ' ') {
+				int j = i+1;
 
-            while(text[j] != ' ' && text[j] != '\0') {
-                j++;
-            }
-            if(j-i+x > 32) {	// j-i = number of characters to next space
-                // .. x + characters to next space
-                i++;			// skip the space
-                x = 0;			// and move to a new line
-                y++;
-            }
-        }
-        // copy tile to map
-        sub_map[y*32+x] = text[i]-' ';
-        x++;
+				while(text[j] != ' ' && text[j] != '\0') {
+					j++;
+				}
+				if(j-i+x > 31) {	// j-i = number of characters to next space
+					// .. x + characters to next space
+					i++;			// skip the space
+					x = 0;			// and move to a new line
+					y++;
+				}
+			}
+			// copy tile to map
+			sub_map[y*32+x] = text[i]-' ';
+			x++;
 
-        // Check for new line
-        x %= 32;	// screen is 32 tiles wide
-        if(!x)
-            y++;
+			// Check for new line
+			x %= 32;	// screen is 32 tiles wide
+			if(!x)
+				y++;
+		}
     }
 }
 /*
@@ -69,6 +69,58 @@ void putString(const char *text, speed flag) {
   Y.2 = (Ymax/2)+Ipixels
   ----------------------------------------
 */
-void drawBox(int width, int height, alignment algn) {
+#define TL	'~'-' '+1	// top left
+#define T	TL+1		// top
+#define TR	T+1			// top right
+#define BL	TR+1		// bottom left
+#define B	BL+1		//
+#define BR	B+1			//
+#define L	BR+1		// left
+#define R	L+1			//
+#define C	R+1			// center
+void drawBox(int x, int y, int w, int h) {
+	u16 *box_map = BG_MAP_RAM_SUB(1);
+	int i,j;
+	box_map += 32*y+x;		// map width is 32
+	// draw top row
+	*box_map = TL;
+	for(i = 0; i < w-2; i++) {
+		box_map++;
+		*box_map = T;
+	}
+	box_map++;
+	*box_map = TR;
+	box_map += 33-w;		// move to next line
+	// draw middle area
+	for(j = 0; j < h-2; j++) {
+		*box_map = L;
+		for(i = 0; i < w-2; i++) {
+			box_map++;
+			*box_map = C;
+		}
+		box_map++;
+		*box_map = R;
+		box_map += 33-w;	// move to next line
+	}
+	// draw bottom row
+	*box_map = BL;
+	for(i = 0; i < w-2; i++) {
+		box_map++;
+		*box_map = B;
+	}
+	box_map++;
+	*box_map = BR;
+}
 
+void delBox(int x, int y, int w, int h) {
+	u16 *box_map = BG_MAP_RAM_SUB(1);
+	int i,j;
+	// erase box by overwriting it with 0s
+	for(j = 0; j < h; j++) {
+		for(i = 0; i < w; i++) {
+			*box_map = 0;
+			box_map++;
+		}
+		box_map += 32-w;	// move to next line
+	}
 }

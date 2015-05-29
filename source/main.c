@@ -130,15 +130,31 @@ int main(void) {
 // main character
 	vramSetBankB(VRAM_B_MAIN_SPRITE_0x06400000);
 // text
-	vramSetBankH(VRAM_H_SUB_BG);
+	vramSetBankC(VRAM_C_SUB_BG);
+//	vramSetBankH(VRAM_H_SUB_BG);
 
 	REG_DISPCNT = MODE_0_2D | DISPLAY_BG0_ACTIVE;   // Set mode 0 in 2D mode and enable background 0
-	REG_BG0CNT = BG_PRIORITY_0 | BG_64x32 | BG_COLOR_256 | BG_MAP_BASE(0) | BG_TILE_BASE(1);
+	REG_BG0CNT = BG_PRIORITY_0 | BG_64x32 | BG_COLOR_256 | BG_MAP_BASE(0) | BG_TILE_BASE(1);	// map base = 2kb, tile base = 16kb
 
 // Font stuff for bottom screen
 // Sub screen uses bg1, sub map base 0 and sub tile base 1.
-	REG_DISPCNT_SUB = MODE_0_2D | DISPLAY_BG1_ACTIVE;   // bottom screen, use bg1
-	REG_BG1CNT_SUB = BG_PRIORITY_0 | BG_32x32 | BG_COLOR_16 | BG_MAP_BASE(0) | BG_TILE_BASE(1);
+	REG_DISPCNT_SUB = MODE_0_2D | DISPLAY_BG0_ACTIVE | DISPLAY_BG1_ACTIVE;   // bottom screen, use bg0 and bg1
+	REG_BG0CNT_SUB = BG_PRIORITY_0 | BG_32x32 | BG_COLOR_16 | BG_MAP_BASE(0) | BG_TILE_BASE(1);
+	REG_BG1CNT_SUB = BG_PRIORITY_3 | BG_32x32 | BG_COLOR_16 | BG_MAP_BASE(1) | BG_TILE_BASE(1);
+
+	u16 *bg1map = BG_MAP_RAM_SUB(1);
+	*bg1map = 1;
+	int i;
+	for(i = 0; i<127-' '; i++) {
+		*bg1map = i;
+		bg1map++;
+	}
+	bg1map = BG_MAP_RAM_SUB(1);
+	*bg1map = 1;
+
+	REG_BG1HOFS_SUB = Level.x;
+	REG_BG1VOFS_SUB = Level.y;
+
 // Copy font data (sprites and palette)
 	dmaCopy(fontTiles, BG_TILE_RAM_SUB(1), fontTilesLen);
 	dmaCopy(fontPal, BG_PALETTE_SUB, fontPalLen);
@@ -159,7 +175,6 @@ int main(void) {
 	dmaCopy(tilesTiles, BG_TILE_RAM(1), tilesTilesLen);
 	dmaCopy(tilesPal, BG_PALETTE, 256*2);
 // **********************************************************************************************
-
 
 //	int maph = 64;
 //	int Level.w = 64;

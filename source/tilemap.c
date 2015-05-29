@@ -46,3 +46,8 @@ void tilemap(map_t *Level) {
         start += w;
     }
 }
+
+int checkTile(map_t *Level, int x, int y) {
+	
+	return 0;
+}

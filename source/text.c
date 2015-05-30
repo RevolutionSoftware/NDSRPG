@@ -5,13 +5,14 @@
 #include "font.h"
 
 // text is defined as a tilemap.
-void putString(const char *text, speed flag) {
+void putString(int x, int y, int w, const char *text, speed flag) {
     int text_length = stringLength(text);
     // address of tilemap
     u16 *sub_map = BG_MAP_RAM_SUB(0);
 
     // Draw the message on the screen.
-    int x = 0, y = 0;
+    int left_edge = x;
+    int right_edge = left_edge + w;
     int i;
 
     if (flag > D_SLOW) {
@@ -22,7 +23,7 @@ void putString(const char *text, speed flag) {
         delay(flag);
         // Check for special characters (\n, etc.)
         if (text[i] == '\n') {
-            x = 0;
+            x = left_edge;
             y++;
         } else {
 			if (text[i] == ' ') {
@@ -31,10 +32,10 @@ void putString(const char *text, speed flag) {
 				while(text[j] != ' ' && text[j] != '\0') {
 					j++;
 				}
-				if(j-i+x > 31) {	// j-i = number of characters to next space
+				if(j-i+x > right_edge) {	// j-i = number of characters to next space
 					// .. x + characters to next space
-					i++;			// skip the space
-					x = 0;			// and move to a new line
+					i++;					// skip the space
+					x = left_edge;			// and move to a new line
 					y++;
 				}
 			}
@@ -110,6 +111,11 @@ void drawBox(int x, int y, int w, int h) {
 	}
 	box_map++;
 	*box_map = BR;
+}
+
+void drawTextBox(int x, int y, int w, int h, const char *text, speed flag) {
+	drawBox(x,y,w,h);
+	putString(x,y,w-1,text,flag);
 }
 
 void delBox(int x, int y, int w, int h) {

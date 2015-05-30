@@ -171,8 +171,7 @@ int main(void) {
 
 	// ############# Box drawn around debug values ##################
 	drawBox(0,0,32,3);
-	drawBox(0,3,32,21);
-	putString("\n\n\nHere we can put some other stats and information, or menus, or options, or bananas, or...\n\nI guess there are still a couple bugs in the text routine. We also need border detection (a width value for how far the text can be drawn without going outside the box).", D_SLOW);
+	drawTextBox(1,3,30,21,"Here we can put some other stats and information, or menus, or options, or bananas, or...\n\nI guess there are still a couple bugs in the text routine. We also need border detection (a width value for how far the text can be drawn without going outside the box).", D_SLOW);
 
 //	delBox(0,0,32,3);
 	// ##############################################################
@@ -182,7 +181,7 @@ int main(void) {
 		char debugStr[100];
 		sprintf(debugStr,"X: %d, Y: %d    \nX TILE: %d, Y TILE: %d     ",
 				player.x, player.y, (player.x + PLAYER_WIDTH)/16, (player.y + 16)/16);
-		putString(debugStr, D_NONE);
+		putString(0,0,31,debugStr, D_NONE);
 		// ####################################
 
 		// Check for keys now

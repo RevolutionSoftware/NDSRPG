@@ -4,7 +4,7 @@
 #include "aux_macros.h"
 tile_t map1_tiledata[][2] = {{true},{true},{false},{false},{false},{false},{false},{false},{false},{false}};
 
-u16 map1_obj_data[][4] = {EOF};
+s16 map1_obj_data[] = {EOF};
 
 global_variable u16 map1[] = {
 	5,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,2,0,3,0,4,0,5,0,1,0,0,0,0,1,1,0,0,2,2,0,0,0,3,3,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,1,

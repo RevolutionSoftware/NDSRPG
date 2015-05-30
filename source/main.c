@@ -47,7 +47,7 @@ enum {
 
 int main(void) {
 	PC_t player = {16,32};
-	map_t Level = map_list[0];
+	map_t Level = map_list[1];
 	Level.x = 0;
 	Level.y = 0;
 
@@ -179,7 +179,7 @@ int main(void) {
 			if ((player.y-Level.y < SCREEN_BOTTOM/2 - PLAYER_HEIGHT/2) && Level.y > 0)
 				Level.y-=SPEED;
 			player.state = W_UP;
-			checkTile(&Level,player.x+8,player.y);
+			checkTile(&Level,&player,player.x+8,player.y);
 		}
 		// draw tilemap
 		drawMap(&Level);

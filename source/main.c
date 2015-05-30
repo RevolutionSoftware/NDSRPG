@@ -94,7 +94,7 @@ int main(void) {
 
 	// ############# Box drawn around debug values ##################
 	drawBox(0,0,32,3);
-	drawTextBox(1,3,30,21,"Here we can put some other stats and information, or menus, or options, or bananas, or...\n\nI guess there are still a couple bugs in the text routine. We also need border detection (a width value for how far the text can be drawn without going outside the box).", D_NONE);
+	drawTextBox(1,3,30,20,"Here we can put some other stats and information, or menus, or options, or bananas, or...\n\nI guess there are still a couple bugs in the text routine. We also need border detection (a width value for how far the text can be drawn without going outside the box).", D_NONE);
 
 //	delBox(0,0,32,3);
 	// ##############################################################
@@ -176,6 +176,7 @@ int main(void) {
 			if ((player.y-Level.y < SCREEN_BOTTOM/2 - PLAYER_HEIGHT/2) && Level.y > 0)
 				Level.y-=SPEED;
 			player.state = W_UP;
+			checkTile(&Level,player.x,player.y);
 		}
 		// draw tilemap
 		tilemap(&Level);

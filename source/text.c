@@ -114,7 +114,7 @@ void drawBox(int x, int y, int w, int h) {
 }
 
 void drawTextBox(int x, int y, int w, int h, const char *text, speed flag) {
-	drawBox(x,y,w,h);
+	drawBox(x,y,w,h+1);
 	putString(x,y,w-1,text,flag);
 }
 
@@ -124,7 +124,7 @@ void delTextBox(int x, int y, int w, int h) {
 	int i,j;
 
 	// erase box by overwriting it with 0s
-	for(j = 0; j < h; j++) {
+	for(j = 0; j < h+1; j++) {
 		for(i = 0; i < w; i++) {
 			*text_map = 0;
 			text_map++;

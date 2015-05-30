@@ -1,7 +1,7 @@
 #include <nds.h>	// Main NDS equates
 #include <stdio.h>
 #include "tilemap.h"
-
+#include "text.h"
 
 /* This draws a 17x13 tilemap, with 1 extra tile on the right and bottom
  * to make scrolling easier.
@@ -47,7 +47,6 @@ void tilemap(map_t *Level) {
     }
 }
 
-int checkTile(map_t *Level, int playerx, int playery) {
-	
-	return 0;
+void checkTile(map_t *Level, int playerx, int playery) {
+	drawTextBox(0,0,32,2,"Checking Up",D_NONE);
 }

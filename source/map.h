@@ -1,3 +1,6 @@
+#ifndef MAP_H
+#define MAP_H
+
 #include "aux_macros.h"
 tile_t map0_tiledata[][2] = {{true,0},
 		{true,0},
@@ -8,7 +11,9 @@ tile_t map0_tiledata[][2] = {{true,0},
 		{false,0},
 		{true,0}
 		};
-u16 map0_obj_data[][4] = {{16,10,0,0},{30,30,0,1}};
+s16 map0_obj_data[] = {	16,10,0,0,
+						30,30,0,1,
+						EOF};
 u16 map0_width = 32;
 u16 map0_height = 32;
 //Width: 32	 Height: 32
@@ -53,3 +58,4 @@ map_t map0_maps[2] = {{0,25,25,30,30},
 					  {0,10,5,16,10}};
 //map_t map0_texts[2] = {{map0,map_tiledata,map_obj_data,32,32,0,0},
 //						{map0,map_tiledata,map_obj_data,32,32,0,0}};
+#endif

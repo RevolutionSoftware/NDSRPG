@@ -4,6 +4,8 @@
 
 #define DEBUG
 
+
+
 // Includes NDS
 #include <nds.h>	// Main NDS equates
 #include <stdio.h>	// For console stuff
@@ -15,8 +17,13 @@
 #include "objects.h"
 #include "movement.h"
 #include "text.h"
+
 // map data
 #include "maps.h"
+
+// tilemap array, tile data array, interaction array, width, height
+
+
 
 #define FRAMES_PER_ANIMATION 3
 
@@ -40,7 +47,7 @@ enum {
 
 int main(void) {
 	PC_t player = {16,32};
-	map_t Level = map_list[1];
+	map_t Level = map_list[0];
 	Level.x = 0;
 	Level.y = 0;
 
@@ -93,10 +100,7 @@ int main(void) {
 	REG_BG0VOFS_SUB = -5;
 
 	// ############# Box drawn around debug values ##################
-	drawBox(0,0,32,3);
 	drawTextBox(1,3,30,20,"Here we can put some other stats and information, or menus, or options, or bananas, or...\n\nI guess there are still a couple bugs in the text routine. We also need border detection (a width value for how far the text can be drawn without going outside the box).", D_NONE);
-
-//	delBox(0,0,32,3);
 	// ##############################################################
 
 	while(1) {
@@ -104,7 +108,7 @@ int main(void) {
 		char debugStr[100];
 		sprintf(debugStr,"X: %d, Y: %d    \nX TILE: %d, Y TILE: %d     ",
 				player.x, player.y, (player.x + PLAYER_WIDTH)/16, (player.y + 16)/16);
-		putString(0,0,31,debugStr, D_NONE);
+		drawTextBox(0,0,32,2,debugStr, D_NONE);
 		// ####################################
 
 		// Check for keys now
@@ -175,10 +179,10 @@ int main(void) {
 			if ((player.y-Level.y < SCREEN_BOTTOM/2 - PLAYER_HEIGHT/2) && Level.y > 0)
 				Level.y-=SPEED;
 			player.state = W_UP;
-			checkTile(&Level,player.x,player.y);
+			checkTile(&Level,player.x+8,player.y);
 		}
 		// draw tilemap
-		tilemap(&Level);
+		drawMap(&Level);
 		if ((keys&KEY_LEFT) | (keys&KEY_RIGHT) | (keys&KEY_DOWN) | (keys&KEY_UP)) {
 			REG_BG0HOFS = (Level.x)%16;
 			REG_BG0VOFS = (Level.y)%16;

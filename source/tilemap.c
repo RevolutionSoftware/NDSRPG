@@ -6,7 +6,7 @@
 /* This draws a 17x13 tilemap, with 1 extra tile on the right and bottom
  * to make scrolling easier.
  */
-void tilemap(map_t *Level) {
+void drawMap(map_t *Level) {
     // Our map will get stored at map base 0
     int w = Level->w;
     int x = Level->x >> 4;
@@ -48,5 +48,25 @@ void tilemap(map_t *Level) {
 }
 
 void checkTile(map_t *Level, int playerx, int playery) {
-	drawTextBox(0,0,32,2,"Checking Up",D_NONE);
+	int x = playerx/16;
+	int y = playery/16;
+	
+	int action = -1;
+	int i = 0;
+	while(Level->objs[i] != -1) {
+		if(Level->objs[i] == x && Level->objs[i+1] == y)
+			action = i+2;		// skip the x and y coordinates
+		i+=4;
+	}
+	if(action != -1)
+		drawTextBox(0,0,32,2,"ACTION! YES! YES! YES!",D_NONE);
+		if(Level->objs[action] == 0) {
+			putString(0,1,32,"MAP",D_NONE);
+//			*Level = map_list[Level->objs[action+1]];
+		}
+	else {
+		char string[100];
+		sprintf(string,"Checking... but nada %d",EOF);
+		drawTextBox(0,0,32,2,string,D_NONE);
+	}
 }

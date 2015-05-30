@@ -9,11 +9,11 @@ typedef struct {
 typedef struct {
 	u16 *map;
 	tile_t *tiles;
-	u16 *objs;
+	s16 *objs;
 	int w,h,x,y;
 }map_t;
 
-void tilemap(map_t *Level);
+void drawMap(map_t *Level);
 
 void checkTile(map_t *Level, int playerx, int playery);
 

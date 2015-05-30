@@ -118,15 +118,20 @@ void drawTextBox(int x, int y, int w, int h, const char *text, speed flag) {
 	putString(x,y,w-1,text,flag);
 }
 
-void delBox(int x, int y, int w, int h) {
-	u16 *box_map = BG_MAP_RAM_SUB(1);
+void delTextBox(int x, int y, int w, int h) {
+	u16 *text_map = BG_MAP_RAM_SUB(0)+32*y+x;
+	u16 *box_map = BG_MAP_RAM_SUB(1)+32*y+x;
 	int i,j;
+
 	// erase box by overwriting it with 0s
 	for(j = 0; j < h; j++) {
 		for(i = 0; i < w; i++) {
+			*text_map = 0;
+			text_map++;
 			*box_map = 0;
 			box_map++;
 		}
+		text_map += 32-w;
 		box_map += 32-w;	// move to next line
 	}
 }

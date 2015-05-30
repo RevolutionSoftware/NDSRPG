@@ -15,7 +15,7 @@ typedef struct {
 
 void tilemap(map_t *Level);
 
-int checkTile(map_t *Level, int x, int y);
+int checkTile(map_t *Level, int playerx, int playery);
 
 #ifdef DEBUG
 char* toString(int i);

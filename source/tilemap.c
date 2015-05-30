@@ -47,7 +47,7 @@ void tilemap(map_t *Level) {
     }
 }
 
-int checkTile(map_t *Level, int x, int y) {
+int checkTile(map_t *Level, int playerx, int playery) {
 	
 	return 0;
 }

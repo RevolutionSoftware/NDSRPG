@@ -116,7 +116,6 @@ int main(void) {
 		if (keysDown()&KEY_A)
 			drawTextBox(0,20,31,1,"You are pressing A",D_NONE);
 		if (keysUp()&KEY_A) {
-			delTextBox(0,20,31,1);
 			drawTextBox(0,20,31,1,"You released A",D_NONE);
 		}
 		if (keys & KEY_RIGHT)

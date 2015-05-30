@@ -2,16 +2,20 @@
 #define TILEMAP_H
 
 typedef struct {
-    bool isPassable;	// 0 = false, 1 = true
-    u16 textId;			// -1 = no text, 0+ = string to display when activated with [A]
-    u8 mapId;			// -1 = no jump, otherwise map to switch to
-    u16 mapX;
-    u16 mapY;
-    u16 playerX;		// player's coordinates in the new map
-    u16 playerY;
+	bool isPassable;	// 0 = false, 1 = true
+	u16 bgId;			// which background buffer to draw tile to
 }tile_t;
 
-void tilemap(u16 map[], int w, int h, int x, int y);
+typedef struct {
+	u16 *map;
+	tile_t *tiles;
+	u16 *objs;
+	int w,h,x,y;
+}map_t;
+
+void tilemap(map_t *Level);
+
+void checkTile(map_t *Level, int playerx, int playery);
 
 #ifdef DEBUG
 char* toString(int i);

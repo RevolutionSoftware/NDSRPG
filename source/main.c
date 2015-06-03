@@ -47,7 +47,7 @@ enum {
 
 int main(void) {
 	PC_t player = {16,32};
-	map_t Level = map_list[0];
+	map_t Level = map_list[1];
 	Level.x = 0;
 	Level.y = 0;
 

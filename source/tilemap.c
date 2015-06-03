@@ -2,6 +2,7 @@
 #include <stdio.h>	// For console stuff
 #include "tilemap.h"
 #include "text.h"
+#include "utilities.h"
 
 /* This draws a 17x13 tilemap, with 1 extra tile on the right and bottom
  * to make scrolling easier.
@@ -83,7 +84,7 @@ void checkTile(map_t *Level, PC_t *player, int playerx, int playery) {
 		}
 	}
 	else {
-		char string[100];
-		drawTextBox(0,0,32,2,"Checking... but nada",D_NONE);
+            //char string[100];
+            drawTextBox(0,0,32,2,"Checking... but nada",D_NONE);
 	}
 }

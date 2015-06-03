@@ -13,10 +13,10 @@ typedef struct {
     int layer;
 } coord_t;
 
-void putString(int x, int y, int w, const char *text, speed flag);
+void putString(int x, int y, int w, const char *text, e_speed flag);
 int stringLength(const char *text);
 void drawBox(int x, int y, int w, int h);
-void drawTextBox(int x, int y, int w, int h, const char *text, speed flag);
+void drawTextBox(int x, int y, int w, int h, const char *text, e_speed flag);
 void delTextBox(int x, int y, int w, int h);
 
 #endif // TEXT_H

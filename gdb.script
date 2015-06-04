@@ -1,3 +1,0 @@
-b main
-target remote localhost:55555
-c

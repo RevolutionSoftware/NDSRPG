@@ -1,3 +1,0 @@
-#!/bin/sh
-
-$DEVKITARM/bin/arm-none-eabi-gdb NDSRPG.elf -x gdb.script

@@ -24,7 +24,16 @@ void initCursor(Drawable *cursor, u8 *gfx) {
 //
 void drawCursor(Drawable *cursor) {
     // It's also being animated whilst being drawn..
-    int cursor_blink;
+    int cursor_blink = cursor->anim_frame/8;
+
+    if (cursor_blink > 1)
+        cursor_blink = (cursor_blink%2)*2;
+
+    int frame = cursor_blink + cursor->state * 3;
+    int *offset = cursor->frame_gfx + frame * 8 * 8;
+
+    dmaCopy(offset, cursor->sprite_gfx_mem, 8 * 8);
+
 }
 
 // selectOption:

@@ -8,24 +8,24 @@
 
 #define FRAMES_PER_ANIMATION 3
 
-void animate_PC(PC_t *sprite)
+void animatePC(Drawable *player)
 {
-	int frame_number = sprite->anim_frame/ANIMATION_SPEED;
+	int frame_number = player->anim_frame/ANIMATION_SPEED;
 	// animation frames should be 01020102 etc.
 	//							  01230123
 	if(frame_number > 1)
 		frame_number = (frame_number%2)*2;
 
-    int frame = frame_number + sprite->state * FRAMES_PER_ANIMATION;
-    u8 *offset = sprite->frame_gfx + frame * 32*32; // 32 * 32
+    int frame = frame_number + player->state * FRAMES_PER_ANIMATION;
+    u8 *offset = player->frame_gfx + frame * 32*32; // 32 * 32
 
-    dmaCopy(offset, sprite->sprite_gfx_mem, 32*32); // 32 * 32
+    dmaCopy(offset, player->sprite_gfx_mem, 32*32); // 32 * 32
 }
 
-void init_PC(PC_t *sprite, u8 *gfx)
+void initPC(Drawable *player, u8 *gfx)
 {
-    sprite->sprite_gfx_mem = oamAllocateGfx(&oamMain, SpriteSize_32x32, SpriteColorFormat_256Color);
+    player->sprite_gfx_mem = oamAllocateGfx(&oamMain, SpriteSize_32x32, SpriteColorFormat_256Color);
 
-    sprite->frame_gfx = (u8 *)gfx;
+    player->frame_gfx = (u8 *)gfx;
 }
 #undef FRAMES_PER_ANIMATION

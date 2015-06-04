@@ -17,6 +17,7 @@
 #include "objects.h"
 #include "movement.h"
 #include "text.h"
+#include "menus.h"
 
 // map data
 #include "maps.h"
@@ -46,7 +47,7 @@ enum {
 };
 
 int main(void) {
-	PC_t player = {16,32};
+	Drawable player = {16,32};
 	map_t Level = map_list[1];
 	Level.x = 0;
 	Level.y = 0;
@@ -81,7 +82,7 @@ int main(void) {
 
 	oamInit(&oamMain, SpriteMapping_1D_128, false);
 
-	init_PC(&player, (u8 *)playerTiles);
+	initPC(&player, (u8 *)playerTiles);
 	dmaCopy(playerPal, SPRITE_PALETTE, 512);
 
 	/* use DMA to copy data over
@@ -117,8 +118,9 @@ int main(void) {
 		// Exit if Start was pressed
 		if (keysDown()&KEY_START)
 			break;
-		if (keysDown()&KEY_A)
+                if (keysDown()&KEY_A)
 			drawTextBox(0,20,31,1,"You are pressing A",D_NONE);
+
 		if (keysUp()&KEY_A) {
 			drawTextBox(0,20,31,1,"You released A",D_NONE);
 		}
@@ -190,7 +192,7 @@ int main(void) {
 			player.anim_frame %= (FRAMES_PER_ANIMATION+1)*ANIMATION_SPEED;
 		} else
 			player.anim_frame = 0;	// reset animation when not moving
-		animate_PC(&player);
+		animatePC(&player);
 		oamSet(&oamMain, 0, player.x-Level.x, player.y-Level.y, 0, 0, SpriteSize_32x32, SpriteColorFormat_256Color,
 			   player.sprite_gfx_mem, -1, false, false, false, false, false);
 		swiWaitForVBlank();

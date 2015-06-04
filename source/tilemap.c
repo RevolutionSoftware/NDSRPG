@@ -51,7 +51,7 @@ void drawMap(map_t *Level) {
 extern map_t map_list[];
 extern u16 map_change_list[][5];
 
-void checkTile(map_t *Level, PC_t *player, int playerx, int playery) {
+void checkTile(map_t *Level, Drawable *player, int playerx, int playery) {
 	int x = playerx/16;
 	int y = (playery+15)/16;
 

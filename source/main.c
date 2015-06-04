@@ -19,8 +19,8 @@
 #include "text.h"
 #include "menus.h"
 
-// map data
-#include "maps.h"
+#include "maps/maps.h"	// map data
+#include "texts/texts.h"	// text data
 
 // tilemap array, tile data array, interaction array, width, height
 
@@ -103,6 +103,9 @@ int main(void) {
 	// ############# Box drawn around debug values ##################
 	drawTextBox(1,3,30,20,"Here we can put some other stats and information, or menus, or options, or bananas, or...\n\nI guess there are still a couple bugs in the text routine. We also need border detection (a width value for how far the text can be drawn without going outside the box).", D_NONE);
 	// ##############################################################
+
+	drawTextBox(1,3,30,20,text_list[0], D_NONE);
+
 
 	while(1) {
 		// ############# DEBUG ################

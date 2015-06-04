@@ -1,6 +1,6 @@
 import pygame
 import tkinter as tk
-import tkinter.filedialog
+import tkinter.filedialog, tkinter.messagebox
 import time, random, os, sys
 
 # constants
@@ -59,8 +59,9 @@ class StatusBar:
 		self.counter = counter
 
 class Tile:
-	def __init__(self,sprite,passable=True,bg=0):
-		self.sprite = sprite
+	def __init__(self,filename,passable=True,bg=0):
+		self.sprite = pygame.image.load(directory+filename).convert()
+		self.filename = filename
 		self.passable=passable
 		self.bg=bg
 
@@ -101,29 +102,22 @@ class Level:
 		self.y = y
 		self.saved = False
 		self.filename = filename
+		self.objects = {}
 		self.loadMap()
 	def loadMap(self):
-		objects.clear()
+		self.objects.clear()
 		for y in range(MAX_HEIGHT):
 			self.map.append([])
 			for x in range(MAX_WIDTH):
 				self.map[y].append(0)
 		if self.filename != '':
 			with open(self.filename,"r") as f:
-				# first line tile data (whether passable or not)
-				line = f.readline().rstrip(',\n')
-				i = 0
-				for item in line.split(','):
-					passable,bg = item.split(' ')
-					tiles[i].passable = (passable == 'True')
-					tiles[i].bg = bg
-					i += 1
-				# next line is object data (actions assigned to a tile)
+				# first line is object data (actions assigned to a tile)
 				line = f.readline().rstrip('/\n')
 				if not line == '':
 					for item in line.split('/'):
 						key,action,data = item.split(' ')
-						objects[key] = {'action': int(action),'data': int(data)}
+						self.objects[key] = {'action': int(action),'data': int(data)}
 				# next line is width and height
 				line = f.readline().rstrip('\n')
 				w,h = line.split(' ')
@@ -149,12 +143,33 @@ class Level:
 		for y in range(height):
 			for x in range(width):
 				obj_name = str(x+self.x)+','+str(y+self.y)
-				if obj_name in objects:
+				if obj_name in self.objects:
 					pygame.draw.rect(screen,RED,(x*TILE_SIZE,(y+1)*TILE_SIZE,TILE_SIZE+1,TILE_SIZE+1),1)
 				blitSprite(tiles[self.map[y+self.y][x+self.x]].sprite,x*TILE_SIZE+1,y*TILE_SIZE+TILE_SIZE+1)
+	def __repr__(self):
+		return "Level: ['{}',{},{},{},{},{}]".format(self.filename,self.width,self.height,self.x,self.y,self.saved)
+
 #########################################
 
 #### File functions #####################
+def quitSave():
+	''' Test if file has been saved before quitting.
+		If not, prompt to save. Returns true if we have saved
+		and can safely exit or if the user doesn't want to save.
+		Returns false if there is some problem. '''
+	root = tk.Tk()
+	root.withdraw()
+	success = False
+	if level.saved == False:
+		if tk.messagebox.askyesno('Map not saved', 'Save before quitting?'):
+			success = saveFile()
+		else:
+			success = True
+	else:
+		success = True
+	root.destroy()
+	return success
+
 def newFile():
 	level.map = []
 	level.width = 32
@@ -169,7 +184,7 @@ def newFile():
 def openFile():
 	root = tk.Tk()
 	root.withdraw()
-	level.filename = tk.filedialog.askopenfilename(title = "Load a map",filetypes = (("map files","*.map"),("all files","*.*")),defaultextension=".map")
+	level.filename = tk.filedialog.askopenfilename(title = "Load a map",initialdir = "maps", filetypes = (("map files","*.map"),("all files","*.*")),defaultextension=".map")
 	if not level.filename:
 		level.filename = ''
 	root.destroy()
@@ -177,20 +192,28 @@ def openFile():
 	statusbar.set("Map loaded")
 
 def saveFile():
+	# save map_jumps
+	with open(mj_file,"wt") as f:
+		for map_jump in map_jumps:
+			for entry in map_jump[:-1]:
+				f.write("{} ".format(entry))
+			f.write("{}\n".format(str(map_jump[-1])))
+
+	# save tile data
+	with open(tile_file,"wt") as f:
+		for tile in tiles[:-1]:
+			f.write("{} {} {}\n".format(tile.filename,str(tile.passable),str(tile.bg)))
+
 	if level.filename == '':
 		root = tk.Tk()
 		root.withdraw()
-		level.filename = tk.filedialog.asksaveasfilename(title = "Save your map",filetypes = (("map files","*.map"),("all files","*.*")),defaultextension=".map")
+		level.filename = tk.filedialog.asksaveasfilename(title = "Save your map",initialdir = "maps",filetypes = (("map files","*.map"),("all files","*.*")),defaultextension=".map")
 		root.destroy()
 	if level.filename:
 		with open(level.filename,"wt") as f:
-			# first save the tile data into the map
-			for tile in tiles:
-				f.write("{} {},".format(str(tile.passable),tile.bg))
-			f.write("\n")
-			# next save object data
-			for key in objects.keys():
-				f.write("{} {} {}/".format(key,objects[key]['action'],objects[key]['data']))
+			# first save object data
+			for key in level.objects.keys():
+				f.write("{} {} {}/".format(key,level.objects[key]['action'],level.objects[key]['data']))
 			f.write("\n")
 			# next the width and height
 			f.write("{} {}\n".format(level.width,level.height))
@@ -200,87 +223,262 @@ def saveFile():
 				f.write('\n')
 		level.saved = True
 		statusbar.set("File saved")
+		return True
 	else:
 		level.filename = ''
 
 def exportFile():
+	global level_list
 	if level.filename == '':
-		saveFile()
-	
-	if level.filename != '':
-		filename,ext = os.path.basename(level.filename).split('.')
-		with open(filename+'.h',"wt") as header:
-			# export tile data
-			header.write("tile_t {}_tiledata[] = {{".format(filename))
-			for t in tiles:
-				header.write("{{{},{}}},\n\t\t".format(str(t.passable),t.bg))
-			header.write("};\n")
-			# export object data
-			header.write("u16 {}_obj_data[] = {{".format(filename))
-			for key in objects.keys():
-				header.write("{{{},{},{}}},\n\t\t".format(key,objects[key]['action'],objects[key]['data']))
-			header.write("};\n")
-			# export map data
-			header.write("//Width: {}\t Height: {}\nglobal_variable u16 {}[] = {{".format(level.width,level.height,filename))
-			for y in range(level.height):
-				header.write('\n\t')
-				for x in range(level.width):
-					header.write(str(level.map[y][x])+',')
-			header.write('\n}')
-		statusbar.set("Map exported")
+		if not saveFile():
+			return
+
+	map_array = []
+
+	# individual tilemaps
+	for entry in level_list:
+		if entry.filename != '':
+			filename,ext = os.path.basename(entry.filename).split('.')
+			map_array.append([filename,entry.width,entry.height])
+			with open('export/'+filename+'.h',"wt") as header:
+				header.write('#include "aux_macros.h"\n\n')
+				# export tile data
+				header.write("tile_t {}_tiledata[][2] = {{".format(filename))
+				for t in tiles:
+					header.write("{{{},{}}},\n\t\t".format(str(t.passable).lower(),t.bg))
+				header.write("};\n\n")
+				# export object data
+				header.write("s16 {}_obj_data[] = {{".format(filename))
+				for key in entry.objects.keys():
+					header.write("{},{},{},\n\t\t".format(key,entry.objects[key]['action'],entry.objects[key]['data']))
+				header.write("EOF};\n\n")
+				# export map data
+				header.write("//Width: {}\t Height: {}\nglobal_variable u16 {}[] = {{".format(entry.width,entry.height,filename))
+				for y in range(entry.height):
+					header.write('\n\t')
+					for x in range(entry.width):
+						header.write(str(entry.map[y][x])+',')
+				header.write('\n};')
+	# the main maps file
+	with open('export/maps.h','wt') as maps:
+		print(len(map_array))
+		# include all the maps
+		for entry in map_array:
+			maps.write('#include "{}.h"\n'.format(entry[0]))
+		# make a list of tilemap data: pointers to tilemap, tile data, and object data
+		maps.write("\nmap_t map_list[{}] = {{".format(len(map_array)))
+		for entry in map_array:
+			maps.write("{{{},{}_tiledata,{}_obj_data,{},{}}},\n\t\t".format(entry[0],entry[0],entry[0],entry[1],entry[2]))
+		maps.write("};\n\n")
+		
+		# map changes
+		maps.write("u16 map_change_list[{}][{}] = {{".format(len(map_jumps),len(map_jumps[0])-1))	# first value is the hint
+		for map_jump in map_jumps:
+			maps.write("{{{},{},{},{},{}}},\n\t\t".format(map_jump[MJ_MAP],map_jump[MJ_MAPX],map_jump[MJ_MAPY],map_jump[MJ_PLAYERX],map_jump[MJ_PLAYERY]))
+		maps.write("};")
+	statusbar.set("Map(s) exported")
+			
+
+def changeMaps():
+	def changeMap(event):
+		# load new map
+		global cur_map,level,level_list
+		level_list[cur_map] = level
+		cur_map = event.widget.curselection()[0]
+		level = level_list[cur_map]
+		root.destroy()
+
+	def cancel(event=''):
+		# quit without saving values
+		root.destroy()
+
+	root = tk.Tk()
+	root.bind('<Escape>',cancel)
+	root.wm_title("List of maps")
+	name_list = list()
+	for level in level_list:
+		d,f = level.filename.split('/')
+		if not level.saved:
+			f = '*'+f
+		name_list.append(f)
+
+	l = tk.Listbox(root)
+	l.insert(0,*name_list)
+	l.pack()
+	l.bind('<<ListboxSelect>>', changeMap)
+	root.mainloop()
+
 #############################################
 
 ACTIONS = ('--Pick Action--','New Map','Display Text')
 
 def editObject(x,y):
+	global level,map_jumps,level_list
 	name = str(x)+','+str(y)
 	# build object if it doesn't exist
-	if not name in objects:
-		objects[name] = {'action': -1,'data': ''}
+	if not name in level.objects:
+		level.objects[name] = {'action': -1,'data': 0}
 
 	def updateTile():
 		# save values and quit
-		objects[name]['action'] = ACTIONS.index(action.get())-1
-		objects[name]['data'] = data.get()
-		if ACTIONS.index(action.get()) == 0:
-			del objects[name]
+		action_id = ACTIONS.index(action.get())
+		level.objects[name]['action'] = action_id-1
+		if action_id == 0:
+			del level.objects[name]
+			root.destroy()
+
+		# if id = 1, we are creating a new map action entry
+		if action_id == 1:
+			map_action_id = map_action_txt.index(map_action_choice.get())
+			map_id = ma_list.index(ma_txt.get())
+			if map_action_id > 0:
+				i = map_action_id - 1
+				# update values
+				map_jumps[i] = [hint.get(),map_id,mapx.get(),mapy.get(),playerx.get(),playery.get()]
+			else:
+				map_jumps.append([hint.get(),map_id,mapx.get(),mapy.get(),playerx.get(),playery.get()])
+				map_action_id = len(map_jumps)
+			
+			print(map_jumps)
+
+			level.objects[name]['data'] = map_action_id-1
 		root.destroy()
 
 	def cancelTile(event=''):
 		# quit without saving values
-		if objects[name]['action'] == -1:	# delete object if it was empty
-			del objects[name]
+		if level.objects[name]['action'] == -1:	# delete object if it was empty
+			del level.objects[name]
 		root.destroy()
+	
+	def changeAction(event):
+		index = ACTIONS.index(action.get())
+		for i in range(len(ACTIONS)-1):
+			if i+1 == index:
+				actionframe[i].grid(column=0,row=1,columnspan=2,sticky=tk.W)
+			else:
+				actionframe[i].grid_forget()
+
+	def changeMapAction(event):
+		index = map_action_txt.index(map_action_choice.get())
+		if index > 0:
+			i = index - 1
+			# update values
+			hint.set(map_jumps[i][MJ_NAME])
+			ma_txt.set(ma_list[map_jumps[i][MJ_MAP]])
+			mapx.set(map_jumps[i][MJ_MAPX])
+			mapy.set(map_jumps[i][MJ_MAPY])
+			playerx.set(map_jumps[i][MJ_PLAYERX])
+			playery.set(map_jumps[i][MJ_PLAYERY])
+		else:
+			ma_txt.set(ma_list[0])
+			hint.set('')
+			mapx.set(0)
+			mapy.set(0)
+			playerx.set(0)
+			playery.set(0)
+			
 
 	root = tk.Tk()
 	root.bind('<Escape>',cancelTile)
 	root.wm_title("Tile {x},{y}".format(**locals()))
 	# create frame and build grid
 	mainframe = tk.Frame(root)
-	mainframe.columnconfigure(0,pad=1)
-	mainframe.columnconfigure(1,pad=1)
 
 	# fill out frame
 	action_txt = tk.Label(mainframe,text="Action:")
 	action_txt.grid(column=0,row=0)
 
-
 	# find the currently selected textid, if any
 	action = tk.StringVar()
-	i = objects[name]['action']+1
+	i = level.objects[name]['action']+1
 	action.set(ACTIONS[i])
 
-	action_input = tk.OptionMenu(mainframe,action,*ACTIONS)
-	action_input.config(width=10,anchor=tk.W)
-	action_input.grid(column=1,row=0,sticky=tk.W)
+	action_choice = tk.OptionMenu(mainframe,action,*ACTIONS,command=changeAction)
+	action_choice.config(width=10,anchor=tk.W)
+	action_choice.grid(column=1,row=0,sticky=tk.W)
 
-	data_txt = tk.Label(mainframe,text="Data:")
+	# frame that changes depending on what action you've picked
+	actionframe = []
+	for i in range(len(ACTIONS)-1):
+		actionframe.append(tk.Frame(mainframe))
+		
+# ----New Map----
+	mj_id = level.objects[name]['data']
+
+	map_action_txt = ["New Map Jump"]
+	for map_jump in map_jumps:
+		# remove the folder path and extension
+		map_name,ext = os.path.basename(level_list[map_jump[1]].filename).split('.')
+		string = "{}: {} [{},{}]".format(str(map_jump[MJ_NAME]),map_name,map_jump[MJ_PLAYERX],map_jump[MJ_PLAYERY])
+		map_action_txt.append(string)
+	map_action_choice = tk.StringVar()
+	map_action_choice.set(map_action_txt[mj_id+1])
+
+	map_action = tk.OptionMenu(actionframe[0],map_action_choice,*map_action_txt,command=changeMapAction)
+	map_action.config(width=18,anchor=tk.W)
+	map_action.grid(column=0,row=0,columnspan=4,sticky=tk.W)
+
+	label = tk.Label(actionframe[0],text="Name:")
+	label.grid(column=0,row=2)
+
+	hint = tk.StringVar()
+	hint.set(map_jumps[mj_id][MJ_NAME])
+	hint_input = tk.Entry(actionframe[0],width=8,textvariable=hint)
+	hint_input.grid(column=1,row=2,sticky=tk.W)
+	
+	label = tk.Label(actionframe[0],text="Map:")
+	label.grid(column=0,row=3)
+
+	# draw list of maps
+	ma_list = []
+	for l in level_list:
+		filename,ext = os.path.basename(l.filename).split('.')
+		ma_list.append(filename)
+	
+	ma_txt = tk.StringVar()
+	ma_txt.set(ma_list[map_jumps[mj_id][MJ_MAP]])
+	map_action = tk.OptionMenu(actionframe[0],ma_txt,*ma_list)
+	map_action.grid(column=1,row=3,columnspan=3,sticky=tk.W)
+
+	label = tk.Label(actionframe[0],text="MapX:")
+	label.grid(column=0,row=4)
+	label = tk.Label(actionframe[0],text="MapY:")
+	label.grid(column=0,row=5)
+	label = tk.Label(actionframe[0],text="PlayerX:")
+	label.grid(column=2,row=4)
+	label = tk.Label(actionframe[0],text="PlayerY:")
+	label.grid(column=2,row=5)
+
+	mapx = tk.IntVar()
+	mapx.set(map_jumps[mj_id][MJ_MAPX])
+	mapx_input = tk.Entry(actionframe[0],width=3,textvariable=mapx)
+	mapx_input.grid(column=1,row=4,sticky=tk.W)
+
+	mapy = tk.IntVar()
+	mapy.set(map_jumps[mj_id][MJ_MAPY])
+	mapy_input = tk.Entry(actionframe[0],width=3,textvariable=mapy)
+	mapy_input.grid(column=1,row=5,sticky=tk.W)
+
+	playerx = tk.IntVar()
+	playerx.set(map_jumps[mj_id][MJ_PLAYERX])
+	playerx_input = tk.Entry(actionframe[0],width=3,textvariable=playerx)
+	playerx_input.grid(column=3,row=4,sticky=tk.W)
+
+	playery = tk.IntVar()
+	playery.set(map_jumps[mj_id][MJ_PLAYERY])
+	playery_input = tk.Entry(actionframe[0],width=3,textvariable=playery)
+	playery_input.grid(column=3,row=5,sticky=tk.W)
+# -------------
+
+# ----Text----
+	data_txt = tk.Label(actionframe[1],text="Placeholder for now:")
 	data_txt.grid(column=0,row=1)
 
 	data = tk.IntVar()
-	data.set(objects[name]['data'])
-	data_input = tk.Entry(mainframe,width=3,textvariable=data)
+	data.set(level.objects[name]['data'])
+	data_input = tk.Entry(actionframe[1],width=3,textvariable=data)
 	data_input.grid(column=1,row=1,sticky=tk.W)
+# ------------
 
 	# draw buttons
 	update_button = tk.Button(mainframe, text="Update", command=updateTile)
@@ -288,6 +486,10 @@ def editObject(x,y):
 	cancel_button = tk.Button(mainframe, text="Cancel", command=cancelTile)
 	cancel_button.grid(row=2,column=1,sticky=tk.W)
 	mainframe.pack(side=tk.LEFT)
+
+	if level.objects[name]['action'] >= 0:
+		changeAction('')
+
 	root.mainloop()
 	
 
@@ -424,7 +626,6 @@ def drawGrid():
 		pygame.draw.line(screen,BLACK,(0,y*TILE_SIZE),(width*TILE_SIZE,y*TILE_SIZE))
 	pygame.draw.line(screen,BLACK,(0,DISPLAY_H-TILE_SIZE),(DISPLAY_W,DISPLAY_H-TILE_SIZE))
 
-
 def checkMouse(buttons):
 	for b in buttons:
 		if mouse.y < TILE_SIZE and b.x < mouse.x < b.x+b.width:
@@ -464,18 +665,31 @@ def checkMouse(buttons):
 			# otherwise, load the tile into the map
 			if mouseClick[0] == 1 and mouse.spriteL != -1:
 				level.map[y+level.y][x+level.x] = mouse.spriteL
-			else:
+			elif mouseClick[2] == 1:
 				level.map[y+level.y][x+level.x] = mouse.spriteR
 			level.saved = False
 
 BUTTONS = [	('New',0,0,50,16,newFile),
 			('Load',50,0,50,16,openFile),
 			('Save',100,0,50,16,saveFile),
-			('Export',150,0,60,16,exportFile)]
+			('Export',150,0,60,16,exportFile),
+			('Change Maps',210,0,120,16,changeMaps)]
 
 ### Main ################################################
 def main():
-#	level.loadMap()
+	global level,level_list
+	d = 'maps/'
+	os.makedirs(d,exist_ok=True)
+	for f in sorted(os.listdir(d)):
+		if f.endswith('.map'):
+			level_list.append(Level(filename=d+f))
+			level_list[-1].loadMap()
+	if level_list:
+		level = level_list[cur_map]
+		print("Loading",level_list[cur_map])
+	else:
+		print("No maps found, creating new map")
+
 	buttons = []
 	for text,x,y,width,height,action in BUTTONS:
 		buttons.append(MenuButton(text,x,y,width,height,action))
@@ -493,7 +707,8 @@ def main():
 		keys = pygame.key.get_pressed()
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
-				running = False
+				if quitSave():
+					running = False
 			# check keyboard commands
 			if event.type == pygame.KEYDOWN:
 				if keys[pygame.K_LCTRL] or keys[pygame.K_RCTRL]:
@@ -507,7 +722,8 @@ def main():
 						exportFile()
 				if event.key == K_ESCAPE:
 					if mouse.w_or_h == '':
-						running = False
+						if quitSave():
+							running = False
 					else:
 						width_str = str(level.width)
 						height_str = str(level.height)
@@ -621,18 +837,49 @@ def main():
 		clock.tick(60)
 	pygame.quit()
 
-# load sprites
+# load map jumps
+MJ_NAME		= 0
+MJ_MAP		= 1
+MJ_MAPX		= 2
+MJ_MAPY		= 3
+MJ_PLAYERX	= 4
+MJ_PLAYERY	= 5
+map_jumps = []
+
+mj_file = 'mapjumps.lst'
+if os.path.isfile(mj_file):
+	with open(mj_file,'r') as mapjumps:
+		for line in mapjumps:
+			line = line.rstrip('\n')
+			array = line.split(' ')
+			for i in range(1,len(array)):
+				array[i] = int(array[i])
+			map_jumps.append(array)
+
+# load texts
+
+# load tiles
 tiles = []
-# these are the tiles with actions assigned to them
-objects = {}
 directory = os.path.dirname(os.path.realpath(sys.argv[0]))+'/'
+tile_file = 'tiles.lst'
 NUMTILES = 0
-for filename in sorted(os.listdir(directory+'tiles/')):
-	tiles.append(Tile(pygame.image.load(directory+'tiles/'+filename).convert()))
-	NUMTILES += 1
-tiles.append(Tile(pygame.image.load(directory+'cursor.bmp').convert()))
+if os.path.isfile(tile_file):
+	with open(tile_file,'r') as f:
+		for line in f:
+			line = line.rstrip('\n')
+			filename,passable,bg = line.split(' ')
+			passable = passable in "True"
+			tiles.append(Tile(filename,passable,int(bg)))
+			NUMTILES += 1
+else:
+	for filename in sorted(os.listdir(directory+'tiles/')):
+		tiles.append(Tile('tiles/'+filename))
+		NUMTILES += 1
+tiles.append(Tile('cursor.bmp'))
 
 mouse = Mouse()
 level = Level()
+level_list = list()
+cur_map = 0
 statusbar = StatusBar()
 main()

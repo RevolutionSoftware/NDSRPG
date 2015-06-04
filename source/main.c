@@ -4,6 +4,8 @@
 
 #define DEBUG
 
+
+
 // Includes NDS
 #include <nds.h>	// Main NDS equates
 #include <stdio.h>	// For console stuff
@@ -15,8 +17,14 @@
 #include "objects.h"
 #include "movement.h"
 #include "text.h"
-// map data
-#include "maps.h"
+#include "menus.h"
+
+#include "maps/maps.h"	// map data
+#include "texts/texts.h"	// text data
+
+// tilemap array, tile data array, interaction array, width, height
+
+
 
 #define FRAMES_PER_ANIMATION 3
 
@@ -39,7 +47,7 @@ enum {
 };
 
 int main(void) {
-	PC_t player = {16,32};
+	Drawable player = {16,32};
 	map_t Level = map_list[1];
 	Level.x = 0;
 	Level.y = 0;
@@ -74,7 +82,7 @@ int main(void) {
 
 	oamInit(&oamMain, SpriteMapping_1D_128, false);
 
-	init_PC(&player, (u8 *)playerTiles);
+	initPC(&player, (u8 *)playerTiles);
 	dmaCopy(playerPal, SPRITE_PALETTE, 512);
 
 	/* use DMA to copy data over
@@ -90,21 +98,21 @@ int main(void) {
 
 	// shift the text a few pixels down and to the right to not collide with the box border
 	REG_BG0HOFS_SUB = -4;
-	REG_BG0VOFS_SUB = -5;
+	REG_BG0VOFS_SUB = -4;
 
 	// ############# Box drawn around debug values ##################
-	drawBox(0,0,32,3);
 	drawTextBox(1,3,30,20,"Here we can put some other stats and information, or menus, or options, or bananas, or...\n\nI guess there are still a couple bugs in the text routine. We also need border detection (a width value for how far the text can be drawn without going outside the box).", D_NONE);
-
-//	delBox(0,0,32,3);
 	// ##############################################################
+
+	drawTextBox(1,3,30,20,text_list[0], D_NONE);
+
 
 	while(1) {
 		// ############# DEBUG ################
 		char debugStr[100];
 		sprintf(debugStr,"X: %d, Y: %d    \nX TILE: %d, Y TILE: %d     ",
 				player.x, player.y, (player.x + PLAYER_WIDTH)/16, (player.y + 16)/16);
-		putString(0,0,31,debugStr, D_NONE);
+		drawTextBox(0,0,32,2,debugStr, D_NONE);
 		// ####################################
 
 		// Check for keys now
@@ -113,8 +121,9 @@ int main(void) {
 		// Exit if Start was pressed
 		if (keysDown()&KEY_START)
 			break;
-		if (keysDown()&KEY_A)
+                if (keysDown()&KEY_A)
 			drawTextBox(0,20,31,1,"You are pressing A",D_NONE);
+
 		if (keysUp()&KEY_A) {
 			drawTextBox(0,20,31,1,"You released A",D_NONE);
 		}
@@ -175,10 +184,10 @@ int main(void) {
 			if ((player.y-Level.y < SCREEN_BOTTOM/2 - PLAYER_HEIGHT/2) && Level.y > 0)
 				Level.y-=SPEED;
 			player.state = W_UP;
-			checkTile(&Level,player.x,player.y);
+			checkTile(&Level,&player,player.x+8,player.y);
 		}
 		// draw tilemap
-		tilemap(&Level);
+		drawMap(&Level);
 		if ((keys&KEY_LEFT) | (keys&KEY_RIGHT) | (keys&KEY_DOWN) | (keys&KEY_UP)) {
 			REG_BG0HOFS = (Level.x)%16;
 			REG_BG0VOFS = (Level.y)%16;
@@ -186,7 +195,7 @@ int main(void) {
 			player.anim_frame %= (FRAMES_PER_ANIMATION+1)*ANIMATION_SPEED;
 		} else
 			player.anim_frame = 0;	// reset animation when not moving
-		animate_PC(&player);
+		animatePC(&player);
 		oamSet(&oamMain, 0, player.x-Level.x, player.y-Level.y, 0, 0, SpriteSize_32x32, SpriteColorFormat_256Color,
 			   player.sprite_gfx_mem, -1, false, false, false, false, false);
 		swiWaitForVBlank();

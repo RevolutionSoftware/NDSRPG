@@ -8,8 +8,8 @@ enum SpriteState {
     W_LEFT = 3
 };
 
-void animate_PC(PC_t *sprite);
+void animatePC(Drawable *player);
 
-void init_PC(PC_t *sprite, u8 *gfx);
+void initPC(Drawable *player, u8 *gfx);
 
 #endif /* MOVEMENT_H */

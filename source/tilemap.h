@@ -1,5 +1,6 @@
 #ifndef TILEMAP_H
 #define TILEMAP_H
+#include "objects.h"
 
 typedef struct {
 	bool isPassable;	// 0 = false, 1 = true
@@ -9,13 +10,13 @@ typedef struct {
 typedef struct {
 	u16 *map;
 	tile_t *tiles;
-	u16 *objs;
+	s16 *objs;
 	int w,h,x,y;
 }map_t;
 
-void tilemap(map_t *Level);
+void drawMap(map_t *Level);
 
-void checkTile(map_t *Level, int playerx, int playery);
+void checkTile(map_t *Level, Drawable *player, int playerx, int playery);
 
 #ifdef DEBUG
 char* toString(int i);

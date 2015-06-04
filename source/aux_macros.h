@@ -25,4 +25,8 @@
 #define local_persist static /* see 2. local_persist */
 #define global_variable static /* see 3. global_variable */
 
+#ifndef EOF
+	#define EOF -1
+#endif
+
 #endif /* MACROS_H */

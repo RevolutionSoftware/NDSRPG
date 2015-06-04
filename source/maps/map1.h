@@ -1,4 +1,4 @@
-#include "aux_macros.h"
+#include "../aux_macros.h"
 
 tile_t map1_tiledata[][2] = {{true,0},
 		{true,0},
@@ -10,9 +10,9 @@ tile_t map1_tiledata[][2] = {{true,0},
 		{true,0},
 		};
 
-s16 map1_obj_data[] = {11,8,0,1,
+s16 map1_obj_data[] = {15,18,0,3,
 		12,3,0,0,
-		15,18,0,3,
+		11,8,0,1,
 		EOF};
 
 //Width: 32	 Height: 32

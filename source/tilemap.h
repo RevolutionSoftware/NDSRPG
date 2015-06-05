@@ -5,6 +5,7 @@
 typedef struct {
 	bool isPassable;	// 0 = false, 1 = true
 	u16 bgId;			// which background buffer to draw tile to
+	u8 flag;
 }tile_t;
 
 typedef struct {
@@ -14,9 +15,14 @@ typedef struct {
 	int w,h,x,y;
 }map_t;
 
+enum TileType {
+	T_MOTION = 0,
+	T_A = 1
+};
+
 void drawMap(map_t *Level);
 
-void checkTile(map_t *Level, Drawable *player, int playerx, int playery);
+void checkTile(map_t *Level, Drawable *player, int type);
 
 #ifdef DEBUG
 char* toString(int i);

@@ -121,13 +121,12 @@ int main(void) {
 		// Exit if Start was pressed
 		if (keysDown()&KEY_START)
 			break;
-                if (keysDown()&KEY_A)
-			drawTextBox(0,20,31,1,"You are pressing A",D_NONE);
-
-		if (keysUp()&KEY_A) {
+		if (keysDown()&KEY_A)
+			checkTile(&Level,&player,T_A);
+/*		if (keysUp()&KEY_A) {
 			drawTextBox(0,20,31,1,"You released A",D_NONE);
 		}
-		if (keys & KEY_RIGHT)
+*/		if (keys & KEY_RIGHT)
 		{
 			int mapOffset = (player.y + 16)/16*Level.w+(player.x + PLAYER_WIDTH + SPEED)/16;
 			int tileId = Level.map[mapOffset];
@@ -136,7 +135,7 @@ int main(void) {
 				tileId2 = Level.map[mapOffset+Level.w];	// move down one row in map
 			// Make sure player isn't at edge of screen
 			if (player.x < Level.w*16-PLAYER_WIDTH)
-				if(Level.tiles[tileId*2].isPassable && Level.tiles[tileId2*2].isPassable)
+				if(Level.tiles[tileId*3].isPassable && Level.tiles[tileId2*3].isPassable)
 					player.x+=SPEED;
 			// Make sure map isn't at edge of screen
 			if ((player.x-Level.x > SCREEN_RIGHT/2 - PLAYER_WIDTH/2) && Level.x < Level.w*16-16*16)
@@ -151,7 +150,7 @@ int main(void) {
 			if ((player.y + 16) % 16 >= 8)
 				tileId2 = Level.map[mapOffset+Level.w];	// move down one row in map
 			if (player.x > 0)
-				if(Level.tiles[tileId*2].isPassable && Level.tiles[tileId2*2].isPassable)
+				if(Level.tiles[tileId*3].isPassable && Level.tiles[tileId2*3].isPassable)
 					player.x-=SPEED;
 			if ((player.x-Level.x < SCREEN_RIGHT/2 - PLAYER_WIDTH/2) && Level.x>0)
 				Level.x-=SPEED;
@@ -165,7 +164,7 @@ int main(void) {
 			if (player.x % 16 != 0)
 				tileId2 = Level.map[mapOffset+1];
 			if (player.y < Level.h*16 - PLAYER_HEIGHT)
-				if(Level.tiles[tileId*2].isPassable && Level.tiles[tileId2*2].isPassable)
+				if(Level.tiles[tileId*3].isPassable && Level.tiles[tileId2*3].isPassable)
 					player.y+=SPEED;
 			if ((player.y-Level.y > SCREEN_BOTTOM/2 - PLAYER_HEIGHT/2) && Level.y < Level.h*16-12*16)
 				Level.y+=SPEED;
@@ -179,12 +178,11 @@ int main(void) {
 			if (player.x % 16 != 0)
 				tileId2 = Level.map[mapOffset+1];
 			if (player.y > 0)
-				if(Level.tiles[tileId*2].isPassable && Level.tiles[tileId2*2].isPassable)
+				if(Level.tiles[tileId*3].isPassable && Level.tiles[tileId2*3].isPassable)
 					player.y -= SPEED;
 			if ((player.y-Level.y < SCREEN_BOTTOM/2 - PLAYER_HEIGHT/2) && Level.y > 0)
 				Level.y-=SPEED;
 			player.state = W_UP;
-			checkTile(&Level,&player,player.x+8,player.y);
 		}
 		// draw tilemap
 		drawMap(&Level);
@@ -193,6 +191,8 @@ int main(void) {
 			REG_BG0VOFS = (Level.y)%16;
 			player.anim_frame++;
 			player.anim_frame %= (FRAMES_PER_ANIMATION+1)*ANIMATION_SPEED;
+			checkTile(&Level,&player,T_MOTION);
+
 		} else
 			player.anim_frame = 0;	// reset animation when not moving
 		animatePC(&player);

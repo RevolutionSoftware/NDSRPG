@@ -3,6 +3,7 @@
 #include "tilemap.h"
 #include "text.h"
 #include "utilities.h"
+#include "movement.h"
 
 /* This draws a 17x13 tilemap, with 1 extra tile on the right and bottom
  * to make scrolling easier.
@@ -50,29 +51,84 @@ void drawMap(map_t *Level) {
 
 extern map_t map_list[];
 extern u16 map_change_list[][5];
+extern char* text_list[];
 
-void checkTile(map_t *Level, Drawable *player, int playerx, int playery) {
-	int x = playerx/16;
-	int y = (playery+15)/16;
+/* checks if a tile has an action that should activate when tile is touched
+ * 0 = map change
+ * 1 = text (activated with B)
+ * */
+void checkTile(map_t *Level, Drawable *player, int type) {
+	int x = player->x;
+	int y = player->y+16;	// +15 lets the player overlap the tile a bit
+	int x2 = x;
+	int y2 = y;
+
+	if(type == T_MOTION) {
+		if(player->state == W_UP) {
+			x+=8;
+			x2 = x;
+			y--;
+		}
+		if(player->state == W_DOWN) {
+			x+=8;
+			x2 = x;
+			y+=10;				// look below player's feet
+		}
+
+		if(player->state == W_LEFT) {
+			x--;
+			y2 += 8;
+		}
+		if(player->state == W_RIGHT) {
+			x+=16;
+			y2 += 8;
+		}
+	} else if(type == T_A) {
+		if(player->state == W_UP) {
+			x2+=15;
+			y--;
+		}
+		if(player->state == W_DOWN) {
+			x2+=15;
+			y+=10;				// look below player's feet
+		}
+
+		if(player->state == W_LEFT) {
+			x--;
+			y2 += 8;
+		}
+		if(player->state == W_RIGHT) {
+			x+=16;
+			y2 += 8;
+		}
+	}
+	// convert x and y into tile positions
+	x/=16;
+	y/=16;
+	x2/=16;
+	y2/=16;
 
 	int action = -1;
 	int i = 0;
+	int flag=0;
+	int tile;
 
 	while(Level->objs[i] != EOF) {
-		if(Level->objs[i] == x && Level->objs[i+1] == y)
+		if((Level->objs[i] == x || Level->objs[i] == x2) && (Level->objs[i+1] == y || Level->objs[i+1] == y2)) {
 			action = i+2;		// skip the x and y coordinates
+			x = Level->objs[i];
+			y = Level->objs[i+1];
+			tile = Level->map[y*Level->w+x];
+			flag = Level->tiles[tile*3].flag;
+		}
 		i+=4;
 	}
 
-	char debugStr[100];
-	sprintf(debugStr,"%d\nAction: %d",Level->objs[i],action);
-	drawTextBox(0,7,32,3,debugStr, D_NONE);
-
-
+	// check if there is an action attached to the tile
 	if(action != -1) {
-		drawTextBox(0,0,32,2,"ACTION! YES! YES! YES!",D_NONE);
-		if(Level->objs[action] == 0) {
-			putString(0,1,32,"MAP",D_NONE);
+		int keys = keysHeld();
+		// maps
+		if(Level->objs[action] == 0 && (flag & 1<<player->state)) {
 			int map_action = Level->objs[action+1];
 			int map_id = map_change_list[map_action][0];
 			*Level = map_list[map_id];
@@ -81,10 +137,17 @@ void checkTile(map_t *Level, Drawable *player, int playerx, int playery) {
 			player->x = map_change_list[map_action][3]*16;
 			player->y = map_change_list[map_action][4]*16;
 			delay(15);
+			REG_BG0HOFS = (Level->x)%16;
+			REG_BG0VOFS = (Level->y)%16;
 		}
-	}
-	else {
-            //char string[100];
-            drawTextBox(0,0,32,2,"Checking... but nada",D_NONE);
+		// texts with [A]
+		if(Level->objs[action] == 1 && keys&KEY_A) {
+			int text_id = Level->objs[action+1];
+			// display the text!
+			drawTextBox(0,0,32,2,text_list[text_id],D_SLOW);
+			waitAB();	// wait for player to press [A] or [B]
+			// remove text box from screen
+//			delTextBox(0,0,32,3);
+		}
 	}
 }

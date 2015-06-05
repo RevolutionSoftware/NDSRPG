@@ -1,13 +1,13 @@
 #include "../aux_macros.h"
 
-tile_t map1_tiledata[][2] = {{true,0},
-		{true,0},
-		{false,0},
-		{false,0},
-		{false,0},
-		{false,0},
-		{false,0},
-		{true,0},
+tile_t map1_tiledata[][3] = {{true,0,0b0},
+		{true,0,0b0},
+		{false,0,0b0},
+		{false,0,0b0001},
+		{false,0,0b0},
+		{false,0,0b0},
+		{false,0,0b0},
+		{true,0,0b0},
 		};
 
 s16 map1_obj_data[] = {15,18,0,3,

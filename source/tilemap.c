@@ -161,6 +161,8 @@ void checkTile(map_t *Level, Drawable *player, int type) {
 			player->x = map_change_list[map_action][3]*16;
 			player->y = map_change_list[map_action][4]*16;
 			delay(15);
+			REG_BG0HOFS = (Level->x)%16;
+			REG_BG0VOFS = (Level->y)%16;
 			REG_BG1HOFS = (Level->x)%16;
 			REG_BG1VOFS = (Level->y)%16;
 		}

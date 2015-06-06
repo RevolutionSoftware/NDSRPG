@@ -164,15 +164,16 @@ void checkTile(map_t *Level, Drawable *player, int type) {
 			player->x = map_change_list[map_action][3]*16;
 			player->y = map_change_list[map_action][4]*16;
 
-			// turn on mosaic effect for bg and player
+			// turn on mosaic effect for bg and disable player
 			REG_BG0CNT = REG_BG0CNT_DEFAULT | BG_MOSAIC_ON;
 			REG_BG1CNT = REG_BG1CNT_DEFAULT | BG_MOSAIC_ON;
 			oamMain.oamMemory[0].isHidden = true;
 			oamUpdate(&oamMain);
 
+			// update mosaic register, first 4 bits are horizontal stretch, 2nd 4 vertical stretch
 			int i;
 			for(i = 0; i<16; i++) {
-				REG_MOSAIC = i+(i<<4)+(i<<8)+(i<<12);
+				REG_MOSAIC = i+(i<<4);	//+(i<<8)+(i<<12);
 				delay(3);
 			}
 

@@ -24,8 +24,8 @@ void animatePC(Drawable *player)
 
 void initPC(Drawable *player, u8 *gfx)
 {
-    player->sprite_gfx_mem = oamAllocateGfx(&oamMain, SpriteSize_32x32, SpriteColorFormat_256Color);
+	player->sprite_gfx_mem = SPRITE_GFX; //oamAllocateGfx(&oamMain, SpriteSize_32x32, SpriteColorFormat_256Color);
 
-    player->frame_gfx = (u8 *)gfx;
+	player->frame_gfx = (u8 *)gfx;
 }
 #undef FRAMES_PER_ANIMATION

@@ -5,6 +5,17 @@
 #include "utilities.h"
 #include "movement.h"
 
+void drawTile(u16 *tilemap, int tileId) {
+	*tilemap = tileId*4;
+	tilemap++;
+	*tilemap = tileId*4+1;
+	tilemap += 31;
+	*tilemap = tileId*4+2;
+	tilemap++;
+	*tilemap = tileId*4+3;
+}
+
+
 /* This draws a 17x13 tilemap, with 1 extra tile on the right and bottom
  * to make scrolling easier.
  */
@@ -13,38 +24,51 @@ void drawMap(map_t *Level) {
     int w = Level->w;
     int x = Level->x >> 4;
     int y = Level->y >> 4;
-    u16 *tilemap = BG_MAP_RAM(0);
+    u16 *tilemap_bg = BG_MAP_RAM(0);
+    u16 *tilemap_fg = BG_MAP_RAM(2);
     int i;
     int row;
     int start = x+y*w;
     for(row = 0; row < 13; row++) {
         for(i = start; i < start+16; i++) {
-            *tilemap = Level->map[i]*4;
-            tilemap++;
-            *tilemap = Level->map[i]*4+1;
-            tilemap += 31;
-            *tilemap = Level->map[i]*4+2;
-            tilemap++;
-            *tilemap = Level->map[i]*4+3;
-            tilemap -= 31;
+			int tileId = Level->map[i]+1;			// the first tile is just a transparent tile
+			int tileBG,tileFG;
+			if(Level->tiles[(tileId-1)*3].bgId == 0) {
+				tileBG = tileId;
+				tileFG = 0;
+			} else {
+				tileBG = 1;
+				tileFG = tileId;
+			}
+			drawTile(tilemap_bg,tileBG);
+			drawTile(tilemap_fg,tileFG);
+			tilemap_bg+=2;
+			tilemap_fg+=2;
         }
-        tilemap += 32;	// jump to next row in tilemap base
-        start += w;		// jump to next row in the tilemap
+		tilemap_bg += 32;	// jump to next row in tilemap base
+		tilemap_fg += 32;	// jump to next row in tilemap base
+		start += w;		// jump to next row in the tilemap
     }
 
-    // Jump to map_base 1 to draw last column of sprites (just off screen)
-    tilemap = BG_MAP_RAM(1);
+    // Jump to map_base 1/3 to draw last column of sprites (just off screen)
+    tilemap_bg = BG_MAP_RAM(1);
+    tilemap_fg = BG_MAP_RAM(3);
 
     start = x+y*w+16;
     for(row = 0; row < 16; row++) {
-        *tilemap = Level->map[start]*4;
-        tilemap++;
-        *tilemap = Level->map[start]*4+1;
-        tilemap += 31;
-        *tilemap = Level->map[start]*4+2;
-        tilemap++;
-        *tilemap = Level->map[start]*4+3;
-        tilemap += 31;
+		int tileId = Level->map[start]+1;
+		int tileBG,tileFG;
+		if(Level->tiles[(tileId-1)*3].bgId == 0) {
+			tileBG = tileId;
+			tileFG = 0;
+		} else {
+			tileBG = 1;
+			tileFG = tileId;
+		}
+		drawTile(tilemap_bg,tileBG);
+		drawTile(tilemap_fg,tileFG);
+        tilemap_bg += 64;
+        tilemap_fg += 64;
         start += w;
     }
 }
@@ -137,8 +161,8 @@ void checkTile(map_t *Level, Drawable *player, int type) {
 			player->x = map_change_list[map_action][3]*16;
 			player->y = map_change_list[map_action][4]*16;
 			delay(15);
-			REG_BG0HOFS = (Level->x)%16;
-			REG_BG0VOFS = (Level->y)%16;
+			REG_BG1HOFS = (Level->x)%16;
+			REG_BG1VOFS = (Level->y)%16;
 		}
 		// texts with [A]
 		if(Level->objs[action] == 1 && keys&KEY_A) {

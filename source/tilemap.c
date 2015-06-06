@@ -1,5 +1,6 @@
 #include <nds.h>	// Main NDS equates
 #include <stdio.h>	// For console stuff
+#include "constants.h"
 #include "tilemap.h"
 #include "text.h"
 #include "utilities.h"
@@ -160,7 +161,20 @@ void checkTile(map_t *Level, Drawable *player, int type) {
 			Level->y = map_change_list[map_action][2]*16;
 			player->x = map_change_list[map_action][3]*16;
 			player->y = map_change_list[map_action][4]*16;
-			delay(15);
+
+			REG_BG0CNT = REG_BG0CNT_DEFAULT | BG_MOSAIC_ON;
+			REG_BG1CNT = REG_BG1CNT_DEFAULT | BG_MOSAIC_ON;
+
+			int i;
+			for(i = 0; i<10; i++) {
+				REG_MOSAIC = i;
+				delay(5);
+			}
+			REG_MOSAIC = 0;
+
+			REG_BG0CNT = REG_BG0CNT_DEFAULT;
+			REG_BG1CNT = REG_BG1CNT_DEFAULT;
+
 			REG_BG0HOFS = (Level->x)%16;
 			REG_BG0VOFS = (Level->y)%16;
 			REG_BG1HOFS = (Level->x)%16;

@@ -18,6 +18,7 @@
 #include "movement.h"
 #include "text.h"
 #include "menus.h"
+#include "constants.h"
 
 #include "maps/maps.h"	// map data
 #include "texts/texts.h"	// text data
@@ -66,8 +67,8 @@ int main(void) {
 
 
 	REG_DISPCNT = MODE_0_2D | DISPLAY_SPR_ACTIVE | DISPLAY_SPR_1D | DISPLAY_SPR_1D_SIZE_128 | DISPLAY_BG0_ACTIVE | DISPLAY_BG1_ACTIVE;   // Set mode 0 in 2D mode and enable background 0
-	REG_BG0CNT = BG_PRIORITY_0 | BG_64x32 | BG_COLOR_256 | BG_MAP_BASE(2) | BG_TILE_BASE(1);	// map base = 2kb, tile base = 16kb
-	REG_BG1CNT = BG_PRIORITY_1 | BG_64x32 | BG_COLOR_256 | BG_MAP_BASE(0) | BG_TILE_BASE(1);	// map base = 2kb, tile base = 16kb
+	REG_BG0CNT = REG_BG0CNT_DEFAULT;	// map base = 2kb, tile base = 16kb
+	REG_BG1CNT = REG_BG1CNT_DEFAULT;	// map base = 2kb, tile base = 16kb
 
 // Font stuff for bottom screen
 // Sub screen uses bg1, sub map base 0 and sub tile base 1.

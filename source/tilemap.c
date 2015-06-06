@@ -156,29 +156,48 @@ void checkTile(map_t *Level, Drawable *player, int type) {
 		if(Level->objs[action] == 0 && (flag & 1<<player->state)) {
 			int map_action = Level->objs[action+1];
 			int map_id = map_change_list[map_action][0];
+			// load the new map into Level
 			*Level = map_list[map_id];
+			// update the player/map coordinates
 			Level->x = map_change_list[map_action][1]*16;
 			Level->y = map_change_list[map_action][2]*16;
 			player->x = map_change_list[map_action][3]*16;
 			player->y = map_change_list[map_action][4]*16;
 
+			// turn on mosaic effect for bg and player
 			REG_BG0CNT = REG_BG0CNT_DEFAULT | BG_MOSAIC_ON;
 			REG_BG1CNT = REG_BG1CNT_DEFAULT | BG_MOSAIC_ON;
+			oamMain.oamMemory[0].isHidden = true;
+			oamUpdate(&oamMain);
 
 			int i;
-			for(i = 0; i<10; i++) {
-				REG_MOSAIC = i;
-				delay(5);
+			for(i = 0; i<16; i++) {
+				REG_MOSAIC = i+(i<<4)+(i<<8)+(i<<12);
+				delay(3);
 			}
-			REG_MOSAIC = 0;
 
-			REG_BG0CNT = REG_BG0CNT_DEFAULT;
-			REG_BG1CNT = REG_BG1CNT_DEFAULT;
-
+/*			oamMain.oamMemory[0].attribute[0] = ATTR0_NORMAL | ATTR0_TYPE_NORMAL | ATTR0_COLOR_256 | ATTR0_SQUARE
+											| OBJ_Y(player->y-Level->y) | ATTR0_MOSAIC;
+			oamMain.oamMemory[0].attribute[1] = ATTR1_SIZE_32 | OBJ_X(player->x-Level->x);
+			oamMain.oamMemory[0].isMosaic = true;
+			oamUpdate(&oamMain);
+*/			
 			REG_BG0HOFS = (Level->x)%16;
 			REG_BG0VOFS = (Level->y)%16;
 			REG_BG1HOFS = (Level->x)%16;
 			REG_BG1VOFS = (Level->y)%16;
+
+			drawMap(Level);
+
+			for(i = 15; i>0; i--) {
+				REG_MOSAIC = i+(i<<4)+(i<<8)+(i<<12);
+				delay(3);
+			}
+
+			REG_MOSAIC = 0;
+			REG_BG0CNT = REG_BG0CNT_DEFAULT;
+			REG_BG1CNT = REG_BG1CNT_DEFAULT;
+
 		}
 		// texts with [A]
 		if(Level->objs[action] == 1 && keys&KEY_A) {

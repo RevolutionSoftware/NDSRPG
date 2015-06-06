@@ -32,4 +32,5 @@ int waitAB() {
 	do {
 		keys = waitKey();
 	} while(!(keys & KEY_A) && !(keys & KEY_B));
+	return keys;
 }

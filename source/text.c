@@ -37,7 +37,7 @@ void putString(int x, int y, int w, const char *text, e_speed flag) {
             y++;
         }
         else {
-            if (text[i] == ' ') {
+            if (text[i] == ' ' || text[i] == '\1') {
                 int j = i+1;
 
                 while(text[j] != ' ' && text[j] != '\0') {
@@ -81,6 +81,18 @@ void putString(int x, int y, int w, const char *text, e_speed flag) {
   Y.2 = (Ymax/2)+Ipixels
   ----------------------------------------
 */
+
+int stringHeight(const char *text) {
+	int i,h;
+	i = 0;
+	h = 1;
+	while(text[i] != '\0') {
+		if(text[i] == '\n')
+			h++;
+		i++;
+	}
+	return h;
+}
 
 void drawBox(int x, int y, int w, int h) {
     delTextBox(x,y,w,h);

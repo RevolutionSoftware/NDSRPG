@@ -13,4 +13,7 @@ typedef struct {
     int anim_frame;
 }Drawable;
 
+SpriteEntry* initSprite(int spriteid, u8 *gfx, int len);
+
+
 #endif /* OBJECTS_H */

@@ -3,9 +3,11 @@
 
 #include "objects.h"
 
-void drawMenu(int x, int y, int w, int h, char *text);
-int selectOption ();
-void drawCursor(Drawable *cursor);
-void initCursor(Drawable *cursor, u8 *gfx);
+typedef struct {
+    int x;
+    int y;
+} MenuChoice;
+
+int drawMenu(int x, int y, int w, char *text);
 
 #endif // MENUS_H

@@ -11,14 +11,19 @@
 #include <stdio.h>	// For console stuff
 #include "aux_macros.h"
 #include "tilemap.h"
-#include "font.h"
-#include "tiles.h"
-#include "player.h"
 #include "objects.h"
 #include "movement.h"
 #include "text.h"
 #include "menus.h"
 #include "constants.h"
+#include "utilities.h"
+
+// sprite data
+#include "font.h"
+#include "tiles.h"
+#include "player.h"
+#include "cursor.h"
+
 
 #include "maps/maps.h"	// map data
 #include "texts/texts.h"	// text data
@@ -72,7 +77,7 @@ int main(void) {
 
 // Font stuff for bottom screen
 // Sub screen uses bg1, sub map base 0 and sub tile base 1.
-	REG_DISPCNT_SUB = MODE_0_2D | DISPLAY_BG0_ACTIVE| DISPLAY_BG1_ACTIVE;   // bottom screen, use bg0 and bg1
+	REG_DISPCNT_SUB = MODE_0_2D | DISPLAY_SPR_ACTIVE | DISPLAY_SPR_1D | DISPLAY_SPR_1D_SIZE_128 | DISPLAY_BG0_ACTIVE| DISPLAY_BG1_ACTIVE;   // bottom screen, use bg0 and bg1
 	REG_BG0CNT_SUB = BG_PRIORITY_2 | BG_32x32 | BG_COLOR_16 | BG_MAP_BASE(0) | BG_TILE_BASE(1); // text
 	REG_BG1CNT_SUB = BG_PRIORITY_3 | BG_32x32 | BG_COLOR_16 | BG_MAP_BASE(1) | BG_TILE_BASE(1); // textboxes
 
@@ -85,17 +90,20 @@ int main(void) {
 	for (i=0;i<128;i++) {
 		oamMain.oamMemory[i].isHidden=true;
 	}
+	for (i=0;i<128;i++) {
+		oamSub.oamMemory[i].isHidden=true;
+	}
+	oamUpdate(&oamSub);
+	oamUpdate(&oamMain);
 
 	oamMain.oamMemory[0].priority = 1;	// set player's sprite priority to 1
-
-//	oamInit(&oamMain, SpriteMapping_1D_128, false);
 
 	initPC(&player, (u8 *)playerTiles);
 	dmaCopy(playerPal, SPRITE_PALETTE, 512);
 
-	/* use DMA to copy data over
-	 * bgGetGfxPtr gets the uses the id from bgInit
-	 * (or bgInitSub, which works with the bottom screen) */
+	// load menu cursor palette
+	dmaCopy(cursorPal, SPRITE_PALETTE_SUB, cursorPalLen);	// copy palette for sub engine (should only have one for the entire engine)
+
 	// tile_ram is divided into blocks of 16kb, tileram(1) = tile_ram + 16kb
 	dmaCopy(tilesTiles, BG_TILE_RAM(1), tilesTilesLen);
 	dmaCopy(tilesPal, BG_PALETTE, 256*2);
@@ -108,11 +116,15 @@ int main(void) {
 	REG_BG0HOFS_SUB = -4;
 	REG_BG0VOFS_SUB = -4;
 
+	char *string =	"\1This is the first option\n"
+					"\1This is the second option\n"
+					"\1And 3rd \1And 4th\n"
+					"oh, and \1one more";
+
 	// ############# Box drawn around debug values ##################
 	drawTextBox(1,3,30,20,"Here we can put some other stats and information, or menus, or options, or bananas, or...\n\nI guess there are still a couple bugs in the text routine. We also need border detection (a width value for how far the text can be drawn without going outside the box).", D_NONE);
 	// ##############################################################
 
-	drawTextBox(1,3,30,20,text_list[0], D_NONE);
 
 
 	while(1) {
@@ -131,6 +143,15 @@ int main(void) {
 			break;
 		if (keysDown()&KEY_A)
 			checkTile(&Level,&player,T_A);
+		if (keysDown()&KEY_Y) {
+			int selected = drawMenu(0,0,32,string);
+			if(selected != -1) {
+				drawTextBox(1,1,30,17,text_list[selected], D_SLOW);
+				waitAB();
+				delTextBox(0,0,32,24);
+			}
+		}
+
 /*		if (keysUp()&KEY_A) {
 			drawTextBox(0,20,31,1,"You released A",D_NONE);
 		}

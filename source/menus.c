@@ -1,48 +1,93 @@
 #include <nds.h>
 
+#include "objects.h"
 #include "menus.h"
 #include "text.h"
+#include "utilities.h"
 
+#include "cursor.h"
 
 // drawMenu: Takes parameters and draws the menu with text inside
 
-// Return: Nothing.
-void drawMenu(int x, int y, int w, int h, char *text) {
-    drawBox(x, y, w, h+1);
-    putString(x, y, w-1, text, D_NONE);
-}
+// Return: -1 if B was pressed, otherwise return id of option selected.
+int drawMenu(int x, int y, int w, char *text) {
+	int h = stringHeight(text);
 
-// initCursor: Initiallizes the cursor sprite and such into memory.
-// Notes: Strangely similar to init_PC. ;-)
-// Returns: Nothing.
-void initCursor(Drawable *cursor, u8 *gfx) {
-    cursor->sprite_gfx_mem = oamAllocateGfx(&oamSub, SpriteSize_8x8, SpriteColorFormat_16Color);
-    cursor->frame_gfx = (u8 *)gfx;
-}
+	// load cursor
+	SpriteEntry *cursor;
+	cursor = initSprite(0, (u8 *)cursorTiles, cursorTilesLen);
 
-// drawCursor:
-//
-void drawCursor(Drawable *cursor) {
-    // It's also being animated whilst being drawn..
-    int cursor_blink = cursor->anim_frame/8;
+	// find coordinates of the menu options in string
+	MenuChoice choices[20];
 
-    if (cursor_blink > 1)
-        cursor_blink = (cursor_blink%2)*2;
+	int tx,ty,i,numChoices;
+	numChoices = 0;
+	i = 0;
+	tx = x;
+	ty = y;
+	while(text[i] != '\0') {
+		switch(text[i]) {
+			case '\n':
+				tx = x-1;
+				ty++;
+				break;
+			case '\1':
+				choices[numChoices].x = tx;	// load x and y values of menu option
+				choices[numChoices].y = ty;
+				numChoices++;
+				break;
+			default:
+				break;
+		}
+		tx++;
+		i++;
+	}
 
-    int frame = cursor_blink + cursor->state * 3;
-    int *offset = cursor->frame_gfx + frame * 8 * 8;
+    drawTextBox(x, y, w, h+1, text, D_NONE);
 
-    dmaCopy(offset, cursor->sprite_gfx_mem, 8 * 8);
+	// turn on cursor
+	cursor->isHidden = false;
 
-}
+	int running = true;
+	int selOption = 0;
+	int animation = 0;
+	keysSetRepeat(10,5);
+	// Handle key presses
+	while(running) {
+		animation++;
+		cursor->x = choices[selOption].x*8+3+((animation & 0b10000)>>4);
+		cursor->y = choices[selOption].y*8+4;
+		oamUpdate(&oamSub);
 
-// selectOption:
-//
-// Return:
-int selectOption () {
-    int option = 0;
+		delay(1);
 
-    return option;
+		scanKeys();
+		int keys = keysDownRepeat();
+
+		if(keys & KEY_DOWN && selOption < numChoices - 1) {
+			selOption++;
+		}
+		if(keys & KEY_UP && selOption > 0) {
+			selOption--;
+		}
+		if(keys & KEY_A) {
+			running = false;
+		}
+		if(keys & KEY_B) {
+			selOption++;
+		}
+		delay(1);
+	}
+	// turn off cursor
+	cursor->isHidden = true;
+	oamUpdate(&oamSub);
+
+	delTextBox(x, y, w, h+2);
+
+	if(keysHeld() & KEY_B)
+		selOption = -1;
+	return selOption;
+
 }
 
 /*

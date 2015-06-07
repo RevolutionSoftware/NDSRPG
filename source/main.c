@@ -144,6 +144,7 @@ int main(void) {
 		if (keysDown()&KEY_A)
 			checkTile(&Level,&player,T_A);
 		if (keysDown()&KEY_Y) {
+			delTextBox(0,0,32,24);
 			int selected = drawMenu(0,0,32,string);
 			if(selected != -1) {
 				drawTextBox(1,1,30,17,text_list[selected], D_SLOW);

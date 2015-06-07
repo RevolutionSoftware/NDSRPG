@@ -74,7 +74,7 @@ int drawMenu(int x, int y, int w, char *text) {
 			running = false;
 		}
 		if(keys & KEY_B) {
-			selOption++;
+			running = false;
 		}
 		delay(1);
 	}

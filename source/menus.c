@@ -19,15 +19,14 @@ int drawMenu(int x, int y, int w, char *text) {
 
 	// find coordinates of the menu options in string
 	MenuChoice choices[20];
-
 	int tx,ty,i,numChoices;
 	numChoices = 0;
-	i = 0;
-	tx = x;
-	ty = y;
+	tx = x;			// tx = current x value on screen
+	ty = y;			// ty = y value on screen
+	i = 0;			// loop through string and store screen coordinates of each \1
 	while(text[i] != '\0') {
 		switch(text[i]) {
-			case '\n':
+			case '\n':						// at \n reset x and move to next y value
 				tx = x-1;
 				ty++;
 				break;
@@ -43,7 +42,7 @@ int drawMenu(int x, int y, int w, char *text) {
 		i++;
 	}
 
-    drawTextBox(x, y, w, h+1, text, D_NONE);
+    drawTextBox(x, y, w, h, text, D_NONE);
 
 	// turn on cursor
 	cursor->isHidden = false;
@@ -51,7 +50,7 @@ int drawMenu(int x, int y, int w, char *text) {
 	int running = true;
 	int selOption = 0;
 	int animation = 0;
-	keysSetRepeat(10,5);
+	keysSetRepeat(8,3);
 	// Handle key presses
 	while(running) {
 		animation++;
@@ -67,9 +66,16 @@ int drawMenu(int x, int y, int w, char *text) {
 		if(keys & KEY_DOWN && selOption < numChoices - 1) {
 			selOption++;
 		}
+		else if (keysDown()&KEY_DOWN && selOption == numChoices-1) {
+			selOption = 0;
+		}
 		if(keys & KEY_UP && selOption > 0) {
 			selOption--;
 		}
+		else if (keysDown()&KEY_UP && selOption == 0) {
+			selOption = numChoices-1;
+		}
+
 		if(keys & KEY_A) {
 			running = false;
 		}

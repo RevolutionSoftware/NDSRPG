@@ -40,7 +40,7 @@ void putString(int x, int y, int w, const char *text, e_speed flag) {
             if (text[i] == ' ' || text[i] == '\1') {
                 int j = i+1;
 
-                while(text[j] != ' ' && text[j] != '\0') {
+                while(text[j] != ' ' && text[j] > '\1' && text[j] != '\n') {
                     j++;
                 }
                 if(j-i+x > right_edge) {	// j-i = number of characters to next space
@@ -150,4 +150,8 @@ void delTextBox(int x, int y, int w, int h) {
         text_map += 32-w;
         box_map += 32-w;	// move to next line
     }
+}
+
+void clrSubScreen() {
+	delTextBox(0,0,32,24);
 }

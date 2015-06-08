@@ -25,8 +25,9 @@
 #include "cursor.h"
 
 
-#include "maps/maps.h"	// map data
+#include "maps/maps.h"		// map data
 #include "texts/texts.h"	// text data
+#include "texts/menus.h"	// text for menus
 
 // tilemap array, tile data array, interaction array, width, height
 
@@ -116,11 +117,6 @@ int main(void) {
 	REG_BG0HOFS_SUB = -4;
 	REG_BG0VOFS_SUB = -4;
 
-	char *string =	"\1This is the first option\n"
-					"\1This is the second option\n"
-					"\1And 3rd \1And 4th\n"
-					"oh, and \1one more";
-
 	// ############# Box drawn around debug values ##################
 	drawTextBox(1,3,30,20,"Here we can put some other stats and information, or menus, or options, or bananas, or...\n\nI guess there are still a couple bugs in the text routine. We also need border detection (a width value for how far the text can be drawn without going outside the box).", D_NONE);
 	// ##############################################################
@@ -144,13 +140,29 @@ int main(void) {
 		if (keysDown()&KEY_A)
 			checkTile(&Level,&player,T_A);
 		if (keysDown()&KEY_Y) {
-			delTextBox(0,0,32,24);
-			int selected = drawMenu(0,0,32,string);
-			if(selected != -1) {
-				drawTextBox(1,1,30,17,text_list[selected], D_SLOW);
-				waitAB();
-				delTextBox(0,0,32,24);
+			clrSubScreen();
+			int selected = drawMenu(0,0,11,menu_Y);
+			clrSubScreen();
+			switch(selected) {
+				case 0:
+					drawTextBox(0,0,32,23,menu_items,D_NONE);
+					break;
+				case 1:
+					drawTextBox(0,0,32,23,menu_equipment,D_NONE);
+					break;
+				case 2:
+					drawTextBox(0,0,32,23,menu_stats,D_NONE);
+					break;
+				case 3:
+					drawTextBox(0,0,32,23,menu_options,D_NONE);
+					break;
+				case 4:
+					drawTextBox(0,0,32,23,menu_save,D_NONE);
+					break;
 			}
+			if(selected != -1 && selected != 5)
+				waitAB();
+			clrSubScreen();
 		}
 
 /*		if (keysUp()&KEY_A) {

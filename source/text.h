@@ -18,5 +18,6 @@ int stringHeight(const char *text);
 void drawBox(int x, int y, int w, int h);
 void drawTextBox(int x, int y, int w, int h, const char *text, e_speed flag);
 void delTextBox(int x, int y, int w, int h);
+void clrSubScreen();
 
 #endif // TEXT_H

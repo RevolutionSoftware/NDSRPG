@@ -1,3 +1,4 @@
+from PIL import Image
 import pygame
 import tkinter as tk
 import tkinter.filedialog, tkinter.messagebox
@@ -59,9 +60,8 @@ class StatusBar:
 		self.counter = counter
 
 class Tile:
-	def __init__(self,filename,passable=True,bg=0,flag=[0,0,0,0]):
-		self.sprite = pygame.image.load(directory+filename).convert()
-		self.filename = filename
+	def __init__(self,sprite,passable=True,bg=0,flag=[0,0,0,0]):
+		self.sprite = pygame.image.fromstring(sprite,(16,16),'RGB').convert()
 		self.passable=passable
 		self.bg=bg
 		self.flag = flag
@@ -199,12 +199,6 @@ def saveFile():
 			for entry in map_jump[:-1]:
 				f.write("{} ".format(entry))
 			f.write("{}\n".format(str(map_jump[-1])))
-
-	# save tile data
-	with open(tile_file,"wt") as f:
-		for tile in tiles[:-1]:
-			flag = [str(tile.flag[i]*1) for i in range(4)]
-			f.write("{} {} {},{} {} {} {}\n".format(tile.filename,str(tile.passable),str(tile.bg),*flag))
 
 	if level.filename == '':
 		root = tk.Tk()
@@ -876,24 +870,17 @@ if os.path.isfile(mj_file):
 # load tiles
 tiles = []
 directory = os.path.dirname(os.path.realpath(sys.argv[0]))+'/'
-tile_file = 'tiles.lst'
+im = Image.open(directory+'tiles/tiles.png','r')
+width,height = im.size
 NUMTILES = 0
-if os.path.isfile(tile_file):
-	with open(tile_file,'r') as f:
-		for line in f:
-			line = line.rstrip('\n')
-			left,flag = line.split(',')
-			filename,passable,bg = left.split(' ')
-			passable = passable in "True"
-			flag = flag.split(' ')
-			flag = [int(i) for i in flag]
-			tiles.append(Tile(filename,passable,int(bg),flag))
-			NUMTILES += 1
-else:
-	for filename in sorted(os.listdir(directory+'tiles/')):
-		tiles.append(Tile('tiles/'+filename))
-		NUMTILES += 1
-tiles.append(Tile('cursor.bmp'))
+for i in range(1,height//16):
+	tile = im.crop((0,i*16,width,i*16+16))
+	data = tile.tostring()
+	tiles.append(Tile(data))
+	NUMTILES += 1
+
+im = Image.open(directory+'cursor.bmp','r')
+tiles.append(Tile(im.tostring()))
 
 mouse = Mouse()
 level = Level()

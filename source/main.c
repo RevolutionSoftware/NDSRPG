@@ -9,6 +9,7 @@
 // Includes NDS
 #include <nds.h>	// Main NDS equates
 #include <stdio.h>	// For console stuff
+
 #include "aux_macros.h"
 #include "tilemap.h"
 #include "objects.h"
@@ -17,21 +18,22 @@
 #include "menus.h"
 #include "constants.h"
 #include "utilities.h"
+#include "player.h"
+#include "weapons.h"
+#include "armor.h"
 
 // sprite data
 #include "font.h"
 #include "tiles.h"
-#include "player.h"
+#include "character.h"
 #include "cursor.h"
 
 
 #include "maps/maps.h"		// map data
 #include "texts/texts.h"	// text data
 #include "texts/menus.h"	// text for menus
-
-// tilemap array, tile data array, interaction array, width, height
-
-
+#include "texts/weapons.h"
+#include "texts/armor.h"
 
 #define FRAMES_PER_ANIMATION 3
 
@@ -54,10 +56,18 @@ enum {
 };
 
 int main(void) {
+	int i;
 	Drawable player = {16,32};
 	map_t Level = map_list[1];
 	Level.x = 0;
 	Level.y = 0;
+// setup party
+	party[0].active = true;
+	party[1].active = false;
+	party[2].active = false;
+
+	// initialize first character
+	party[0] = (Character) {"chickenadd",1,0,50,40,10,15,13,1,0};	
 
 	/* NDS has nine memory banks, banks 0-4
 	 *  Use mode 0. Mode 0 is for tilebased sprites, called "text" mode
@@ -87,11 +97,8 @@ int main(void) {
 	dmaCopy(fontPal, BG_PALETTE_SUB, fontPalLen);
 
 // Sprite data
-	int i;
 	for (i=0;i<128;i++) {
 		oamMain.oamMemory[i].isHidden=true;
-	}
-	for (i=0;i<128;i++) {
 		oamSub.oamMemory[i].isHidden=true;
 	}
 	oamUpdate(&oamSub);
@@ -99,8 +106,8 @@ int main(void) {
 
 	oamMain.oamMemory[0].priority = 1;	// set player's sprite priority to 1
 
-	initPC(&player, (u8 *)playerTiles);
-	dmaCopy(playerPal, SPRITE_PALETTE, 512);
+	initPC(&player, (u8 *)characterTiles);
+	dmaCopy(characterPal, SPRITE_PALETTE, 512);
 
 	// load menu cursor palette
 	dmaCopy(cursorPal, SPRITE_PALETTE_SUB, cursorPalLen);	// copy palette for sub engine (should only have one for the entire engine)

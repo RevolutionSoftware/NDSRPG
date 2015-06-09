@@ -1,5 +1,5 @@
 #include <nds.h>	// Main NDS equates
-#include <stdio.h>	// For console stuff
+
 #include "constants.h"
 #include "tilemap.h"
 #include "text.h"
@@ -138,7 +138,7 @@ void checkTile(map_t *Level, Drawable *player, int type) {
 	int flag=0;
 	int tile;
 
-	while(Level->objs[i] != EOF) {
+	while(Level->objs[i] != '\0') {
 		if((Level->objs[i] == x || Level->objs[i] == x2) && (Level->objs[i+1] == y || Level->objs[i+1] == y2)) {
 			action = i+2;		// skip the x and y coordinates
 			x = Level->objs[i];

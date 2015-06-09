@@ -3,8 +3,11 @@
 #include "utilities.h"
 #include "text.h"
 #include "font.h"
+#include "player.h"
+#include "weapons.h"
+#include "armor.h"
 
-#define TL	'~'-' '+1	// top left
+#define TL	'~'-' '+1	// top left (this is the tile id)
 #define T	TL+1		// top
 #define TR	T+1			// top right
 #define BL	TR+1		// bottom left
@@ -14,53 +17,136 @@
 #define R	L+1			//
 #define C	R+1			// center
 
+extern Character party[3];
+extern Weapon weapon_list[];
+extern Armor armor_list[];
+
 // text is defined as a tilemap.
 void putString(int x, int y, int w, const char *text, e_speed flag) {
-    int text_length = stringLength(text);
-    // address of tilemap
-    u16 *sub_map = BG_MAP_RAM_SUB(0);
+	int text_length = stringLength(text);
+	u16 *sub_map = BG_MAP_RAM_SUB(0);		// address of tilemap
 
-    // Draw the message on the screen.
-    int left_edge = x;
-    int right_edge = left_edge + w;
-    int i;
+	// Draw the message on the screen.
+	int left_edge = x;
+	int right_edge = left_edge + w;
+	int i;
 
-    if (flag > D_SLOW) {
-        flag = D_SLOW;
-    }
+	if (flag > D_SLOW) {
+		flag = D_SLOW;
+	}
 
-    for (i = 0; i < text_length; i++) {
-        delay(flag);
-        // Check for special characters (\n, etc.)
-        if (text[i] == '\n') {
-            x = left_edge;
-            y++;
-        }
-        else {
-            if (text[i] == ' ' || text[i] == '\1') {
-                int j = i+1;
+	for (i = 0; i < text_length; i++) {
+		delay(flag);
+		// Check for special characters (\n, etc.)
+		if (text[i] == '\n') {
+			x = left_edge;
+			y++;
+		}
+		// check if a stat should be drawn
+		else if (text[i] == 2) {
+			putStat(&x,&y,text[++i],flag);
+		} else {
+			// check for a space or menu entry
+			if (text[i] == ' ' || text[i] == 1) {
+				int j = i+1;
 
-                while(text[j] != ' ' && text[j] > '\1' && text[j] != '\n') {
-                    j++;
-                }
-                if(j-i+x > right_edge) {	// j-i = number of characters to next space
-                    // .. x + characters to next space
-                    i++;					// skip the space
-                    x = left_edge;			// and move to a new line
-                    y++;
-                }
-            }
-            // copy tile to map
-            sub_map[y*32+x] = text[i]-' ';
-            x++;
+				while(text[j] != ' ' && text[j] > '\1' && text[j] != '\n') {
+					j++;
+				}
+				if(j-i+x > right_edge) {	// j-i = number of characters to next space
+					// .. x + characters to next space
+					i++;					// skip the space
+					x = left_edge;			// and move to a new line
+					y++;
+				}
+			}
+			// copy tile to map
+			sub_map[y*32+x] = text[i]-' ';
+			x++;
 
-            // Check for new line
-            x %= 32;	// screen is 32 tiles wide
-            if(!x)
-                y++;
-        }
+			// Check for new line
+			x %= 32;	// screen is 32 tiles wide
+			if(!x)
+				y++;
+		}
     }
 }
+
+/*****************
+ *  converts integer to string, max six digits
+ * Returns:
+ * 	length of integer in digits (ie. 5 returns 1, 543 returns 3)
+ *****************/
+int putInt(int x, int y, int num, e_speed flag) {
+	char numStr[8] = {0};
+	int i,j,digit;
+	j=0;						// j holds the position in the string
+	for(i = 1000000; i > 0; i/=10) {
+		digit = -1;
+		while(num >= 0) {
+			num -= i;
+			digit++;			// add 1 to this digit's place
+		}
+		num += i;				// num is now negative, so we need to make it positive again for the next iteration
+		numStr[j] = digit+'0';
+		if(j > 0 || digit != 0 || i == 0)	// only add 0s once the first non-zero character has been received
+			j++;
+	}
+	numStr[7] = 0;
+	putString(x,y,32,numStr,flag);
+	return stringLength(numStr);
+}
+
+/*********************
+ * Prints the stat at the x and y location and updates x
+ *********************/
+void putStat(int *x, int *y, int statId, e_speed flag) {
+	// convert number to string
+	int text_length;
+
+	switch(statId) {
+		case 0:
+			text_length = stringLength(party[0].name);
+			putString(*x,*y,32,party[0].name,flag);
+			break;
+		case 1:
+			text_length = putInt(*x, *y, party[0].lvl, flag);
+			break;
+		case 2:
+			text_length = putInt(*x, *y, party[0].exp, flag);
+			break;
+		case 3:
+			text_length = putInt(*x, *y, party[0].HP_max, flag);
+			break;
+		case 4:
+			text_length = putInt(*x, *y, party[0].HP, flag);
+			break;
+		case 5:
+			text_length = putInt(*x, *y, party[0].str, flag);
+			break;
+		case 6:
+			text_length = putInt(*x, *y, party[0].def, flag);
+			break;
+		case 7:
+			text_length = putInt(*x, *y, party[0].agi, flag);
+			break;
+		case 8:
+			text_length = stringLength(weapon_list[party[0].wId].name);
+			putString(*x, *y, 32, weapon_list[party[0].wId].name, flag);
+			break;
+		case 9:
+			text_length = stringLength(armor_list[party[0].aId].name);
+			putString(*x, *y, 32, armor_list[party[0].aId].name, flag);
+			break;
+		case 10:
+			text_length = putInt(*x, *y, party[0].agi, flag);	// not added yet
+			break;
+		default:
+			text_length = 0;
+	}
+	*x += text_length;	// update x to account for the string we just drew
+}
+
 /*
   How wide/high does the box have to be?
   Where do we want it aligned (centered? To the left or right?)

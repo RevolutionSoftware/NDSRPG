@@ -1,6 +1,26 @@
 #ifndef TEXT_H
 #define TEXT_H
 
+/**************
+ * \1 marks a menu choie
+ * \2 displays character stats
+ ***/
+
+#define S_NAME "\x00"
+#define S_LVL "\x01"
+#define S_EXP "\x02"
+#define S_HP_MAX "\x03"
+#define S_HP "\x04"
+#define S_STR "\x05"
+#define S_DEF "\x06"
+#define S_AGI "\x07"
+#define S_WID "\x08"
+#define S_AID "\x09"
+#define S_STATE "\x0A"
+
+#define STAT(stat) "\2" stat
+
+
 typedef enum {
     D_NONE,
     D_FAST,
@@ -14,6 +34,8 @@ typedef struct {
 } coord_t;
 
 void putString(int x, int y, int w, const char *text, e_speed flag);
+void putStat(int *x, int *y, int statId, e_speed flag);
+int putInt(int x, int y, int num, e_speed flag);
 int stringHeight(const char *text);
 void drawBox(int x, int y, int w, int h);
 void drawTextBox(int x, int y, int w, int h, const char *text, e_speed flag);

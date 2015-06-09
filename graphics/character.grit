@@ -7,4 +7,4 @@
 # meta tile height
 -Mh4
 # do not create header file with declarations
--fh!
+-fh

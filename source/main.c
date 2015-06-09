@@ -123,7 +123,7 @@ int main(void) {
 	// shift the text a few pixels down and to the right to not collide with the box border
 	REG_BG0HOFS_SUB = -4;
 	REG_BG0VOFS_SUB = -4;
-
+	
 	// ############# Box drawn around debug values ##################
 	drawTextBox(1,3,30,20,"Here we can put some other stats and information, or menus, or options, or bananas, or...\n\nI guess there are still a couple bugs in the text routine. We also need border detection (a width value for how far the text can be drawn without going outside the box).", D_NONE);
 	// ##############################################################
@@ -158,7 +158,9 @@ int main(void) {
 					drawTextBox(0,0,32,23,menu_equipment,D_NONE);
 					break;
 				case 2:
-					drawTextBox(0,0,32,23,menu_stats,D_NONE);
+					// NOTE: We will probably want to move this to a separate function, eg. statsMenu() or something.
+					drawBox(0,0,32,24);
+					putString(0,0,31,D_NONE,menu_stats,party[0].name,party[0].hp,party[0].hp_max,party[0].str,party[0].def,party[0].agi,weapon_list[party[0].wId].name,armor_list[party[0].aId].name);
 					break;
 				case 3:
 					drawTextBox(0,0,32,23,menu_options,D_NONE);

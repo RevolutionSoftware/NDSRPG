@@ -17,156 +17,87 @@
 #define R	L+1			//
 #define C	R+1			// center
 
-extern Character party[3];
-extern Weapon weapon_list[];
-extern Armor armor_list[];
+/*************
+ * Performs word wrapping
+ * - pass pointers to x and y and function updates them for you
+ *************/
+void wordWrap(int *x, int *y, int r_edge, int l_edge, const char *text) {
+	int i=0;
+	int j = i+1;
+	while(text[j] != ' ' && text[j] > '\1' && text[j] != '\n') {
+		j++;
+	}
+	if(j-i+*x > r_edge) {	// j-i = number of characters to next space
+								// .. x + characters to next space
+		*x = l_edge;			// move to a new line
+		*y += 1;
+	}
+}
 
 // text is defined as a tilemap.
-void putString(int x, int y, int w, const char *text, e_speed flag) {
-	int text_length = stringLength(text);
-	u16 *sub_map = BG_MAP_RAM_SUB(0);		// address of tilemap
+void putString(int x, int y, int w, e_speed flag, const char *text, ...) {
+	// get pointer to arg list
+	int *argp;
+	char c;
+	argp = (int *)&text;
+	argp++;
 
 	// Draw the message on the screen.
+	int text_length = stringLength(text);
 	int left_edge = x;
 	int right_edge = left_edge + w;
 	int i;
 
-	if (flag > D_SLOW) {
-		flag = D_SLOW;
-	}
-
 	for (i = 0; i < text_length; i++) {
-		delay(flag);
+		c = *text++;
 		// Check for special characters (\n, etc.)
-		if (text[i] == '\n') {
-			x = left_edge;
-			y++;
-		}
-		// check if a stat should be drawn
-		else if (text[i] == 2) {
-			putStat(&x,&y,text[++i],flag);
-		} else {
-			// check for a space or menu entry
-			if (text[i] == ' ' || text[i] == 1) {
-				int j = i+1;
-
-				while(text[j] != ' ' && text[j] > '\1' && text[j] != '\n') {
-					j++;
-				}
-				if(j-i+x > right_edge) {	// j-i = number of characters to next space
-					// .. x + characters to next space
-					i++;					// skip the space
-					x = left_edge;			// and move to a new line
-					y++;
-				}
-			}
-			// copy tile to map
-			sub_map[y*32+x] = text[i]-' ';
-			x++;
-
-			// Check for new line
-			x %= 32;	// screen is 32 tiles wide
-			if(!x)
+		switch(c) {
+			case '\n':
+				x = left_edge;
 				y++;
+				break;
+			case '%':
+				c = *text++;
+				i++;
+				switch(c) {
+					case 'd':			// display the int
+						putInt(&x,y,flag,*argp++);
+						break;
+					case 's':			// display the string
+						wordWrap(&x, &y, right_edge, left_edge, text);
+						char *str = (char *)*argp++;
+						putString(x,y,w,flag,str);
+						x += stringLength(str);
+						break;
+				}
+				break;
+			case ' ':
+			case '\1':					// \1 is the menu option character
+				x++;					// shift over one character for the space
+				wordWrap(&x, &y, right_edge, left_edge, text);
+				break;
+			default:
+				putChar(&x,y,flag,c-' ');
 		}
     }
 }
 
 /*****************
- *  converts integer to string, max six digits
- * Returns:
- * 	length of integer in digits (ie. 5 returns 1, 543 returns 3)
+ * converts integer to string
  *****************/
-int putInt(int x, int y, int num, e_speed flag) {
-	char numStr[8] = {0};
-	int i,j,digit;
-	j=0;						// j holds the position in the string
-	for(i = 1000000; i > 0; i/=10) {
-		digit = -1;
-		while(num >= 0) {
-			num -= i;
-			digit++;			// add 1 to this digit's place
-		}
-		num += i;				// num is now negative, so we need to make it positive again for the next iteration
-		numStr[j] = digit+'0';
-		if(j > 0 || digit != 0 || i == 0)	// only add 0s once the first non-zero character has been received
-			j++;
-	}
-	numStr[7] = 0;
-	putString(x,y,32,numStr,flag);
-	return stringLength(numStr);
+void putInt(int *x, int y, e_speed flag, int num) {
+	int i = num/10;
+	if(i>0)
+		putInt(x,y,flag,i);
+	putChar(x,y,flag,num%10 + '0'-' ');
 }
 
-/*********************
- * Prints the stat at the x and y location and updates x
- *********************/
-void putStat(int *x, int *y, int statId, e_speed flag) {
-	// convert number to string
-	int text_length;
-
-	switch(statId) {
-		case 0:
-			text_length = stringLength(party[0].name);
-			putString(*x,*y,32,party[0].name,flag);
-			break;
-		case 1:
-			text_length = putInt(*x, *y, party[0].lvl, flag);
-			break;
-		case 2:
-			text_length = putInt(*x, *y, party[0].exp, flag);
-			break;
-		case 3:
-			text_length = putInt(*x, *y, party[0].HP_max, flag);
-			break;
-		case 4:
-			text_length = putInt(*x, *y, party[0].HP, flag);
-			break;
-		case 5:
-			text_length = putInt(*x, *y, party[0].str, flag);
-			break;
-		case 6:
-			text_length = putInt(*x, *y, party[0].def, flag);
-			break;
-		case 7:
-			text_length = putInt(*x, *y, party[0].agi, flag);
-			break;
-		case 8:
-			text_length = stringLength(weapon_list[party[0].wId].name);
-			putString(*x, *y, 32, weapon_list[party[0].wId].name, flag);
-			break;
-		case 9:
-			text_length = stringLength(armor_list[party[0].aId].name);
-			putString(*x, *y, 32, armor_list[party[0].aId].name, flag);
-			break;
-		case 10:
-			text_length = putInt(*x, *y, party[0].agi, flag);	// not added yet
-			break;
-		default:
-			text_length = 0;
-	}
-	*x += text_length;	// update x to account for the string we just drew
-}
-
-/*
-  How wide/high does the box have to be?
-  Where do we want it aligned (centered? To the left or right?)
-  Some good standard alignment values:
-  ------------ Down - Central ------------
-  Xstart = Xmin + 20pix -> Xmax - 20pix
-  Ystart = Ymax - 20pix -> Ymax
-  ----------- Middle - Central -----------
-  X.1 = Xstart \ Y.1 = Ystart
-  X.2 = Xend   \ Y.2 = Yend
-
-  Xd (delta) = X.2 - X.1
-  Yd (delta) = Y.2 - Y.1
-
-  X.1 = (Xmax/2)-Zpixels
-  X.2 = (Xmax/2)+Zpixels
-  Y.1 = (Ymax/2)-Ipixels
-  Y.2 = (Ymax/2)+Ipixels
-  ----------------------------------------
-*/
+void putChar(int *x, int y, e_speed flag, char c) {
+	u16 *sub_map = BG_MAP_RAM_SUB(0);		// address of text tilemap
+	sub_map[y*32+*x] = c;					// draw the character to the tilemap
+	*x += 1;								// advance x
+	delay(flag);
+}	
 
 int stringHeight(const char *text) {
 	int i,h;
@@ -215,9 +146,10 @@ void drawBox(int x, int y, int w, int h) {
     *box_map = BR;
 }
 
+// draws a box with text inside it
 void drawTextBox(int x, int y, int w, int h, const char *text, e_speed flag) {
     drawBox(x,y,w,h+1);
-    putString(x,y,w-1,text,flag);
+    putString(x,y,w-1,flag,text);
 }
 
 void delTextBox(int x, int y, int w, int h) {

@@ -33,9 +33,11 @@ typedef struct {
     int layer;
 } coord_t;
 
-void putString(int x, int y, int w, const char *text, e_speed flag);
-void putStat(int *x, int *y, int statId, e_speed flag);
-int putInt(int x, int y, int num, e_speed flag);
+//void putString(int x, int y, int w, const char *text, e_speed flag);
+void putString(int x, int y, int w, e_speed flag, const char *text, ...);
+void putStat(int *x, int *y, e_speed flag, int statId);
+void putInt(int *x, int y, e_speed flag, int num);
+void putChar(int *x, int y, e_speed flag, char c);
 int stringHeight(const char *text);
 void drawBox(int x, int y, int w, int h);
 void drawTextBox(int x, int y, int w, int h, const char *text, e_speed flag);

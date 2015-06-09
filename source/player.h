@@ -13,8 +13,8 @@ typedef struct {
 	int exp;
 
 // stats
-	int HP_max;
-	int HP;				// current hp (ie. not the max hp)
+	int hp_max;
+	int hp;				// current hp (ie. not the max hp)
 	int str;
 	int def;
 	int agi;

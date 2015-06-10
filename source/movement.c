@@ -17,9 +17,9 @@ void animatePC(Drawable *player)
 		frame_number = (frame_number%2)*2;
 
     int frame = frame_number + player->state * FRAMES_PER_ANIMATION;
-    u8 *offset = player->frame_gfx + frame * 32*32; // 32 * 32
+    u8 *offset = player->frame_gfx + frame * 16*32; // each frame = 16x32
 
-    dmaCopy(offset, player->sprite_gfx_mem, 32*32); // 32 * 32
+    dmaCopy(offset, player->sprite_gfx_mem, 16*32); // 16x32
 }
 
 void initPC(Drawable *player, u8 *gfx)

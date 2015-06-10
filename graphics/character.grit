@@ -3,7 +3,7 @@
 # bit depth 8
 -GB8
 # meta tile width
--Mw4
+-Mw2
 # meta tile height
 -Mh4
 # do not create header file with declarations

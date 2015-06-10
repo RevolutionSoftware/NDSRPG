@@ -221,7 +221,7 @@ int main(void) {
 			player.anim_frame = 0;	// reset animation when not moving
 		animatePC(&player);
 
-		oamMain.oamMemory[0].attribute[0] = ATTR0_NORMAL | ATTR0_TYPE_NORMAL | ATTR0_COLOR_256 | ATTR0_SQUARE
+		oamMain.oamMemory[0].attribute[0] = ATTR0_NORMAL | ATTR0_TYPE_NORMAL | ATTR0_COLOR_256 | ATTR0_TALL
 											| OBJ_Y(player.y-Level.y);
 		oamMain.oamMemory[0].attribute[1] = ATTR1_SIZE_32 | OBJ_X(player.x-Level.x);
 //		oamSet(&oamMain, 0, player.x-Level.x, player.y-Level.y, 1, 0, SpriteSize_32x32, SpriteColorFormat_256Color,

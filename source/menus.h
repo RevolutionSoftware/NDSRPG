@@ -8,7 +8,7 @@ typedef struct {
     int y;
 } MenuChoice;
 
-int drawMenu(int x, int y, int w, char *text);
+int drawMenu(int x, int y, int w, char *text, int defValue);
 void menuMain();
 void menuStats();
 

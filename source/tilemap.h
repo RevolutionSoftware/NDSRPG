@@ -12,7 +12,7 @@ typedef struct {
 	u16 *map;
 	tile_t *tiles;
 	s16 *objs;
-	int w,h,x,y;
+	int w,h,x,y,numNPCs;
 }map_t;
 
 enum TileType {

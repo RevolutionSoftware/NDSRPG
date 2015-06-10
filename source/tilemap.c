@@ -5,6 +5,7 @@
 #include "text.h"
 #include "utilities.h"
 #include "movement.h"
+#include "npcs.h"
 
 void drawTile(u16 *tilemap, int tileId) {
 	*tilemap = tileId*4;
@@ -154,10 +155,15 @@ void checkTile(map_t *Level, Drawable *player, int type) {
 		int keys = keysHeld();
 		// maps
 		if(Level->objs[action] == 0 && (flag & 1<<player->state)) {
+			// hide player and NPCs
+			for(i = 0; i < Level->numNPCs+1; i++)
+				oamMain.oamMemory[i].isHidden = true;
+
 			int map_action = Level->objs[action+1];
 			int map_id = map_change_list[map_action][0];
 			// load the new map into Level
 			*Level = map_list[map_id];
+			loadNPCs(map_id);
 			// update the player/map coordinates
 			Level->x = map_change_list[map_action][1]*16;
 			Level->y = map_change_list[map_action][2]*16;
@@ -167,7 +173,6 @@ void checkTile(map_t *Level, Drawable *player, int type) {
 			// turn on mosaic effect for bg and disable player
 			REG_BG0CNT = REG_BG0CNT_DEFAULT | BG_MOSAIC_ON;
 			REG_BG1CNT = REG_BG1CNT_DEFAULT | BG_MOSAIC_ON;
-			oamMain.oamMemory[0].isHidden = true;
 			oamUpdate(&oamMain);
 
 			// update mosaic register, first 4 bits are horizontal stretch, 2nd 4 vertical stretch

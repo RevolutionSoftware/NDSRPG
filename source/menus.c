@@ -14,7 +14,7 @@
 // drawMenu: Takes parameters and draws the menu with text inside
 
 // Return: -1 if B was pressed, otherwise return id of option selected.
-int drawMenu(int x, int y, int w, char *text) {
+int drawMenu(int x, int y, int w, char *text, int defValue) {
 	int h = stringHeight(text);
 
 	// load cursor
@@ -52,7 +52,7 @@ int drawMenu(int x, int y, int w, char *text) {
 	cursor->isHidden = false;
 
 	int running = true;
-	int selOption = 0;
+	int selOption = defValue;
 	int animation = 0;
 	keysSetRepeat(8,3);
 	// Handle key presses
@@ -117,34 +117,35 @@ extern char *menu_save;
  * From here it extends into the other menus
  ***************/
 void menuMain() {
-	int selected;
+	int selected=0;
 	while(selected != -1) {
 		clrSubScreen();
-		selected = drawMenu(0,0,11,menu_Y);		// draw the main menu
+		selected = drawMenu(0,0,11,menu_Y,selected);		// draw the main menu
 		clrSubScreen();
 		switch(selected) {							// check which option was chosen
 			case 0:
 				drawTextBox(0,0,32,23,menu_items,D_NONE);
+				waitAB();
 				break;
 			case 1:
 				drawTextBox(0,0,32,23,menu_equipment,D_NONE);
+				waitAB();
 				break;
 			case 2:
 				menuStats();
 				break;
 			case 3:
 				drawTextBox(0,0,32,23,menu_options,D_NONE);
+				waitAB();
 				break;
 			case 4:
 				drawTextBox(0,0,32,23,menu_save,D_NONE);
+				waitAB();
 				break;
 			default:
 				selected = -1;
 		}
-		if(selected != -1 && selected != 5) {			// if B was pressed, don't wait for an extra AB keypress
-			releaseKeys();
-			waitAB();
-		}
+		releaseKeys();
 		clrSubScreen();
 	}
 }
@@ -154,7 +155,8 @@ void menuStats() {
 	char *name, *weapon, *armor;
 	int hp,hp_max,str,def,agi;
 	int i = 0;
-	while(1) {
+	bool running = true;
+	while(running) {
 		name = party.member[i].name;
 		hp = party.member[i].hp;
 		hp_max = party.member[i].hp_max;
@@ -167,8 +169,7 @@ void menuStats() {
 		// display the stats screen with the stats inserted into it
 		putString(0,0,31,D_NONE,menu_stats,name,hp,hp_max,str,def,agi,weapon,armor);
 
-		scanKeys();
-		int keys = keysDown();
+		int keys = waitKey();
 
 		if (keys & KEY_RIGHT && party.member[i+1].active) {
 			delText(0,0,31,23);
@@ -179,6 +180,6 @@ void menuStats() {
 			i--;
 		}
 		if (keys & KEY_B)
-			break;
+			running = false;
 	}
 }

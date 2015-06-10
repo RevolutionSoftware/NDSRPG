@@ -27,10 +27,10 @@ void releaseKeys() {
 }
 
 int waitKey() {
-	int keys = keysCurrent();
-
 	// first release the keys
 	releaseKeys();
+
+	int keys = keysCurrent();
 	
 	while((keys & 0b111111111111) == 0) {
 		keys = keysCurrent();

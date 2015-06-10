@@ -21,6 +21,7 @@
 #include "player.h"
 #include "weapons.h"
 #include "armor.h"
+#include "npcs.h"
 
 // sprite data
 #include "font.h"
@@ -34,6 +35,7 @@
 #include "texts/menus.h"	// text for menus
 #include "texts/weapons.h"
 #include "texts/armor.h"
+#include "npcs/npcs.h"
 
 #define FRAMES_PER_ANIMATION 3
 
@@ -55,14 +57,20 @@ enum {
 	T_BASE1 = 1
 };
 
+NPC npcs[10];
+map_t Level;
+Drawable player;
+
 int main(void) {
 	int i;
-	Drawable player = {16,32};
-	map_t Level = map_list[1];
+	player = (Drawable) {16,32};
+	Level = map_list[0];
 	Level.x = 0;
 	Level.y = 0;
+	
+	loadNPCs(0);
+	
 // setup party
-	// initialize first character
 	party.member[0] = (Character) {"add",1,0,60,60,10,19,13,0,1};
 	party.member[1] = (Character) {"chickendude",1,0,50,40,16,15,3,1,0};
 	party.member[2] = (Character) {"NanoWar",90,92860,1650,1645,168,135,83,3,2};
@@ -71,22 +79,20 @@ int main(void) {
 	party.member[1].active = true;
 	party.member[2].active = true;
 
-
 	/* NDS has nine memory banks, banks 0-4
 	 *  Use mode 0. Mode 0 is for tilebased sprites, called "text" mode
 	 * Other modes have options for rotation, scaling,
 	 * and bitmap display. You have access to 4 backgrounds in mode 0 */
 // background
 	vramSetBankA(VRAM_A_MAIN_BG_0x06000000);
-// main character
+// main character/npcs
 	vramSetBankB(VRAM_B_MAIN_SPRITE_0x06400000);
 // text
 //	vramSetBankC(VRAM_C_SUB_BG);
 	vramSetBankH(VRAM_H_SUB_BG);
 
-
-	REG_DISPCNT = MODE_0_2D | DISPLAY_SPR_ACTIVE | DISPLAY_SPR_1D | DISPLAY_SPR_1D_SIZE_128 | DISPLAY_BG0_ACTIVE | DISPLAY_BG1_ACTIVE;   // Set mode 0 in 2D mode and enable background 0
-	REG_BG0CNT = REG_BG0CNT_DEFAULT;	// map base = 2kb, tile base = 16kb
+	REG_DISPCNT = MODE_0_2D | DISPLAY_SPR_ACTIVE | DISPLAY_SPR_1D | DISPLAY_SPR_1D_SIZE_256 | DISPLAY_BG0_ACTIVE | DISPLAY_BG1_ACTIVE;   // Set mode 0 in 2D mode and enable background 0
+	REG_BG0CNT = REG_BG0CNT_DEFAULT;	// see constants.h
 	REG_BG1CNT = REG_BG1CNT_DEFAULT;	// map base = 2kb, tile base = 16kb
 
 // Font stuff for bottom screen
@@ -107,8 +113,6 @@ int main(void) {
 	oamUpdate(&oamSub);
 	oamUpdate(&oamMain);
 
-	oamMain.oamMemory[0].priority = 1;	// set player's sprite priority to 1
-
 	initPC(&player, (u8 *)characterTiles);
 	dmaCopy(characterPal, SPRITE_PALETTE, 512);
 
@@ -126,7 +130,7 @@ int main(void) {
 	// shift the text a few pixels down and to the right to not collide with the box border
 	REG_BG0HOFS_SUB = -4;
 	REG_BG0VOFS_SUB = -4;
-	
+
 	// ############# Box drawn around debug values ##################
 	drawTextBox(1,3,30,20,"Here we can put some other stats and information, or menus, or options, or bananas, or...\n\nI guess there are still a couple bugs in the text routine. We also need border detection (a width value for how far the text can be drawn without going outside the box).", D_NONE);
 	// ##############################################################
@@ -220,6 +224,7 @@ int main(void) {
 		} else
 			player.anim_frame = 0;	// reset animation when not moving
 		animatePC(&player);
+		animateNPCs(&player);
 
 		oamMain.oamMemory[0].attribute[0] = ATTR0_NORMAL | ATTR0_TYPE_NORMAL | ATTR0_COLOR_256 | ATTR0_TALL
 											| OBJ_Y(player.y-Level.y);

@@ -9,7 +9,6 @@ enum SpriteState {
 };
 
 void animatePC(Drawable *player);
-
 void initPC(Drawable *player, u8 *gfx);
 
 #endif /* MOVEMENT_H */

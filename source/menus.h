@@ -9,5 +9,7 @@ typedef struct {
 } MenuChoice;
 
 int drawMenu(int x, int y, int w, char *text);
+void menuMain();
+void menuStats();
 
 #endif // MENUS_H

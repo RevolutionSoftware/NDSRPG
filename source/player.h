@@ -20,15 +20,20 @@ typedef struct {
 	int agi;
 
 // equipment
-	int wId;		// NOTE: u8 is probably more than enough, but will it actually save space?
-	int aId;		// same as above
+	int wId;			// NOTE: u8 is probably more than enough, but will it actually save space?
+	int aId;			// same as above
 
 // misc
 	int state;			// poison, paralyze, etc.
 	bool active;		// if the character is in the party or not
 }Character;
 
-Character party[3];
+typedef struct {
+	Character member[3];
+	int gold;
+}Party;
+
+Party party;
 
 
 #endif // PLAYER_H

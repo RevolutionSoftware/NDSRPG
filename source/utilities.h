@@ -4,6 +4,7 @@
 
 void delay(u32 sleep_time);
 int stringLength(const char *text);
+void releaseKeys();
 int waitKey();
 int waitAB();
 

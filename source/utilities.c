@@ -18,15 +18,20 @@ void delay (u32 sleep_time) {
     }
 }
 
-int waitKey() {
+void releaseKeys() {
 	int keys = keysCurrent();
-
-	// first release the keys
 	while((keys & 0b111111111111) != 0) {
 		keys = keysCurrent();
 		delay(1);
 	}
+}
 
+int waitKey() {
+	int keys = keysCurrent();
+
+	// first release the keys
+	releaseKeys();
+	
 	while((keys & 0b111111111111) == 0) {
 		keys = keysCurrent();
 		delay(1);

@@ -62,12 +62,15 @@ int main(void) {
 	Level.x = 0;
 	Level.y = 0;
 // setup party
-	party[0].active = true;
-	party[1].active = false;
-	party[2].active = false;
-
 	// initialize first character
-	party[0] = (Character) {"chickenadd",1,0,50,40,10,15,13,1,0};	
+	party.member[0] = (Character) {"add",1,0,60,60,10,19,13,0,1};
+	party.member[1] = (Character) {"chickendude",1,0,50,40,16,15,3,1,0};
+	party.member[2] = (Character) {"NanoWar",90,92860,1650,1645,168,135,83,3,2};
+
+	party.member[0].active = true;
+	party.member[1].active = true;
+	party.member[2].active = true;
+
 
 	/* NDS has nine memory banks, banks 0-4
 	 *  Use mode 0. Mode 0 is for tilebased sprites, called "text" mode
@@ -131,13 +134,6 @@ int main(void) {
 
 
 	while(1) {
-		// ############# DEBUG ################
-		char debugStr[100];
-		sprintf(debugStr,"X: %d, Y: %d    \nX TILE: %d, Y TILE: %d     ",
-				player.x, player.y, (player.x + PLAYER_WIDTH)/16, (player.y + 16)/16);
-		drawTextBox(0,0,32,2,debugStr, D_NONE);
-		// ####################################
-
 		// Check for keys now
 		scanKeys();
 		int keys = keysHeld();
@@ -147,37 +143,10 @@ int main(void) {
 		if (keysDown()&KEY_A)
 			checkTile(&Level,&player,T_A);
 		if (keysDown()&KEY_Y) {
-			clrSubScreen();
-			int selected = drawMenu(0,0,11,menu_Y);
-			clrSubScreen();
-			switch(selected) {
-				case 0:
-					drawTextBox(0,0,32,23,menu_items,D_NONE);
-					break;
-				case 1:
-					drawTextBox(0,0,32,23,menu_equipment,D_NONE);
-					break;
-				case 2:
-					// NOTE: We will probably want to move this to a separate function, eg. statsMenu() or something.
-					drawBox(0,0,32,24);
-					putString(0,0,31,D_NONE,menu_stats,party[0].name,party[0].hp,party[0].hp_max,party[0].str,party[0].def,party[0].agi,weapon_list[party[0].wId].name,armor_list[party[0].aId].name);
-					break;
-				case 3:
-					drawTextBox(0,0,32,23,menu_options,D_NONE);
-					break;
-				case 4:
-					drawTextBox(0,0,32,23,menu_save,D_NONE);
-					break;
-			}
-			if(selected != -1 && selected != 5)
-				waitAB();
-			clrSubScreen();
+			menuMain();
 		}
 
-/*		if (keysUp()&KEY_A) {
-			drawTextBox(0,20,31,1,"You released A",D_NONE);
-		}
-*/		if (keys & KEY_RIGHT)
+		if (keys & KEY_RIGHT)
 		{
 			int mapOffset = (player.y + 16)/16*Level.w+(player.x + PLAYER_WIDTH + SPEED)/16;
 			int tileId = Level.map[mapOffset];

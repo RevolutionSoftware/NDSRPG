@@ -4,7 +4,11 @@
 #include "menus.h"
 #include "text.h"
 #include "utilities.h"
+#include "player.h"
+#include "weapons.h"
+#include "armor.h"
 
+// sprites
 #include "cursor.h"
 
 // drawMenu: Takes parameters and draws the menu with text inside
@@ -96,13 +100,85 @@ int drawMenu(int x, int y, int w, char *text) {
 
 }
 
-/*
-  Within the menus there will be options you can select with a cursor
-  controlled by the directional-pad.
+// ************** specific menus **************************//
+extern Party party;
+extern Weapon weapon_list[];
+extern Armor armor_list[];
+// menus
+extern char *menu_Y;
+extern char *menu_items;
+extern char *menu_equipment;
+extern char *menu_stats;
+extern char *menu_options;
+extern char *menu_save;
 
-  Pressing Y will open the menu, pressing B in the menu will get you
-  back to the game.
+/***************
+ * Displays the main menu that pops up when you press Y
+ * From here it extends into the other menus
+ ***************/
+void menuMain() {
+	int selected;
+	while(selected != -1) {
+		clrSubScreen();
+		selected = drawMenu(0,0,11,menu_Y);		// draw the main menu
+		clrSubScreen();
+		switch(selected) {							// check which option was chosen
+			case 0:
+				drawTextBox(0,0,32,23,menu_items,D_NONE);
+				break;
+			case 1:
+				drawTextBox(0,0,32,23,menu_equipment,D_NONE);
+				break;
+			case 2:
+				menuStats();
+				break;
+			case 3:
+				drawTextBox(0,0,32,23,menu_options,D_NONE);
+				break;
+			case 4:
+				drawTextBox(0,0,32,23,menu_save,D_NONE);
+				break;
+			default:
+				selected = -1;
+		}
+		if(selected != -1 && selected != 5) {			// if B was pressed, don't wait for an extra AB keypress
+			releaseKeys();
+			waitAB();
+		}
+		clrSubScreen();
+	}
+}
 
-  NOTE: Should being in the menu pause the game?
-  ANSWER: Yes, it should.
-*/
+void menuStats() {
+	drawBox(0,0,32,24);
+	char *name, *weapon, *armor;
+	int hp,hp_max,str,def,agi;
+	int i = 0;
+	while(1) {
+		name = party.member[i].name;
+		hp = party.member[i].hp;
+		hp_max = party.member[i].hp_max;
+		str = party.member[i].str;
+		def = party.member[i].def;
+		agi = party.member[i].agi;
+		weapon = weapon_list[party.member[i].wId].name;
+		armor = armor_list[party.member[i].aId].name;
+
+		// display the stats screen with the stats inserted into it
+		putString(0,0,31,D_NONE,menu_stats,name,hp,hp_max,str,def,agi,weapon,armor);
+
+		scanKeys();
+		int keys = keysDown();
+
+		if (keys & KEY_RIGHT && party.member[i+1].active) {
+			delText(0,0,31,23);
+			i++;
+		}
+		if (keys & KEY_LEFT && i > 0) {
+			delText(0,0,31,23);
+			i--;
+		}
+		if (keys & KEY_B)
+			break;
+	}
+}

@@ -28,8 +28,8 @@ void wordWrap(int *x, int *y, int r_edge, int l_edge, const char *text) {
 		j++;
 	}
 	if(j-i+*x > r_edge) {	// j-i = number of characters to next space
-								// .. x + characters to next space
-		*x = l_edge;			// move to a new line
+							// .. x + characters to next space
+		*x = l_edge;		// move to a new line
 		*y += 1;
 	}
 }
@@ -150,6 +150,20 @@ void drawBox(int x, int y, int w, int h) {
 void drawTextBox(int x, int y, int w, int h, const char *text, e_speed flag) {
     drawBox(x,y,w,h+1);
     putString(x,y,w-1,flag,text);
+}
+
+void delText(int x, int y, int w, int h) {
+    u16 *text_map = BG_MAP_RAM_SUB(0)+32*y+x;
+    int i,j;
+
+    // erase box by overwriting it with 0s
+    for(j = 0; j < h; j++) {
+        for(i = 0; i < w; i++) {
+            *text_map = 0;
+            text_map++;
+        }
+        text_map += 32-w;
+    }
 }
 
 void delTextBox(int x, int y, int w, int h) {

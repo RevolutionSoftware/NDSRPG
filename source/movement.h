@@ -3,6 +3,7 @@
 
 void animatePC(Drawable *player);
 void initPC(Drawable *player, u8 *gfx);
-void movePlayer(int *x, int *y, int direction, int speed);
+void movePlayer();
+bool isPassable(int x, int y, int pdir, int ndir, int speed);
 
 #endif /* MOVEMENT_H */

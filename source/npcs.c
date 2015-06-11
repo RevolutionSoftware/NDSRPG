@@ -4,6 +4,7 @@
 #include "npcs.h"
 #include "tilemap.h"
 #include "constants.h"
+#include "movement.h"
 
 // sprite data
 #include "character.h"
@@ -28,7 +29,7 @@ void loadNPCs(int map) {
 		npcs[i/NPC_ENTRY].sprite_id	= map_n[i+3];
 		npcs[i/NPC_ENTRY].direction	= map_n[i+4];
 		npcs[i/NPC_ENTRY].path.set	= map_n[i+5];
-		npcs[i/NPC_ENTRY].path.pos	= 0;
+		npcs[i/NPC_ENTRY].path.pos	= -2;
 		npcs[i/NPC_ENTRY].path.ctr	= 0;
 		npcs[i/NPC_ENTRY].active	= true;
 		i += NPC_ENTRY;
@@ -93,33 +94,49 @@ void moveNPC(int id) {
 			npcs[id].direction = W_RIGHT;
 			if(NPCCollision(id,-1,npcs[id].direction))
 				break;
-			npcs[id].x++;
-			npcs[id].path.ctr--;
+			if(isPassable(npcs[id].x,npcs[id].y,-1,npcs[id].direction,1)) {
+				npcs[id].x++;
+				npcs[id].path.ctr--;
+			} else
+				npcs[id].path.ctr = 0;
 			break;
 		case 1:	// walk left
 			npcs[id].direction = W_LEFT;
 			if(NPCCollision(id,-1,npcs[id].direction))
 				break;
-			npcs[id].x--;
-			npcs[id].path.ctr--;
+			if(isPassable(npcs[id].x,npcs[id].y,-1,npcs[id].direction,1)) {
+				npcs[id].x--;
+				npcs[id].path.ctr--;
+			} else
+				npcs[id].path.ctr = 0;
 			break;
 		case 2:	// walk down
 			npcs[id].direction = W_DOWN;
 			if(NPCCollision(id,-1,npcs[id].direction))
 				break;
-			npcs[id].y++;
-			npcs[id].path.ctr--;
+			if(isPassable(npcs[id].x,npcs[id].y,-1,npcs[id].direction,1)) {
+				npcs[id].y++;
+				npcs[id].path.ctr--;
+			} else
+				npcs[id].path.ctr = 0;
 			break;
 		case 3:	// walk up
 			npcs[id].direction = W_UP;
 			if(NPCCollision(id,-1,npcs[id].direction))
 				break;
-			npcs[id].y--;
-			npcs[id].path.ctr--;
+			if(isPassable(npcs[id].x,npcs[id].y,-1,npcs[id].direction,1)) {
+				npcs[id].y--;
+				npcs[id].path.ctr--;
+			} else
+				npcs[id].path.ctr = 0;
 			break;
 		case 4:	// wait
 			npcs[id].anim_frame = 0;
 			npcs[id].path.ctr--;
+			break;
+		case 5:	// face a certain direction
+			npcs[id].direction = path[pos+1];
+			npcs[id].path.ctr = 0;
 			break;
 	}
 	npcs[id].anim_frame++;

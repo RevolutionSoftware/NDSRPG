@@ -133,7 +133,6 @@ int main(void) {
 	while(1) {
 		// Check for keys now
 		scanKeys();
-		int keys = keysHeld();
 		// Exit if Start was pressed
 		if (keysDown()&KEY_START)
 			break;
@@ -143,38 +142,8 @@ int main(void) {
 			menuMain();
 		}
 
-		if (keys & KEY_RIGHT)
-		{
-			player.state = W_RIGHT;
-			movePlayer(&player.x,&player.x,player.state,SPEED);
-		}
-		if (keys & KEY_LEFT)
-		{
-			player.state = W_LEFT;
-			movePlayer(&player.x,&player.x,player.state,SPEED);
-		}
-		if (keys & KEY_DOWN)		// w*tile_height - tile_height*tiles_per_column
-		{
-			player.state = W_DOWN;
-			movePlayer(&player.x,&player.x,player.state,SPEED);
-		}
-		if (keys & KEY_UP)
-		{
-			player.state = W_UP;
-			movePlayer(&player.x,&player.x,player.state,SPEED);
-		}
-		if ((keys&KEY_LEFT) | (keys&KEY_RIGHT) | (keys&KEY_DOWN) | (keys&KEY_UP)) {
-			// top bg
-			REG_BG0HOFS = (Level.x)%16;
-			REG_BG0VOFS = (Level.y)%16;
-			// bottom bg
-			REG_BG1HOFS = (Level.x)%16;
-			REG_BG1VOFS = (Level.y)%16;
-			player.anim_frame++;
-			player.anim_frame %= (FRAMES_PER_ANIMATION+1)*ANIMATION_SPEED;
-			checkTile(&Level,&player,T_MOTION);
-		} else
-			player.anim_frame = 0;	// reset animation when not moving
+		movePlayer();
+
 		// draw tilemap
 		drawMap(&Level);
 

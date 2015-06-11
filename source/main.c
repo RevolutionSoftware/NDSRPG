@@ -125,7 +125,7 @@ int main(void) {
 	REG_BG0VOFS_SUB = -4;
 
 	// ############# Box drawn around debug values ##################
-	drawTextBox(1,3,30,20,"Here we can put some other stats and information, or menus, or options, or bananas, or...\n\nI guess there are still a couple bugs in the text routine. We also need border detection (a width value for how far the text can be drawn without going outside the box).", D_NONE);
+//	drawTextBox(1,3,30,20,"Here we can put some other stats and information, or menus, or options, or bananas, or...\n\nI guess there are still a couple bugs in the text routine. We also need border detection (a width value for how far the text can be drawn without going outside the box).", D_NONE);
 	// ##############################################################
 
 
@@ -137,7 +137,7 @@ int main(void) {
 		if (keysDown()&KEY_START)
 			break;
 		if (keysDown()&KEY_A)
-			checkTile(&Level,&player,T_A);
+			checkTile(T_A);
 		if (keysDown()&KEY_Y) {
 			menuMain();
 		}
@@ -145,7 +145,7 @@ int main(void) {
 		movePlayer();
 
 		// draw tilemap
-		drawMap(&Level);
+		drawMap();
 
 		animatePC(&player);
 		animateNPCs();

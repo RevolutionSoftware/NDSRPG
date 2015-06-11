@@ -1,6 +1,6 @@
 // 				   x, y,textid,spriteid,frame,path set
 int map0_npc[] = {60,30,4,3,2,0,
-				50,50,4,3,1,1,
+				50,50,5,3,1,1,
 				-1};
 
 int map1_npc[] = {0,30,4,3,2,0,

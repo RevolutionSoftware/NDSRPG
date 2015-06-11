@@ -82,7 +82,7 @@ void movePlayer() {
 		REG_BG1VOFS = (Level.y)%16;
 		player.anim_frame++;
 		player.anim_frame %= (FRAMES_PER_ANIMATION+1)*ANIMATION_SPEED;
-		checkTile(&Level,&player,T_MOTION);
+		checkTile(T_MOTION);
 	} else
 		player.anim_frame = 0;	// reset animation when not moving
 }

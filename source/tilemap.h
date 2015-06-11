@@ -20,9 +20,9 @@ enum TileType {
 	T_A = 1
 };
 
-void drawMap(map_t *Level);
+void drawMap();
 
-void checkTile(map_t *Level, Drawable *player, int type);
+void checkTile(int type);
 
 #ifdef DEBUG
 char* toString(int i);

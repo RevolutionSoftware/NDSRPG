@@ -7,6 +7,13 @@
 #include "movement.h"
 #include "npcs.h"
 
+extern map_t map_list[];
+extern u16 map_change_list[][5];
+extern char* text_list[];
+extern Drawable player;		// main character
+extern map_t Level;			// map and tile data
+extern NPC npcs[];			// list of npcs on the current map
+
 void drawTile(u16 *tilemap, int tileId) {
 	*tilemap = tileId*4;
 	tilemap++;
@@ -21,11 +28,11 @@ void drawTile(u16 *tilemap, int tileId) {
 /* This draws a 17x13 tilemap, with 1 extra tile on the right and bottom
  * to make scrolling easier.
  */
-void drawMap(map_t *Level) {
+void drawMap() {
     // Our map will get stored at map base 0
-    int w = Level->w;
-    int x = Level->x >> 4;
-    int y = Level->y >> 4;
+    int w = Level.w;
+    int x = Level.x >> 4;
+    int y = Level.y >> 4;
     u16 *tilemap_bg = BG_MAP_RAM(0);
     u16 *tilemap_fg = BG_MAP_RAM(2);
     int i;
@@ -33,9 +40,9 @@ void drawMap(map_t *Level) {
     int start = x+y*w;
     for(row = 0; row < 13; row++) {
         for(i = start; i < start+16; i++) {
-			int tileId = Level->map[i]+1;			// the first tile is just a transparent tile
+			int tileId = Level.map[i]+1;			// the first tile is just a transparent tile
 			int tileBG,tileFG;
-			if(Level->tiles[(tileId-1)*3].bgId == 0) {
+			if(Level.tiles[(tileId-1)*3].bgId == 0) {
 				tileBG = tileId;
 				tileFG = 0;
 			} else {
@@ -58,9 +65,9 @@ void drawMap(map_t *Level) {
 
     start = x+y*w+16;
     for(row = 0; row < 16; row++) {
-		int tileId = Level->map[start]+1;
+		int tileId = Level.map[start]+1;
 		int tileBG,tileFG;
-		if(Level->tiles[(tileId-1)*3].bgId == 0) {
+		if(Level.tiles[(tileId-1)*3].bgId == 0) {
 			tileBG = tileId;
 			tileFG = 0;
 		} else {
@@ -75,55 +82,69 @@ void drawMap(map_t *Level) {
     }
 }
 
-extern map_t map_list[];
-extern u16 map_change_list[][5];
-extern char* text_list[];
-
 /* checks if a tile has an action that should activate when tile is touched
  * 0 = map change
  * 1 = text (activated with B)
  * */
-void checkTile(map_t *Level, Drawable *player, int type) {
-	int x = player->x;
-	int y = player->y+16;	// +15 lets the player overlap the tile a bit
+void checkTile(int type) {
+	// check if we should talk to an NPC
+	if(type == T_A) {
+		int i;
+		int npc_id=-1;
+		for(i = 0; i < Level.numNPCs; i++) {
+			if(NPCCollision(i,player.state,-1))
+				npc_id = i;
+		}
+		if(npc_id >= 0) {
+			// display the text!
+			drawTextBox(0,0,32,3,text_list[npcs[npc_id].string_id],D_SLOW);
+			waitAB();	// wait for player to press [A] or [B]
+			// remove text box from screen
+			delTextBox(0,0,32,4);
+		}
+	}
+	
+	
+	int x = player.x;
+	int y = player.y+16;	// +15 lets the player overlap the tile a bit
 	int x2 = x;
 	int y2 = y;
 
 	if(type == T_MOTION) {
-		if(player->state == W_UP) {
+		if(player.state == W_UP) {
 			x+=8;
 			x2 = x;
 			y--;
 		}
-		if(player->state == W_DOWN) {
+		if(player.state == W_DOWN) {
 			x+=8;
 			x2 = x;
 			y+=10;				// look below player's feet
 		}
 
-		if(player->state == W_LEFT) {
+		if(player.state == W_LEFT) {
 			x--;
 			y2 += 8;
 		}
-		if(player->state == W_RIGHT) {
+		if(player.state == W_RIGHT) {
 			x+=16;
 			y2 += 8;
 		}
 	} else if(type == T_A) {
-		if(player->state == W_UP) {
+		if(player.state == W_UP) {
 			x2+=15;
 			y--;
 		}
-		if(player->state == W_DOWN) {
+		if(player.state == W_DOWN) {
 			x2+=15;
 			y+=10;				// look below player's feet
 		}
 
-		if(player->state == W_LEFT) {
+		if(player.state == W_LEFT) {
 			x--;
 			y2 += 8;
 		}
-		if(player->state == W_RIGHT) {
+		if(player.state == W_RIGHT) {
 			x+=16;
 			y2 += 8;
 		}
@@ -139,13 +160,13 @@ void checkTile(map_t *Level, Drawable *player, int type) {
 	int flag=0;
 	int tile;
 
-	while(Level->objs[i] != '\0') {
-		if((Level->objs[i] == x || Level->objs[i] == x2) && (Level->objs[i+1] == y || Level->objs[i+1] == y2)) {
+	while(Level.objs[i] != '\0') {
+		if((Level.objs[i] == x || Level.objs[i] == x2) && (Level.objs[i+1] == y || Level.objs[i+1] == y2)) {
 			action = i+2;		// skip the x and y coordinates
-			x = Level->objs[i];
-			y = Level->objs[i+1];
-			tile = Level->map[y*Level->w+x];
-			flag = Level->tiles[tile*3].flag;
+			x = Level.objs[i];
+			y = Level.objs[i+1];
+			tile = Level.map[y*Level.w+x];
+			flag = Level.tiles[tile*3].flag;
 		}
 		i+=4;
 	}
@@ -154,21 +175,21 @@ void checkTile(map_t *Level, Drawable *player, int type) {
 	if(action != -1) {
 		int keys = keysHeld();
 		// maps
-		if(Level->objs[action] == 0 && (flag & 1<<player->state)) {
+		if(Level.objs[action] == 0 && (flag & 1<<player.state)) {
 			// hide player and NPCs
-			for(i = 0; i < Level->numNPCs+1; i++)
+			for(i = 0; i < Level.numNPCs+1; i++)
 				oamMain.oamMemory[i].isHidden = true;
 
-			int map_action = Level->objs[action+1];
+			int map_action = Level.objs[action+1];
 			int map_id = map_change_list[map_action][0];
 			// load the new map into Level
-			*Level = map_list[map_id];
+			Level = map_list[map_id];
 			loadNPCs(map_id);
 			// update the player/map coordinates
-			Level->x = map_change_list[map_action][1]*16;
-			Level->y = map_change_list[map_action][2]*16;
-			player->x = map_change_list[map_action][3]*16;
-			player->y = map_change_list[map_action][4]*16;
+			Level.x = map_change_list[map_action][1]*16;
+			Level.y = map_change_list[map_action][2]*16;
+			player.x = map_change_list[map_action][3]*16;
+			player.y = map_change_list[map_action][4]*16;
 
 			// turn on mosaic effect for bg and disable player
 			REG_BG0CNT = REG_BG0CNT_DEFAULT | BG_MOSAIC_ON;
@@ -182,12 +203,12 @@ void checkTile(map_t *Level, Drawable *player, int type) {
 				delay(3);
 			}
 
-			REG_BG0HOFS = (Level->x)%16;
-			REG_BG0VOFS = (Level->y)%16;
-			REG_BG1HOFS = (Level->x)%16;
-			REG_BG1VOFS = (Level->y)%16;
+			REG_BG0HOFS = (Level.x)%16;
+			REG_BG0VOFS = (Level.y)%16;
+			REG_BG1HOFS = (Level.x)%16;
+			REG_BG1VOFS = (Level.y)%16;
 
-			drawMap(Level);
+			drawMap();
 
 			for(i = 15; i>0; i--) {
 				REG_MOSAIC = i+(i<<4)+(i<<8)+(i<<12);
@@ -200,8 +221,8 @@ void checkTile(map_t *Level, Drawable *player, int type) {
 
 		}
 		// texts with [A]
-		if(Level->objs[action] == 1 && keys&KEY_A) {
-			int text_id = Level->objs[action+1];
+		if(Level.objs[action] == 1 && keys&KEY_A) {
+			int text_id = Level.objs[action+1];
 			// display the text!
 			drawTextBox(0,0,32,2,text_list[text_id],D_SLOW);
 			waitAB();	// wait for player to press [A] or [B]

@@ -1,11 +1,6 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#define PLAYER_WIDTH 17
-#define PLAYER_HEIGHT 24
-#define SPEED 2
-#define ANIMATION_SPEED 8
-
 typedef struct {
 	char name[11];
 

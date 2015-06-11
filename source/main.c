@@ -41,13 +41,6 @@
 
 // Equates
 enum {
-	SCREEN_TOP = 0,
-	SCREEN_BOTTOM = 192,
-	SCREEN_LEFT = 0,
-	SCREEN_RIGHT = 256
-};
-
-enum {
 	M_BASE0 = 0,
 	M_BASE1 = 1,
 	M_BASE2 = 2,
@@ -152,61 +145,23 @@ int main(void) {
 
 		if (keys & KEY_RIGHT)
 		{
-			int mapOffset = (player.y + 16)/16*Level.w+(player.x + PLAYER_WIDTH + SPEED)/16;
-			int tileId = Level.map[mapOffset];
-			int tileId2 = tileId;
-			if ((player.y % 16) >= 9)
-				tileId2 = Level.map[mapOffset+Level.w];	// move down one row in map
-			// Make sure player isn't at edge of screen
-			if (player.x < Level.w*16-PLAYER_WIDTH)
-				if(Level.tiles[tileId*3].isPassable && Level.tiles[tileId2*3].isPassable)
-					player.x+=SPEED;
-			// Make sure map isn't at edge of screen
-			if ((player.x-Level.x > SCREEN_RIGHT/2 - PLAYER_WIDTH/2) && Level.x < Level.w*16-16*16)
-				Level.x+=SPEED;
 			player.state = W_RIGHT;
+			movePlayer();
 		}
 		if (keys & KEY_LEFT)
 		{
-			int mapOffset = (player.y+16)/16*Level.w+(player.x-SPEED)/16;
-			int tileId = Level.map[mapOffset];
-			int tileId2 = tileId;
-			if (player.y % 16 >= 9)
-				tileId2 = Level.map[mapOffset+Level.w];	// move down one row in map
-			if (player.x > 0)
-				if(Level.tiles[tileId*3].isPassable && Level.tiles[tileId2*3].isPassable)
-					player.x-=SPEED;
-			if ((player.x-Level.x < SCREEN_RIGHT/2 - PLAYER_WIDTH/2) && Level.x>0)
-				Level.x-=SPEED;
 			player.state = W_LEFT;
+			movePlayer();
 		}
 		if (keys & KEY_DOWN)		// w*tile_height - tile_height*tiles_per_column
 		{
-			int mapOffset = (player.y+PLAYER_HEIGHT+SPEED)/16*Level.w+player.x/16;
-			int tileId = Level.map[mapOffset];
-			int tileId2 = tileId;
-			if (player.x % 16 != 0)
-				tileId2 = Level.map[mapOffset+1];
-			if (player.y < Level.h*16 - PLAYER_HEIGHT)
-				if(Level.tiles[tileId*3].isPassable && Level.tiles[tileId2*3].isPassable)
-					player.y+=SPEED;
-			if ((player.y-Level.y > SCREEN_BOTTOM/2 - PLAYER_HEIGHT/2) && Level.y < Level.h*16-12*16)
-				Level.y+=SPEED;
 			player.state = W_DOWN;
+			movePlayer();
 		}
 		if (keys & KEY_UP)
 		{
-			int mapOffset = (player.y+16-SPEED)/16*Level.w+player.x/16;
-			int tileId = Level.map[mapOffset];
-			int tileId2 = tileId;
-			if (player.x % 16 != 0)
-				tileId2 = Level.map[mapOffset+1];
-			if (player.y > 0)
-				if(Level.tiles[tileId*3].isPassable && Level.tiles[tileId2*3].isPassable)
-					player.y -= SPEED;
-			if ((player.y-Level.y < SCREEN_BOTTOM/2 - PLAYER_HEIGHT/2) && Level.y > 0)
-				Level.y-=SPEED;
 			player.state = W_UP;
+			movePlayer();
 		}
 		// draw tilemap
 		drawMap(&Level);
@@ -224,7 +179,7 @@ int main(void) {
 		} else
 			player.anim_frame = 0;	// reset animation when not moving
 		animatePC(&player);
-		animateNPCs(&player);
+		animateNPCs();
 
 		oamMain.oamMemory[0].attribute[0] = ATTR0_NORMAL | ATTR0_TYPE_NORMAL | ATTR0_COLOR_256 | ATTR0_TALL
 											| OBJ_Y(player.y-Level.y);

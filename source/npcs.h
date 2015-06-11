@@ -1,3 +1,5 @@
+#define NPC_ENTRY 5			// size of each entry in npcs/npcs.h
+
 typedef struct {
 	int x;					// x and y coordinates
 	int y;
@@ -10,5 +12,5 @@ typedef struct {
 }NPC;
 
 void loadNPCs(int map);
-void animateNPCs(Drawable *player);
-
+void animateNPCs();
+bool NPCCollision(int id);

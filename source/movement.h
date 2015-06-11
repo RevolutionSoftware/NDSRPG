@@ -3,6 +3,6 @@
 
 void animatePC(Drawable *player);
 void initPC(Drawable *player, u8 *gfx);
-void movePlayer();
+void movePlayer(int *x, int *y, int direction, int speed);
 
 #endif /* MOVEMENT_H */

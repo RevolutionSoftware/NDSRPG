@@ -2,11 +2,11 @@
  * Authors: Chickendude, add
  * Description: Movement of characters and objects */
 #include <nds.h>
+#include "constants.h"
 #include "player.h"
 #include "objects.h"
 #include "movement.h"
 #include "tilemap.h"
-#include "constants.h"
 #include "npcs.h"
 
 #define FRAMES_PER_ANIMATION 3
@@ -37,17 +37,17 @@ void initPC(Drawable *player, u8 *gfx)
 	player->frame_gfx = (u8 *)gfx;
 }
 
-void movePlayer() {
+void movePlayer(int *x, int *y, int direction,int speed) {
 	// check if player will collide with an NPC
 	bool hitNPC = false;
 	int i;
 	for(i = 0; i < Level.numNPCs; i++) {
-		if(NPCCollision(i))
+		if(NPCCollision(i,player.state,-1))
 			hitNPC = true;
 	}
 	// if not, check if player will collide with a tile
 	if(!hitNPC) {
-		if(player.state == W_RIGHT) {
+		if(direction == W_RIGHT) {
 			int mapOffset = (player.y + PLAYER_Y_OVERLAP)/16*Level.w+(player.x + PLAYER_WIDTH + SPEED)/16;
 			int tileId = Level.map[mapOffset];
 			int tileId2 = tileId;
@@ -61,7 +61,7 @@ void movePlayer() {
 			if ((player.x-Level.x > SCREEN_RIGHT/2 - PLAYER_WIDTH/2) && Level.x < Level.w*16-16*16)
 				Level.x+=SPEED;
 		}
-		else if(player.state == W_LEFT) {
+		else if(direction == W_LEFT) {
 			int mapOffset = (player.y+16)/16*Level.w+(player.x-SPEED)/16;
 			int tileId = Level.map[mapOffset];
 			int tileId2 = tileId;
@@ -73,7 +73,7 @@ void movePlayer() {
 			if ((player.x-Level.x < SCREEN_RIGHT/2 - PLAYER_WIDTH/2) && Level.x>0)
 				Level.x-=SPEED;
 		}
-		else if(player.state == W_DOWN) {
+		else if(direction == W_DOWN) {
 			int mapOffset = (player.y+PLAYER_HEIGHT+SPEED)/16*Level.w+player.x/16;
 			int tileId = Level.map[mapOffset];
 			int tileId2 = tileId;
@@ -85,7 +85,7 @@ void movePlayer() {
 			if ((player.y-Level.y > SCREEN_BOTTOM/2 - PLAYER_HEIGHT/2) && Level.y < Level.h*16-12*16)
 				Level.y+=SPEED;
 		}
-		else if(player.state == W_UP) {
+		else if(direction == W_UP) {
 			int mapOffset = (player.y+16-SPEED)/16*Level.w+player.x/16;
 			int tileId = Level.map[mapOffset];
 			int tileId2 = tileId;

@@ -182,12 +182,6 @@ void checkTile(map_t *Level, Drawable *player, int type) {
 				delay(3);
 			}
 
-/*			oamMain.oamMemory[0].attribute[0] = ATTR0_NORMAL | ATTR0_TYPE_NORMAL | ATTR0_COLOR_256 | ATTR0_SQUARE
-											| OBJ_Y(player->y-Level->y) | ATTR0_MOSAIC;
-			oamMain.oamMemory[0].attribute[1] = ATTR1_SIZE_32 | OBJ_X(player->x-Level->x);
-			oamMain.oamMemory[0].isMosaic = true;
-			oamUpdate(&oamMain);
-*/			
 			REG_BG0HOFS = (Level->x)%16;
 			REG_BG0VOFS = (Level->y)%16;
 			REG_BG1HOFS = (Level->x)%16;
@@ -212,7 +206,7 @@ void checkTile(map_t *Level, Drawable *player, int type) {
 			drawTextBox(0,0,32,2,text_list[text_id],D_SLOW);
 			waitAB();	// wait for player to press [A] or [B]
 			// remove text box from screen
-//			delTextBox(0,0,32,3);
+			delTextBox(0,0,32,3);
 		}
 	}
 }

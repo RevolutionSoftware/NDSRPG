@@ -15,6 +15,7 @@
 extern NPC npcs[];
 extern map_t Level;
 extern int *npc_list[];
+extern int *npc_paths[];
 extern Drawable player;
 
 void loadNPCs(int map) {
@@ -26,6 +27,9 @@ void loadNPCs(int map) {
 		npcs[i/NPC_ENTRY].string_id	= map_n[i+2];
 		npcs[i/NPC_ENTRY].sprite_id	= map_n[i+3];
 		npcs[i/NPC_ENTRY].direction	= map_n[i+4];
+		npcs[i/NPC_ENTRY].path.set	= map_n[i+5];
+		npcs[i/NPC_ENTRY].path.pos	= 0;
+		npcs[i/NPC_ENTRY].path.ctr	= 0;
 		npcs[i/NPC_ENTRY].active	= true;
 		i += NPC_ENTRY;
 	}
@@ -35,6 +39,7 @@ void loadNPCs(int map) {
 void animateNPCs() {
 	int i;
 	for(i = 0; i < Level.numNPCs; i++) {
+		moveNPC(i);
 		int frame_number = npcs[i].anim_frame/ANIMATION_SPEED;
 
 		if(frame_number > 1)
@@ -67,22 +72,90 @@ void animateNPCs() {
 	oamUpdate(&oamMain);
 }
 
-#include "text.h"
+void moveNPC(int id) {
+	int pId = npcs[id].path.set;
+	int *path = npc_paths[pId];
+	int pos = npcs[id].path.pos;
 
+	// if ctr = 0, load the next path
+	if(npcs[id].path.ctr == 0) {
+		pos+=2;
+		if(path[pos] == -1)
+			pos = 0;
+		npcs[id].path.ctr = path[pos+1];
+	}
+	npcs[id].path.pos = pos;
 
-bool NPCCollision(int id) {
-	int xoff=0;
-	int yoff=0;
+	int path_action = path[pos];
 
-	if(player.state == W_LEFT)
-		xoff-=SPEED;
-	if(player.state == W_RIGHT)
-		xoff+=SPEED;
-	if(player.state == W_DOWN)
-		yoff+=SPEED;
-	if(player.state == W_UP)
-		yoff-=SPEED;
+	switch(path_action) {
+		case 0:	// walk right
+			npcs[id].direction = W_RIGHT;
+			if(NPCCollision(id,-1,npcs[id].direction))
+				break;
+			npcs[id].x++;
+			npcs[id].path.ctr--;
+			break;
+		case 1:	// walk left
+			npcs[id].direction = W_LEFT;
+			if(NPCCollision(id,-1,npcs[id].direction))
+				break;
+			npcs[id].x--;
+			npcs[id].path.ctr--;
+			break;
+		case 2:	// walk down
+			npcs[id].direction = W_DOWN;
+			if(NPCCollision(id,-1,npcs[id].direction))
+				break;
+			npcs[id].y++;
+			npcs[id].path.ctr--;
+			break;
+		case 3:	// walk up
+			npcs[id].direction = W_UP;
+			if(NPCCollision(id,-1,npcs[id].direction))
+				break;
+			npcs[id].y--;
+			npcs[id].path.ctr--;
+			break;
+		case 4:	// wait
+			npcs[id].anim_frame = 0;
+			npcs[id].path.ctr--;
+			break;
+	}
+	npcs[id].anim_frame++;
+	if(NPCCollision(id,-1,npcs[id].direction))
+		npcs[id].anim_frame = 0;
+	npcs[id].anim_frame %= (FRAMES_PER_ANIMATION+1)*ANIMATION_SPEED;
+}
+
+bool NPCCollision(int id, int pdir, int ndir) {
+	int pxoff=0;
+	int pyoff=0;
+	int nxoff=0;
+	int nyoff=0;
+
+	if(ndir != -1) {
+		if(ndir == W_LEFT)
+			nxoff-=SPEED;
+		if(ndir == W_RIGHT)
+			nxoff+=SPEED;
+		if(ndir == W_DOWN)
+			nyoff+=SPEED;
+		if(ndir == W_UP)
+			nyoff-=SPEED;
+	}
+
+	if(pdir != -1) {
+		if(pdir == W_LEFT)
+			pxoff-=SPEED;
+		if(pdir == W_RIGHT)
+			pxoff+=SPEED;
+		if(pdir == W_DOWN)
+			pyoff+=SPEED;
+		if(pdir == W_UP)
+			pyoff-=SPEED;
+	}
 
 	// the +3 lets you get a little closer to the NPC
-	return (player.x + xoff + 3 <= npcs[id].x + PLAYER_WIDTH) && (player.x + xoff + PLAYER_WIDTH >= npcs[id].x+3) && (player.y + yoff <= npcs[id].y + 24 - PLAYER_Y_OVERLAP) && (player.y + yoff + 24 - PLAYER_Y_OVERLAP >= npcs[id].y);
+	return (player.x + pxoff + 3 <= npcs[id].x + nxoff + PLAYER_WIDTH) && (player.x + pxoff + PLAYER_WIDTH >= npcs[id].x + nxoff +3) && (player.y + pyoff <= npcs[id].y + nyoff + 24 - PLAYER_Y_OVERLAP) && (player.y + pyoff + 24 - PLAYER_Y_OVERLAP >= npcs[id].y + nyoff);
 }

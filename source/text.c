@@ -6,6 +6,10 @@
 #include "player.h"
 #include "weapons.h"
 #include "armor.h"
+#include "objects.h"
+
+// sprites
+#include "cursor.h"
 
 #define TL	'~'-' '+1	// top left (this is the tile id)
 #define T	TL+1		// top
@@ -35,7 +39,7 @@ void wordWrap(int *x, int *y, int r_edge, int l_edge, const char *text) {
 }
 
 // text is defined as a tilemap.
-void putString(int x, int y, int w, e_speed flag, const char *text, ...) {
+void putString(int x, int y, int w, int h, e_speed flag, const char *text, ...) {
 	// get pointer to arg list
 	int *argp;
 	char c;
@@ -43,12 +47,43 @@ void putString(int x, int y, int w, e_speed flag, const char *text, ...) {
 	argp++;
 
 	// Draw the message on the screen.
+	int text_top = y;
 	int text_length = stringLength(text);
 	int left_edge = x;
 	int right_edge = left_edge + w;
 	int i;
 
 	for (i = 0; i < text_length; i++) {
+		// check if text goes beyond bottom of the textbox
+		if(y == text_top+h) {
+			// load little blinky thingy
+			SpriteEntry *blinky;
+			blinky = initSprite(0, (u8 *)cursorTiles+64, cursorTilesLen);
+			blinky->isHidden = false;
+			blinky->x = (left_edge+w-1)*8+4;
+			blinky->y = (text_top+h)*8;
+
+			int counter = 0b010000;
+			scanKeys();
+			while(!(keysDown()&KEY_A) && !(keysDown()&KEY_B)) {
+				counter++;
+				if(counter & 0b110000)
+					blinky->isHidden = false;
+				else
+					blinky->isHidden = true;
+				oamUpdate(&oamSub);
+				scanKeys();
+				delay(1);
+			}
+
+			blinky->isHidden = true;
+			oamUpdate(&oamSub);
+			releaseKeys();
+			delText(left_edge, text_top, w, h);
+			x = left_edge;
+			y = text_top;
+		}
+		
 		c = *text++;
 		// Check for special characters (\n, etc.)
 		switch(c) {
@@ -66,7 +101,7 @@ void putString(int x, int y, int w, e_speed flag, const char *text, ...) {
 					case 's':			// display the string
 						wordWrap(&x, &y, right_edge, left_edge, text);
 						char *str = (char *)*argp++;
-						putString(x,y,w,flag,str);
+						putString(x,y,w,h,flag,str);
 						x += stringLength(str);
 						break;
 				}
@@ -149,7 +184,7 @@ void drawBox(int x, int y, int w, int h) {
 // draws a box with text inside it
 void drawTextBox(int x, int y, int w, int h, const char *text, e_speed flag) {
     drawBox(x,y,w,h+1);
-    putString(x,y,w-1,flag,text);
+    putString(x,y,w-1,h,flag,text);
 }
 
 void delText(int x, int y, int w, int h) {

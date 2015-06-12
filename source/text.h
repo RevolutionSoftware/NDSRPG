@@ -34,7 +34,7 @@ typedef struct {
 } coord_t;
 
 //void putString(int x, int y, int w, const char *text, e_speed flag);
-void putString(int x, int y, int w, e_speed flag, const char *text, ...);
+void putString(int x, int y, int w, int h, e_speed flag, const char *text, ...);
 void putStat(int *x, int *y, e_speed flag, int statId);
 void putInt(int *x, int y, e_speed flag, int num);
 void putChar(int *x, int y, e_speed flag, char c);

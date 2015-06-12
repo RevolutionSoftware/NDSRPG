@@ -167,11 +167,11 @@ void menuStats() {
 		armor = armor_list[party.member[i].aId].name;
 
 		// display the stats screen with the stats inserted into it
-		putString(0,0,31,D_NONE,menu_stats,name,hp,hp_max,str,def,agi,weapon,armor);
+		putString(0,0,31,23,D_NONE,menu_stats,name,hp,hp_max,str,def,agi,weapon,armor);
 
 		int keys = waitKey();
 
-		if (keys & KEY_RIGHT && party.member[i+1].active) {
+		if (keys & KEY_RIGHT && party.member[i+1].active && i < 2) {
 			delText(0,0,31,23);
 			i++;
 		}

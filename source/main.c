@@ -124,12 +124,6 @@ int main(void) {
 	REG_BG0HOFS_SUB = -4;
 	REG_BG0VOFS_SUB = -4;
 
-	// ############# Box drawn around debug values ##################
-
-	// ##############################################################
-
-
-
 	while(1) {
 		// Check for keys now
 		scanKeys();

@@ -1,4 +1,9 @@
 #include <nds.h>
+#include <time.h>
+#include "tilemap.h"
+
+extern Drawable player;
+extern map_t Level;
 
 int stringLength(const char *text) {
 	int text_length = 0;
@@ -46,4 +51,14 @@ int waitAB() {
 		keys = waitKey();
 	} while(!(keys & KEY_A) && !(keys & KEY_B));
 	return keys;
+}
+
+int randNum(int max) {
+	static u16 seed = 0;
+	u32 i = time(NULL);
+	
+	seed += (u32)i*seed/11;
+	seed -= (u32)player.x;
+
+	return seed % max;
 }

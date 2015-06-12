@@ -1,16 +1,19 @@
-#define NPC_ENTRY 8			// size of each entry in npcs/npcs.h
+#define NPC_ENTRY 10			// size of each entry in npcs/npcs.h
 
 typedef struct {
 	int set;
 	int pos;
 	int ctr;
+	int action;
 }Path;
 
 typedef struct {
 	int startx;				// starting x and y coordinates
 	int starty;
-	int rangex;				// how far from starting x/y NPC can walk
-	int rangey;
+	int x1;					// NPCs boundaries
+	int y1;
+	int x2;
+	int y2;
 	int x;					// current x and y coordinates
 	int y;
 	int string_id;			// text to display when spoken to

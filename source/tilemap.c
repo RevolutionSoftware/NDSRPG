@@ -106,9 +106,9 @@ void checkTile(int type) {
 			waitAB();	// wait for player to press [A] or [B]
 			// remove text box from screen
 			delTextBox(0,0,32,4);
+			return;
 		}
 	}
-	
 	
 	int x = player.x;
 	int y = player.y+16;	// +15 lets the player overlap the tile a bit

@@ -5,6 +5,9 @@
 #include "tilemap.h"
 #include "constants.h"
 #include "movement.h"
+#include "utilities.h"
+
+#include "text.h"
 
 // sprite data
 #include "character.h"
@@ -27,12 +30,14 @@ void loadNPCs(int map) {
 		npcs[i/NPC_ENTRY].starty	= map_n[i+1];
 		npcs[i/NPC_ENTRY].x			= map_n[i];
 		npcs[i/NPC_ENTRY].y			= map_n[i+1];
-		npcs[i/NPC_ENTRY].rangex	= map_n[i+2];
-		npcs[i/NPC_ENTRY].rangey	= map_n[i+3];
-		npcs[i/NPC_ENTRY].string_id	= map_n[i+4];
-		npcs[i/NPC_ENTRY].sprite_id	= map_n[i+5];
-		npcs[i/NPC_ENTRY].direction	= map_n[i+6];
-		npcs[i/NPC_ENTRY].path.set	= map_n[i+7];
+		npcs[i/NPC_ENTRY].x1		= map_n[i+2];
+		npcs[i/NPC_ENTRY].y1		= map_n[i+3];
+		npcs[i/NPC_ENTRY].x2		= map_n[i+4];
+		npcs[i/NPC_ENTRY].y2		= map_n[i+5];
+		npcs[i/NPC_ENTRY].string_id	= map_n[i+6];
+		npcs[i/NPC_ENTRY].sprite_id	= map_n[i+7];
+		npcs[i/NPC_ENTRY].direction	= map_n[i+8];
+		npcs[i/NPC_ENTRY].path.set	= map_n[i+9];
 		npcs[i/NPC_ENTRY].path.pos	= -2;
 		npcs[i/NPC_ENTRY].path.ctr	= 0;
 		npcs[i/NPC_ENTRY].active	= true;
@@ -89,13 +94,12 @@ void moveNPCs() {
 			if(path[pos] == -1)
 				pos = 0;
 			npcs[id].path.ctr = path[pos+1];
+			npcs[id].path.action = path[pos];
 		}
 		npcs[id].path.pos = pos;
 
-		int path_action = path[pos];
-
-		switch(path_action) {
-			case 0:	// walk right
+		switch(npcs[id].path.action) {
+			case 0:			// walk right
 				npcs[id].direction = W_RIGHT;
 				if(NPCCollision(id,-1,npcs[id].direction))
 					break;
@@ -105,7 +109,7 @@ void moveNPCs() {
 				} else
 					npcs[id].path.ctr = 0;
 				break;
-			case 1:	// walk left
+			case 1:			// walk left
 				npcs[id].direction = W_LEFT;
 				if(NPCCollision(id,-1,npcs[id].direction))
 					break;
@@ -115,7 +119,7 @@ void moveNPCs() {
 				} else
 					npcs[id].path.ctr = 0;
 				break;
-			case 2:	// walk down
+			case 2:			// walk down
 				npcs[id].direction = W_DOWN;
 				if(NPCCollision(id,-1,npcs[id].direction))
 					break;
@@ -125,7 +129,7 @@ void moveNPCs() {
 				} else
 					npcs[id].path.ctr = 0;
 				break;
-			case 3:	// walk up
+			case 3:			// walk up
 				npcs[id].direction = W_UP;
 				if(NPCCollision(id,-1,npcs[id].direction))
 					break;
@@ -135,15 +139,48 @@ void moveNPCs() {
 				} else
 					npcs[id].path.ctr = 0;
 				break;
-			case 4:	// wait
+			case 4:			// wait
 				npcs[id].anim_frame = 0;
 				npcs[id].path.ctr--;
 				break;
-			case 5:	// face a certain direction
+			case 5:			// face a certain direction
 				npcs[id].direction = path[pos+1];
 				npcs[id].path.ctr = 0;
 				break;
+			case 6:			// random
+				npcs[id].path.action = randNum(10) < 4 ? randNum(4) : 4;
+				
+				// make them turn around if they are supposed to walk out of their boundary
+				if(	npcs[id].path.action != 4 &&
+					((npcs[id].x == npcs[id].x1 && npcs[id].path.action == 1) ||
+					(npcs[id].x == npcs[id].x2 && npcs[id].path.action == 0) ||
+					(npcs[id].y == npcs[id].y1 && npcs[id].path.action == 3) ||
+					(npcs[id].y == npcs[id].y2 && npcs[id].path.action == 2)))
+						npcs[id].path.action -= (npcs[id].path.action%1)*2-1;
+				npcs[id].path.ctr = 16*(randNum(3)+1);
+				break;
 		}
+
+		if(npcs[id].x < npcs[id].x1) {
+			npcs[id].x = npcs[id].x1;
+			npcs[id].path.ctr = 0;
+		}
+
+		if(npcs[id].y < npcs[id].y1) {
+			npcs[id].y = npcs[id].y1;
+			npcs[id].path.ctr = 0;
+		}
+
+		if(npcs[id].x > npcs[id].x2) {
+			npcs[id].x = npcs[id].x2;
+			npcs[id].path.ctr = 0;
+		}
+
+		if(npcs[id].y > npcs[id].y2) {
+			npcs[id].y = npcs[id].y2;
+			npcs[id].path.ctr = 0;
+		}
+		
 		npcs[id].anim_frame++;
 		if(NPCCollision(id,-1,npcs[id].direction))
 			npcs[id].anim_frame = 0;

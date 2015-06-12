@@ -1,4 +1,4 @@
-#define NPC_ENTRY 6			// size of each entry in npcs/npcs.h
+#define NPC_ENTRY 8			// size of each entry in npcs/npcs.h
 
 typedef struct {
 	int set;
@@ -7,7 +7,11 @@ typedef struct {
 }Path;
 
 typedef struct {
-	int x;					// x and y coordinates
+	int startx;				// starting x and y coordinates
+	int starty;
+	int rangex;				// how far from starting x/y NPC can walk
+	int rangey;
+	int x;					// current x and y coordinates
 	int y;
 	int string_id;			// text to display when spoken to
 	int sprite_id;			// 
@@ -20,4 +24,4 @@ typedef struct {
 void loadNPCs(int map);
 void animateNPCs();
 bool NPCCollision(int id, int pdir, int ndir);
-void moveNPC(int id);
+void moveNPCs();

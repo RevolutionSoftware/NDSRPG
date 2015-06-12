@@ -23,12 +23,16 @@ void loadNPCs(int map) {
 	int i=0;
 	int *map_n = (int *)npc_list[map];
 	while(map_n[i] != -1) {
+		npcs[i/NPC_ENTRY].startx	= map_n[i];
+		npcs[i/NPC_ENTRY].starty	= map_n[i+1];
 		npcs[i/NPC_ENTRY].x			= map_n[i];
 		npcs[i/NPC_ENTRY].y			= map_n[i+1];
-		npcs[i/NPC_ENTRY].string_id	= map_n[i+2];
-		npcs[i/NPC_ENTRY].sprite_id	= map_n[i+3];
-		npcs[i/NPC_ENTRY].direction	= map_n[i+4];
-		npcs[i/NPC_ENTRY].path.set	= map_n[i+5];
+		npcs[i/NPC_ENTRY].rangex	= map_n[i+2];
+		npcs[i/NPC_ENTRY].rangey	= map_n[i+3];
+		npcs[i/NPC_ENTRY].string_id	= map_n[i+4];
+		npcs[i/NPC_ENTRY].sprite_id	= map_n[i+5];
+		npcs[i/NPC_ENTRY].direction	= map_n[i+6];
+		npcs[i/NPC_ENTRY].path.set	= map_n[i+7];
 		npcs[i/NPC_ENTRY].path.pos	= -2;
 		npcs[i/NPC_ENTRY].path.ctr	= 0;
 		npcs[i/NPC_ENTRY].active	= true;
@@ -40,7 +44,6 @@ void loadNPCs(int map) {
 void animateNPCs() {
 	int i;
 	for(i = 0; i < Level.numNPCs; i++) {
-		moveNPC(i);
 		int frame_number = npcs[i].anim_frame/ANIMATION_SPEED;
 
 		if(frame_number > 1)
@@ -73,76 +76,79 @@ void animateNPCs() {
 	oamUpdate(&oamMain);
 }
 
-void moveNPC(int id) {
-	int pId = npcs[id].path.set;
-	int *path = npc_paths[pId];
-	int pos = npcs[id].path.pos;
+void moveNPCs() {
+	int id;
+	for(id = 0; id < Level.numNPCs; id++) {
+		int pId = npcs[id].path.set;
+		int *path = npc_paths[pId];
+		int pos = npcs[id].path.pos;
 
-	// if ctr = 0, load the next path
-	if(npcs[id].path.ctr == 0) {
-		pos+=2;
-		if(path[pos] == -1)
-			pos = 0;
-		npcs[id].path.ctr = path[pos+1];
-	}
-	npcs[id].path.pos = pos;
+		// if ctr = 0, load the next path
+		if(npcs[id].path.ctr == 0) {
+			pos+=2;
+			if(path[pos] == -1)
+				pos = 0;
+			npcs[id].path.ctr = path[pos+1];
+		}
+		npcs[id].path.pos = pos;
 
-	int path_action = path[pos];
+		int path_action = path[pos];
 
-	switch(path_action) {
-		case 0:	// walk right
-			npcs[id].direction = W_RIGHT;
-			if(NPCCollision(id,-1,npcs[id].direction))
+		switch(path_action) {
+			case 0:	// walk right
+				npcs[id].direction = W_RIGHT;
+				if(NPCCollision(id,-1,npcs[id].direction))
+					break;
+				if(isPassable(npcs[id].x,npcs[id].y,-1,npcs[id].direction,1)) {
+					npcs[id].x++;
+					npcs[id].path.ctr--;
+				} else
+					npcs[id].path.ctr = 0;
 				break;
-			if(isPassable(npcs[id].x,npcs[id].y,-1,npcs[id].direction,1)) {
-				npcs[id].x++;
-				npcs[id].path.ctr--;
-			} else
-				npcs[id].path.ctr = 0;
-			break;
-		case 1:	// walk left
-			npcs[id].direction = W_LEFT;
-			if(NPCCollision(id,-1,npcs[id].direction))
+			case 1:	// walk left
+				npcs[id].direction = W_LEFT;
+				if(NPCCollision(id,-1,npcs[id].direction))
+					break;
+				if(isPassable(npcs[id].x,npcs[id].y,-1,npcs[id].direction,1)) {
+					npcs[id].x--;
+					npcs[id].path.ctr--;
+				} else
+					npcs[id].path.ctr = 0;
 				break;
-			if(isPassable(npcs[id].x,npcs[id].y,-1,npcs[id].direction,1)) {
-				npcs[id].x--;
-				npcs[id].path.ctr--;
-			} else
-				npcs[id].path.ctr = 0;
-			break;
-		case 2:	// walk down
-			npcs[id].direction = W_DOWN;
-			if(NPCCollision(id,-1,npcs[id].direction))
+			case 2:	// walk down
+				npcs[id].direction = W_DOWN;
+				if(NPCCollision(id,-1,npcs[id].direction))
+					break;
+				if(isPassable(npcs[id].x,npcs[id].y,-1,npcs[id].direction,1)) {
+					npcs[id].y++;
+					npcs[id].path.ctr--;
+				} else
+					npcs[id].path.ctr = 0;
 				break;
-			if(isPassable(npcs[id].x,npcs[id].y,-1,npcs[id].direction,1)) {
-				npcs[id].y++;
-				npcs[id].path.ctr--;
-			} else
-				npcs[id].path.ctr = 0;
-			break;
-		case 3:	// walk up
-			npcs[id].direction = W_UP;
-			if(NPCCollision(id,-1,npcs[id].direction))
+			case 3:	// walk up
+				npcs[id].direction = W_UP;
+				if(NPCCollision(id,-1,npcs[id].direction))
+					break;
+				if(isPassable(npcs[id].x,npcs[id].y,-1,npcs[id].direction,1)) {
+					npcs[id].y--;
+					npcs[id].path.ctr--;
+				} else
+					npcs[id].path.ctr = 0;
 				break;
-			if(isPassable(npcs[id].x,npcs[id].y,-1,npcs[id].direction,1)) {
-				npcs[id].y--;
+			case 4:	// wait
+				npcs[id].anim_frame = 0;
 				npcs[id].path.ctr--;
-			} else
+				break;
+			case 5:	// face a certain direction
+				npcs[id].direction = path[pos+1];
 				npcs[id].path.ctr = 0;
-			break;
-		case 4:	// wait
+				break;
+		}
+		npcs[id].anim_frame++;
+		if(NPCCollision(id,-1,npcs[id].direction))
 			npcs[id].anim_frame = 0;
-			npcs[id].path.ctr--;
-			break;
-		case 5:	// face a certain direction
-			npcs[id].direction = path[pos+1];
-			npcs[id].path.ctr = 0;
-			break;
+		npcs[id].anim_frame %= (FRAMES_PER_ANIMATION+1)*ANIMATION_SPEED;
 	}
-	npcs[id].anim_frame++;
-	if(NPCCollision(id,-1,npcs[id].direction))
-		npcs[id].anim_frame = 0;
-	npcs[id].anim_frame %= (FRAMES_PER_ANIMATION+1)*ANIMATION_SPEED;
 }
 
 bool NPCCollision(int id, int pdir, int ndir) {
@@ -151,6 +157,7 @@ bool NPCCollision(int id, int pdir, int ndir) {
 	int nxoff=0;
 	int nyoff=0;
 
+	// if ndir is set, we are checking if the NPC will collide with the player
 	if(ndir != -1) {
 		if(ndir == W_LEFT)
 			nxoff-=SPEED;
@@ -162,6 +169,7 @@ bool NPCCollision(int id, int pdir, int ndir) {
 			nyoff-=SPEED;
 	}
 
+	// if pdir is set, we're checking if the player will collide with the NPC
 	if(pdir != -1) {
 		if(pdir == W_LEFT)
 			pxoff-=SPEED;

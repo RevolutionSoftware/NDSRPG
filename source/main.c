@@ -148,6 +148,7 @@ int main(void) {
 		drawMap();
 
 		animatePC(&player);
+		moveNPCs();
 		animateNPCs();
 
 		oamMain.oamMemory[0].attribute[0] = ATTR0_NORMAL | ATTR0_TYPE_NORMAL | ATTR0_COLOR_256 | ATTR0_TALL

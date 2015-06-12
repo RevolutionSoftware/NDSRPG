@@ -96,6 +96,11 @@ void checkTile(int type) {
 				npc_id = i;
 		}
 		if(npc_id >= 0) {
+			// make sure NPC is facing player
+			npcs[npc_id].direction = (player.state+2)%4;	// see constants.h for why this works
+			npcs[npc_id].anim_frame = 0;					// stand still when talking to player
+			animateNPCs();
+
 			// display the text!
 			drawTextBox(0,0,32,3,text_list[npcs[npc_id].string_id],D_SLOW);
 			waitAB();	// wait for player to press [A] or [B]
@@ -174,7 +179,7 @@ void checkTile(int type) {
 	// check if there is an action attached to the tile
 	if(action != -1) {
 		int keys = keysHeld();
-		// maps
+		// Change maps
 		if(Level.objs[action] == 0 && (flag & 1<<player.state)) {
 			// hide player and NPCs
 			for(i = 0; i < Level.numNPCs+1; i++)

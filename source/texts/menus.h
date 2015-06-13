@@ -7,7 +7,7 @@ char *menu_Y	=	"\1Items\n"
 					"\1Exit";
 
 // Items menu
-char *menu_items	=	"Sorry, we haven't programmed items into the game yet! Please check back in about 3 months ;)";
+//char *menu_items	=	"Sorry, we haven't programmed items into the game yet! Please check back in about 3 months ;)";
 
 // Equipment menu
 char *menu_equipment	=	"It uh.. kinda appears that you are naked. You should really find some armor.";

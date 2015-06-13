@@ -23,8 +23,18 @@ typedef struct {
 	bool active;		// if the character is in the party or not
 }Character;
 
+#define MAX_ITEMS	38
+
+typedef struct {
+	int id;
+	int amt;
+}Inventory;
+
 typedef struct {
 	Character member[3];
+	Inventory inventory[MAX_ITEMS];
+	Inventory weapons[20][2];
+	Inventory armor[20][2];
 	int gold;
 }Party;
 

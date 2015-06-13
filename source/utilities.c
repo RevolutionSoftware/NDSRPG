@@ -54,11 +54,14 @@ int waitAB() {
 }
 
 int randNum(int max) {
-	static u16 seed = 0;
+	static u16 seed = 0x1337;
+	unsigned bit;
 	u32 i = time(NULL);
-	
-	seed += (u32)i*seed/11;
-	seed -= (u32)player.x;
+
+	seed += i;
+
+	bit  = ((seed >> 0) ^ (seed >> 2) ^ (seed >> 3) ^ (seed >> 5) ) & 1;
+	seed =  (seed >> 1) | (bit << 15);
 
 	return seed % max;
 }

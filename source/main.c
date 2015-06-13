@@ -74,6 +74,11 @@ int main(void) {
 	party.member[1].active = true;
 	party.member[2].active = true;
 
+	for(i = 0; i < 4; i++) {
+		party.inventory[i].id	= i;
+		party.inventory[i].amt	= randNum(20);
+	}
+
 	/* NDS has nine memory banks, banks 0-4
 	 *  Use mode 0. Mode 0 is for tilebased sprites, called "text" mode
 	 * Other modes have options for rotation, scaling,
@@ -95,6 +100,8 @@ int main(void) {
 	REG_DISPCNT_SUB = MODE_0_2D | DISPLAY_SPR_ACTIVE | DISPLAY_SPR_1D | DISPLAY_SPR_1D_SIZE_128 | DISPLAY_BG0_ACTIVE| DISPLAY_BG1_ACTIVE;   // bottom screen, use bg0 and bg1
 	REG_BG0CNT_SUB = BG_PRIORITY_2 | BG_32x32 | BG_COLOR_16 | BG_MAP_BASE(0) | BG_TILE_BASE(1); // text
 	REG_BG1CNT_SUB = BG_PRIORITY_3 | BG_32x32 | BG_COLOR_16 | BG_MAP_BASE(1) | BG_TILE_BASE(1); // textboxes
+
+
 
 // Copy font data (sprites and palette)
 	dmaCopy(fontTiles, BG_TILE_RAM_SUB(1), fontTilesLen);

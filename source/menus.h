@@ -17,6 +17,7 @@ typedef struct {
 
 
 int drawMenu(int x, int y, int w, char *text, int defValue);
+void menuItems();
 void menuMain();
 void menuStats();
 void menuStore(int id);

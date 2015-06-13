@@ -12,9 +12,14 @@
 // sprites
 #include "cursor.h"
 
-// drawMenu: Takes parameters and draws the menu with text inside
+#define ITEMS_ON_SCREEN 19
 
-// Return: -1 if B was pressed, otherwise return id of option selected.
+
+/******************
+ * drawMenu: Takes parameters and draws the menu with text inside
+ * 
+ * Return: -1 if B was pressed, otherwise return id of option selected.
+*******************/
 int drawMenu(int x, int y, int w, char *text, int defValue) {
 	int h = stringHeight(text);
 
@@ -87,7 +92,6 @@ int drawMenu(int x, int y, int w, char *text, int defValue) {
 		if(keys & KEY_B) {
 			running = false;
 		}
-		delay(1);
 	}
 	// turn off cursor
 	cursor->isHidden = true;
@@ -128,8 +132,7 @@ void menuMain() {
 		clrSubScreen();
 		switch(selected) {							// check which option was chosen
 			case 0:
-				drawTextBox(0,0,32,23,menu_items,D_NONE);
-				waitAB();
+				menuItems();
 				break;
 			case 1:
 				drawTextBox(0,0,32,23,menu_equipment,D_NONE);
@@ -152,6 +155,92 @@ void menuMain() {
 		releaseKeys();
 		clrSubScreen();
 	}
+}
+
+/************************
+ * Displays the list of items you have
+ ************************/
+void menuItems() {
+	clrSubScreen();
+	drawBox(0,0,16,20);	// main item box
+	drawBox(16,0,16,20);	// main item box
+	drawBox(0,20,32,4);	// item description box
+
+	// display your items
+	int i;
+	for(i = 0; i < MAX_ITEMS; i++) {
+		int itemId,itemAmt;
+		char *iName;
+		int y = i < 19 ? i : i-19;
+		int x = i < 19 ? 1 : 17;
+		itemId = party.inventory[i].id;
+		itemAmt = party.inventory[i].amt;
+		iName = item_list[itemId].name;
+		if(itemAmt > 0) {
+			putString(x,y,32,24,D_NONE,iName);
+			putString(x+9,y,32,24,D_NONE,"*%d",itemAmt);
+		} else {
+			putString(x,y,32,24,D_NONE,"---");
+		}
+	}
+
+	// load cursor
+	SpriteEntry *cursor;
+	cursor = initSprite(0, (u8 *)cursorTiles, cursorTilesLen);
+	cursor->isHidden = false;
+
+	int running = true;
+	int selection = 0;
+	int animation = 0;	// cursor animation
+	keysSetRepeat(16,5);
+	// Handle key presses
+	while(running) {
+		animation++;
+		cursor->x = 3+((animation & 0b10000)>>4) + (selection < 19 ? 0 : 16*8);
+		cursor->y = (selection < 19 ? selection : selection - 19)*8+4;
+		oamUpdate(&oamSub);
+
+		int itemId = party.inventory[selection].id;
+		char *iDesc = "---";
+		if(party.inventory[selection].amt > 0)
+			iDesc = item_list[itemId].description;
+		delText(0,20,31,3);
+		putString(0,20,31,3,D_NONE,iDesc);
+
+		delay(1);	// don't waste toooo much battery power!
+
+		scanKeys();
+		int keys = keysDownRepeat();
+
+		if(keys & KEY_DOWN && selection < MAX_ITEMS - 1) {
+			selection++;
+		}
+		else if (keysDown()&KEY_DOWN && selection == MAX_ITEMS-1) {
+			selection = 0;
+		}
+		if(keys & KEY_UP && selection > 0) {
+			selection--;
+		}
+		else if (keysDown()&KEY_UP && selection == 0) {
+			selection = MAX_ITEMS-1;
+		}
+		if((keysDown()&KEY_RIGHT && selection < MAX_ITEMS/2) || (keysDown()&KEY_LEFT && selection < MAX_ITEMS/2)) {
+			selection += 19;
+		}
+		else if((keysDown()&KEY_RIGHT) || (keysDown()&KEY_LEFT && selection >= MAX_ITEMS/2)) {
+			selection -= 19;
+		}
+
+		if(keys & KEY_A) {
+			running = false;
+		}
+		if(keys & KEY_B) {
+			running = false;
+		}
+	}
+	// turn off cursor
+	cursor->isHidden = true;
+	oamUpdate(&oamSub);
 }
 
 void menuStats() {
@@ -187,8 +276,6 @@ void menuStats() {
 			running = false;
 	}
 }
-
-#define ITEMS_ON_SCREEN 19
 
 /*********************
  * handle the shops
@@ -248,6 +335,9 @@ void menuStore(int id) {
 
 		if(keys & KEY_A) {
 			// buy item
+			drawBox(10,5,10,12);
+			
+			waitAB();
 			running = false;
 		}
 		if(keys & KEY_B) {

@@ -147,38 +147,38 @@ int stringHeight(const char *text) {
 }
 
 void drawBox(int x, int y, int w, int h) {
-    delTextBox(x,y,w,h);
-    u16 *box_map = BG_MAP_RAM_SUB(1);
-    int i,j;
-    box_map += 32*y+x;		// map width is 32
-    // draw top row
-    *box_map = TL;
-    for(i = 0; i < w-2; i++) {
-        box_map++;
-        *box_map = T;
-    }
-    box_map++;
-    *box_map = TR;
-    box_map += 33-w;		// move to next line
-    // draw middle area
-    for(j = 0; j < h-2; j++) {
-        *box_map = L;
-        for(i = 0; i < w-2; i++) {
-            box_map++;
-            *box_map = C;
-        }
-        box_map++;
-        *box_map = R;
-        box_map += 33-w;	// move to next line
-    }
-    // draw bottom row
-    *box_map = BL;
-    for(i = 0; i < w-2; i++) {
-        box_map++;
-        *box_map = B;
-    }
-    box_map++;
-    *box_map = BR;
+	delTextBox(x,y,w,h);
+	u16 *box_map = BG_MAP_RAM_SUB(1);
+	int i,j;
+	box_map += 32*y+x;		// map width is 32
+	// draw top row
+	*box_map = TL;
+	for(i = 0; i < w-2; i++) {
+		box_map++;
+		*box_map = T;
+	}
+	box_map++;
+	*box_map = TR;
+	box_map += 33-w;		// move to next line
+	// draw middle area
+	for(j = 0; j < h-2; j++) {
+		*box_map = L;
+		for(i = 0; i < w-2; i++) {
+			box_map++;
+			*box_map = C;
+		}
+		box_map++;
+		*box_map = R;
+		box_map += 33-w;	// move to next line
+	}
+	// draw bottom row
+	*box_map = BL;
+	for(i = 0; i < w-2; i++) {
+		box_map++;
+		*box_map = B;
+	}
+	box_map++;
+	*box_map = BR;
 }
 
 // draws a box with text inside it

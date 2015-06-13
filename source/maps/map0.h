@@ -10,7 +10,7 @@ tile_t map0_tiledata[][3] = {{true,0,0b0},
 		{true,0,0b0},
 		};
 
-s16 map0_obj_data[] = {5,6,1,2,
+s16 map0_obj_data[] = {5,6,2,0,
 		24,32,0,0,
 		25,32,1,3,
 		48,22,1,1,

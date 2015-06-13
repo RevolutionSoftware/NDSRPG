@@ -21,6 +21,7 @@
 #include "player.h"
 #include "weapons.h"
 #include "armor.h"
+#include "items.h"
 #include "npcs.h"
 
 // sprite data
@@ -35,6 +36,7 @@
 #include "texts/menus.h"	// text for menus
 #include "texts/weapons.h"
 #include "texts/armor.h"
+#include "texts/items.h"
 #include "npcs/npcs.h"
 
 #define FRAMES_PER_ANIMATION 3

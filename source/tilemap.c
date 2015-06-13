@@ -6,6 +6,7 @@
 #include "utilities.h"
 #include "movement.h"
 #include "npcs.h"
+#include "menus.h"
 
 extern map_t map_list[];
 extern u16 map_change_list[][5];
@@ -95,9 +96,10 @@ void checkTile(int type) {
 			if(NPCCollision(i,player.state,-1))
 				npc_id = i;
 		}
+		// if talking to an NPC
 		if(npc_id >= 0) {
 			// make sure NPC is facing player
-			npcs[npc_id].direction = (player.state+2)%4;	// see constants.h for why this works
+			npcs[npc_id].direction = (player.state+2)%4;	// basically add 2 to player's state (direction) and wrap around if necessary
 			npcs[npc_id].anim_frame = 0;					// stand still when talking to player
 			animateNPCs();
 
@@ -178,7 +180,6 @@ void checkTile(int type) {
 
 	// check if there is an action attached to the tile
 	if(action != -1) {
-		int keys = keysHeld();
 		// Change maps
 		if(Level.objs[action] == 0 && (flag & 1<<player.state)) {
 			// hide player and NPCs
@@ -226,13 +227,17 @@ void checkTile(int type) {
 
 		}
 		// texts with [A]
-		if(Level.objs[action] == 1 && keys&KEY_A) {
+		if(Level.objs[action] == 1 && type == T_A) {
 			int text_id = Level.objs[action+1];
 			// display the text!
 			drawTextBox(0,0,32,2,text_list[text_id],D_SLOW);
-			waitAB();	// wait for player to press [A] or [B]
-			// remove text box from screen
+			waitAB();				// wait for player to press [A] or [B]
 			delTextBox(0,0,32,3);
+		}
+		// load a store with [A]
+		if(Level.objs[action] == 2 && type == T_A) {
+			int store_id = Level.objs[action+1];
+			menuStore(store_id);
 		}
 	}
 }

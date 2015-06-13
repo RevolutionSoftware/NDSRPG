@@ -7,6 +7,7 @@
 #include "player.h"
 #include "weapons.h"
 #include "armor.h"
+#include "items.h"
 
 // sprites
 #include "cursor.h"
@@ -104,6 +105,9 @@ int drawMenu(int x, int y, int w, char *text, int defValue) {
 extern Party party;
 extern Weapon weapon_list[];
 extern Armor armor_list[];
+extern Item item_list[];
+extern Store store_list[];
+
 // menus
 extern char *menu_Y;
 extern char *menu_items;
@@ -181,5 +185,125 @@ void menuStats() {
 		}
 		if (keys & KEY_B)
 			running = false;
+	}
+}
+
+#define ITEMS_ON_SCREEN 19
+
+/*********************
+ * handle the shops
+ *********************/
+void menuStore(int id) {
+	// display the text!
+	drawTextBox(0,0,32,2,store_list[id].hello,D_SLOW);
+	waitAB();				// wait for player to press [A] or [B]
+	clrSubScreen();
+
+
+	drawBox(0,0,32,20);	// main item box
+	drawBox(0,20,32,4);	// item description box
+
+	// load cursor
+	SpriteEntry *cursor;
+	cursor = initSprite(0, (u8 *)cursorTiles, cursorTilesLen);
+	cursor->isHidden = false;
+
+	int running = true;
+	int selOption = 0;
+	int topOption = 0;
+	int numItems = store_list[id].numItems;
+	int animation = 0;
+	keysSetRepeat(16,5);
+	// Handle key presses
+	while(running) {
+		animation++;
+		cursor->x = 3 + ((animation & 0b10000)>>4);
+		cursor->y = (selOption-topOption)*8+4;
+		oamUpdate(&oamSub);
+
+		delay(1);
+		drawStore(id,topOption,selOption);
+
+		scanKeys();
+		int keys = keysDownRepeat();
+
+		if(keys & KEY_DOWN && selOption < numItems - 1) {
+			selOption++;
+			if((selOption > topOption + ITEMS_ON_SCREEN-1) && (topOption + ITEMS_ON_SCREEN < numItems))
+				topOption++;
+		}
+		else if (keysDown()&KEY_DOWN && selOption == numItems-1) {
+			topOption = 0;
+			selOption = 0;
+		}
+		if(keys & KEY_UP && selOption > 0) {
+			selOption--;
+			if((selOption < topOption) && (topOption > 0))
+				topOption--;
+		}
+		else if (keysDown()&KEY_UP && selOption == 0) {
+			topOption = numItems-ITEMS_ON_SCREEN;
+			selOption = numItems-1;
+		}
+
+		if(keys & KEY_A) {
+			// buy item
+			running = false;
+		}
+		if(keys & KEY_B) {
+			// exit store
+			running = false;
+		}
+	}
+	// turn off cursor
+	cursor->isHidden = true;
+	oamUpdate(&oamSub);
+
+	clrSubScreen();
+
+	// display the text!
+	drawTextBox(0,0,32,2,store_list[id].goodbye,D_SLOW);
+	waitAB();				// wait for player to press [A] or [B]
+	clrSubScreen();
+
+	releaseKeys();
+
+}
+
+void drawStore(int storeId, int start, int selected) {
+	delText(0,0,32,24);
+	int i,numItems;
+	numItems = store_list[storeId].numItems;
+	if(numItems + start > ITEMS_ON_SCREEN)
+		numItems = ITEMS_ON_SCREEN;
+	for(i = 0; i < numItems; i++) {
+		int itemType = store_list[storeId].items[(i+start)*2];
+		int itemId = store_list[storeId].items[(i+start)*2+1];
+		int itemPrice = 0;
+		char *itemName = "";
+		char *itemDesc = "";
+
+		switch(itemType) {
+			case 0:		// item
+				itemName = item_list[itemId].name;
+				itemDesc = item_list[itemId].description;
+				itemPrice = item_list[itemId].cost;
+				break;
+			case 1:		// armor
+				itemName = armor_list[itemId].name;
+				itemDesc = armor_list[itemId].description;
+				itemPrice = armor_list[itemId].cost;
+				break;
+			case 2:		// weapon
+				itemName = weapon_list[itemId].name;
+				itemDesc = weapon_list[itemId].description;
+				itemPrice = weapon_list[itemId].cost;
+				break;
+		}
+		putString(1,i,32,24,D_NONE,itemName);
+		putString(15,i,32,24,D_NONE,"$%d",itemPrice);
+		if(i+start == selected)
+			putString(0,20,31,3,D_NONE,itemDesc);
+
 	}
 }

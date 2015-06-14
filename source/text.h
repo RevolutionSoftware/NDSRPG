@@ -40,7 +40,7 @@ void putInt(int *x, int y, e_speed flag, int num);
 void putChar(int *x, int y, e_speed flag, char c);
 int stringHeight(const char *text);
 void drawBox(int x, int y, int w, int h);
-void drawTextBox(int x, int y, int w, int h, const char *text, e_speed flag);
+void drawTextBox(int x, int y, int w, int h, e_speed flag, const char *text);
 void delText(int x, int y, int w, int h);
 void delTextBox(int x, int y, int w, int h);
 void clrSubScreen();

@@ -118,7 +118,7 @@ void putString(int x, int y, int w, int h, e_speed flag, const char *text, ...) 
 }
 
 /*****************
- * converts integer to string
+ * prints integer
  *****************/
 void putInt(int *x, int y, e_speed flag, int num) {
 	int i = num/10;
@@ -182,7 +182,7 @@ void drawBox(int x, int y, int w, int h) {
 }
 
 // draws a box with text inside it
-void drawTextBox(int x, int y, int w, int h, const char *text, e_speed flag) {
+void drawTextBox(int x, int y, int w, int h, e_speed flag, const char *text) {
     drawBox(x,y,w,h+1);
     putString(x,y,w-1,h,flag,text);
 }

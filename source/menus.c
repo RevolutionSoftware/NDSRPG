@@ -20,9 +20,7 @@
  * 
  * Return: -1 if B was pressed, otherwise return id of option selected.
 *******************/
-int drawMenu(int x, int y, int w, char *text, int defValue) {
-	int h = stringHeight(text);
-
+int drawMenu(int x, int y, int w, int h, char *text, int defValue) {
 	// load cursor
 	SpriteEntry *cursor;
 	cursor = initSprite(0, (u8 *)cursorTiles, cursorTilesLen);
@@ -52,7 +50,7 @@ int drawMenu(int x, int y, int w, char *text, int defValue) {
 		i++;
 	}
 
-    drawTextBox(x, y, w, h, text, D_NONE);
+    drawTextBox(x, y, w, h, D_NONE, text);
 
 	// turn on cursor
 	cursor->isHidden = false;
@@ -60,7 +58,7 @@ int drawMenu(int x, int y, int w, char *text, int defValue) {
 	int running = true;
 	int selOption = defValue;
 	int animation = 0;
-	keysSetRepeat(8,3);
+	keysSetRepeat(16,5);
 	// Handle key presses
 	while(running) {
 		animation++;
@@ -73,13 +71,13 @@ int drawMenu(int x, int y, int w, char *text, int defValue) {
 		scanKeys();
 		int keys = keysDownRepeat();
 
-		if(keys & KEY_DOWN && selOption < numChoices - 1) {
+		if((keys & KEY_DOWN || keys & KEY_RIGHT) && selOption < numChoices - 1) {
 			selOption++;
 		}
 		else if (keysDown()&KEY_DOWN && selOption == numChoices-1) {
 			selOption = 0;
 		}
-		if(keys & KEY_UP && selOption > 0) {
+		if((keys & KEY_UP || keys & KEY_LEFT) && selOption > 0) {
 			selOption--;
 		}
 		else if (keysDown()&KEY_UP && selOption == 0) {
@@ -96,8 +94,6 @@ int drawMenu(int x, int y, int w, char *text, int defValue) {
 	// turn off cursor
 	cursor->isHidden = true;
 	oamUpdate(&oamSub);
-
-	delTextBox(x, y, w, h+2);
 
 	if(keysHeld() & KEY_B)
 		selOption = -1;
@@ -119,8 +115,16 @@ extern char *menu_equipment;
 extern char *menu_stats;
 extern char *menu_options;
 extern char *menu_save;
+extern char *yes_or_no;
+
+// store texts
+extern char *store_items_txt;
+extern char *store_buy_txt;
+extern char *store_items_txt;
 
 /***************
+ * MAIN MENU
+ * ---------
  * Displays the main menu that pops up when you press Y
  * From here it extends into the other menus
  ***************/
@@ -128,25 +132,25 @@ void menuMain() {
 	int selected=0;
 	while(selected != -1) {
 		clrSubScreen();
-		selected = drawMenu(0,0,11,menu_Y,selected);		// draw the main menu
+		selected = drawMenu(0,0,11,6,menu_Y,selected);		// draw the main menu
 		clrSubScreen();
 		switch(selected) {							// check which option was chosen
 			case 0:
 				menuItems();
 				break;
 			case 1:
-				drawTextBox(0,0,32,23,menu_equipment,D_NONE);
+				drawTextBox(0,0,32,23,D_NONE,menu_equipment);
 				waitAB();
 				break;
 			case 2:
 				menuStats();
 				break;
 			case 3:
-				drawTextBox(0,0,32,23,menu_options,D_NONE);
+				drawTextBox(0,0,32,23,D_NONE,menu_options);
 				waitAB();
 				break;
 			case 4:
-				drawTextBox(0,0,32,23,menu_save,D_NONE);
+				drawTextBox(0,0,32,23,D_NONE,menu_save);
 				waitAB();
 				break;
 			default:
@@ -158,7 +162,7 @@ void menuMain() {
 }
 
 /************************
- * Displays the list of items you have
+ * ITEMS MENU
  ************************/
 void menuItems() {
 	clrSubScreen();
@@ -243,6 +247,9 @@ void menuItems() {
 	oamUpdate(&oamSub);
 }
 
+/*****************
+ * STATS
+ *****************/
 void menuStats() {
 	drawBox(0,0,32,24);
 	char *name, *weapon, *armor;
@@ -278,27 +285,32 @@ void menuStats() {
 }
 
 /*********************
- * handle the shops
+ * SHOPS
  *********************/
 void menuStore(int id) {
 	// display the text!
-	drawTextBox(0,0,32,2,store_list[id].hello,D_SLOW);
+	drawTextBox(0,0,32,2,D_SLOW,store_list[id].hello);
 	waitAB();				// wait for player to press [A] or [B]
 	clrSubScreen();
 
 
-	drawBox(0,0,32,20);	// main item box
-	drawBox(0,20,32,4);	// item description box
+	drawBox(0,0,18,20);		// main item box
+	drawBox(18,0,14,20);	// extra info/purchase box
+	drawBox(0,20,32,4);		// item description box
 
 	// load cursor
 	SpriteEntry *cursor;
-	cursor = initSprite(0, (u8 *)cursorTiles, cursorTilesLen);
+	cursor = initSprite(1, (u8 *)cursorTiles, cursorTilesLen);
 	cursor->isHidden = false;
+
 
 	int running = true;
 	int selOption = 0;
 	int topOption = 0;
 	int numItems = store_list[id].numItems;
+	int itemsOnScreen = ITEMS_ON_SCREEN;
+	if(itemsOnScreen > numItems)
+		itemsOnScreen = numItems;
 	int animation = 0;
 	keysSetRepeat(16,5);
 	// Handle key presses
@@ -316,7 +328,7 @@ void menuStore(int id) {
 
 		if(keys & KEY_DOWN && selOption < numItems - 1) {
 			selOption++;
-			if((selOption > topOption + ITEMS_ON_SCREEN-1) && (topOption + ITEMS_ON_SCREEN < numItems))
+			if((selOption > topOption + itemsOnScreen-1) && (topOption + itemsOnScreen < numItems))
 				topOption++;
 		}
 		else if (keysDown()&KEY_DOWN && selOption == numItems-1) {
@@ -329,18 +341,16 @@ void menuStore(int id) {
 				topOption--;
 		}
 		else if (keysDown()&KEY_UP && selOption == 0) {
-			topOption = numItems-ITEMS_ON_SCREEN;
+			topOption = numItems-itemsOnScreen;
 			selOption = numItems-1;
 		}
 
-		if(keys & KEY_A) {
+		if(keysDown()&KEY_A) {
 			// buy item
-			drawBox(10,5,10,12);
-			
-			waitAB();
-			running = false;
+			buyItem(id, selOption);
+			scanKeys();
 		}
-		if(keys & KEY_B) {
+		if(keysDown()&KEY_B) {
 			// exit store
 			running = false;
 		}
@@ -349,15 +359,72 @@ void menuStore(int id) {
 	cursor->isHidden = true;
 	oamUpdate(&oamSub);
 
-	clrSubScreen();
-
 	// display the text!
-	drawTextBox(0,0,32,2,store_list[id].goodbye,D_SLOW);
+	drawTextBox(0,20,32,3,D_SLOW,store_list[id].goodbye);
 	waitAB();				// wait for player to press [A] or [B]
 	clrSubScreen();
 
 	releaseKeys();
 
+}
+
+/***************
+ * BUY ITEM
+ ***************/
+void buyItem(int storeId, int selected) {
+	int amt = 0;
+	int itemPrice = 0;
+	int itemType = store_list[storeId].items[(selected)*2];
+	int itemId = store_list[storeId].items[(selected)*2+1];
+	int itemPos = findItemPos(itemId);
+	int curAmt = 0;
+	if(itemPos != -1)
+		curAmt = party.inventory[itemPos].amt;
+	switch(itemType) {
+		case 0:		// item
+			itemPrice = item_list[itemId].cost;
+			break;
+		case 1:		// armor
+			itemPrice = armor_list[itemId].cost;
+			break;
+		case 2:		// weapon
+			itemPrice = weapon_list[itemId].cost;
+			break;
+	}
+	keysSetRepeat(16,5);
+	bool running = true;
+	while(running) {
+		delay(1);
+		delText(18,6,32,24);
+		putString(18,6,32,24,D_NONE,store_buy_txt,amt,amt*itemPrice);
+
+		scanKeys();
+		int keys = keysDownRepeat();
+
+		if(keys & KEY_RIGHT && amt < 99-curAmt && party.gold >= (amt+1)*itemPrice)
+			amt++;
+		if(keys & KEY_LEFT && amt > 0)
+			amt--;
+
+		if(keysDown()&KEY_A) {
+			// confirm purchase
+			if(amt > 0) {
+				int choice = drawMenu(0, 20, 32, 3, yes_or_no, 0);
+				if(choice == 0) {
+					if(receiveItem(itemId,amt))
+						party.gold -= amt*itemPrice;
+					else
+						drawTextBox(0,0,32,24,D_NONE,"ERROR!");
+				}
+			}
+			running = false;
+		}
+		if(keysDown()&KEY_B) {
+			// exit store
+			running = false;
+		}
+	}
+		
 }
 
 void drawStore(int storeId, int start, int selected) {
@@ -391,9 +458,18 @@ void drawStore(int storeId, int start, int selected) {
 				break;
 		}
 		putString(1,i,32,24,D_NONE,itemName);
-		putString(15,i,32,24,D_NONE,"$%d",itemPrice);
-		if(i+start == selected)
+		putString(11,i,32,24,D_NONE,":");
+		putString(17-countDigits(itemPrice),i,32,24,D_NONE,"%d",itemPrice);
+
+		// if this is the currently selected item, update the extra menu sections
+		if(i+start == selected) {
 			putString(0,20,31,3,D_NONE,itemDesc);
+			int pos = findItemPos(itemId);
+			int amt = 0;
+			if(pos >= 0)
+				amt = party.inventory[pos].amt;
+			putString(18,0,32,24,D_NONE,store_items_txt,party.gold,amt);
+		}
 
 	}
 }

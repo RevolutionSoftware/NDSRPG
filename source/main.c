@@ -73,11 +73,19 @@ int main(void) {
 	party.member[0].active = true;
 	party.member[1].active = true;
 	party.member[2].active = true;
+	
+	party.gold = 1337;
 
 	for(i = 0; i < 4; i++) {
 		party.inventory[i].id	= i;
-		party.inventory[i].amt	= randNum(20);
+		party.inventory[i].amt	= randNum(2);
 	}
+
+	for(i = 4; i < MAX_ITEMS; i++) {
+		party.inventory[i].id	= -1;
+		party.inventory[i].amt	= 0;
+	}
+
 
 	/* NDS has nine memory banks, banks 0-4
 	 *  Use mode 0. Mode 0 is for tilebased sprites, called "text" mode

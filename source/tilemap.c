@@ -104,7 +104,7 @@ void checkTile(int type) {
 			animateNPCs();
 
 			// display the text!
-			drawTextBox(0,0,32,3,text_list[npcs[npc_id].string_id],D_SLOW);
+			drawTextBox(0,0,32,3,D_SLOW,text_list[npcs[npc_id].string_id]);
 			waitAB();	// wait for player to press [A] or [B]
 			// remove text box from screen
 			delTextBox(0,0,32,4);
@@ -230,7 +230,7 @@ void checkTile(int type) {
 		if(Level.objs[action] == 1 && type == T_A) {
 			int text_id = Level.objs[action+1];
 			// display the text!
-			drawTextBox(0,0,32,2,text_list[text_id],D_SLOW);
+			drawTextBox(0,0,32,2,D_SLOW,text_list[text_id]);
 			waitAB();				// wait for player to press [A] or [B]
 			delTextBox(0,0,32,3);
 		}

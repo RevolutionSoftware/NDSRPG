@@ -28,6 +28,13 @@ char *menu_options	=	"What do you need options for? Our game is perfect as-is!";
 // Save menu
 char *menu_save		=	"There is no saving you! MwahAHahHAH!";
 
+// Confirmation dialog
+char *yes_or_no		=	"Are you sure?\n\1Yes \1No";
+
+// Stores
+char *store_buy_txt	= "How many?\n< %d >\n\nPrice:\n%d";
+char *store_items_txt = "Money:\n%d\n\nYou have:\n%d";
+
 #define I_BANANA	0,0
 #define I_OATMEAL	0,1
 #define I_TENT		0,2
@@ -47,25 +54,6 @@ char store_1_goodbye[] = "That's all you wanted?";
 int store_1_items[]	= {	I_BANANA,
 						I_OATMEAL,
 						I_TENT,
-						I_FLOWER,
-						A_TSHIRT,
-						A_CHAINMAIL,
-						A_LEG_ARMOR,
-						W_DAGGER,
-						W_SWORD,
-						W_PISTOL,
-						W_BAZOOKA,
-						I_TENT,
-						I_FLOWER,
-						A_TSHIRT,
-						A_CHAINMAIL,
-						I_TENT,
-						I_FLOWER,
-						W_SWORD,
-						I_TENT,
-						I_FLOWER,
-						A_TSHIRT,
-						W_BAZOOKA,
-						A_CHAINMAIL};
+						I_FLOWER};
 
-Store store_list[] = {{store_1_hello,store_1_goodbye,store_1_items,23}};
+Store store_list[] = {{store_1_hello,store_1_goodbye,store_1_items,4}};

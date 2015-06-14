@@ -8,5 +8,5 @@ void releaseKeys();
 int waitKey();
 int waitAB();
 int randNum(int max);
-
+int countDigits(int num);
 #endif // UTILITIES_H

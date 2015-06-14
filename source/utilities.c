@@ -1,9 +1,12 @@
 #include <nds.h>
 #include <time.h>
 #include "tilemap.h"
+#include "items.h"
+#include "player.h"
 
 extern Drawable player;
 extern map_t Level;
+extern Party party;
 
 int stringLength(const char *text) {
 	int text_length = 0;
@@ -64,4 +67,14 @@ int randNum(int max) {
 	seed =  (seed >> 1) | (bit << 15);
 
 	return seed % max;
+}
+
+int countDigits(int num) {
+	int digits = 1;
+	int i = num / 10;
+	while(i > 0) {
+		i /= 10;
+		digits++;
+	}
+	return digits;
 }

@@ -255,37 +255,31 @@ void menuItems() {
 
 void menuEquip() {
 	clrSubScreen();
-	drawBox(0,0,11,2);	// party member 1
-	drawBox(11,0,10,2);	// party member 2
-	drawBox(21,0,11,2);	// party member 3
-	drawBox(0,2,16,22);	// equiped weapons
-	drawBox(16,2,16,22);	// unequipped weapons
-	if(party.member[0].active)
-		putString(1,0,32,24,D_NONE,party.member[0].name);
-	if(party.member[1].active)
-		putString(12,0,32,24,D_NONE,party.member[1].name);
-	if(party.member[2].active)
-		putString(22,0,32,24,D_NONE,party.member[2].name);
+	drawBox(0,0,16,4);	// party members
+	drawBox(0,4,16,20);	// equiped weapons
+	drawBox(16,0,16,24);	// unequipped weapons
+	int i;
+	for(i=0;i<3;i++)
+		putString(1,i,32,24,D_NONE,party.member[i].name);
 
 	SpriteEntry *cursor;
 	cursor = initSprite(0, (u8 *)cursorTiles, cursorTilesLen);
 	cursor->isHidden = false;
-	cursor->y = 4;
 
-	int cursorX[3] = {4,11*8+4,21*8+4};
 	int selPlayer = 0;
 	int animation = 0;
 	bool running = true;
 	while(running) {
 		delay(1);
-		cursor->x = cursorX[selPlayer]+((animation++ & 0b10000)>>4);
+		cursor->x = 4+((animation++ & 0b10000)>>4);
+		cursor->y = 4+selPlayer*8;
 		oamUpdate(&oamSub);
 
 		scanKeys();
-		if(keysDown()& KEY_RIGHT && selPlayer < 2 && party.member[selPlayer+1].active) {
+		if(keysDown()& KEY_DOWN && selPlayer < 2 && party.member[selPlayer+1].active) {
 			selPlayer++;
 		}
-		if(keysDown()& KEY_LEFT && selPlayer > 0) {
+		if(keysDown()& KEY_UP && selPlayer > 0) {
 			selPlayer--;
 		}
 		if(keysDown()&KEY_B)
@@ -303,9 +297,9 @@ void viewEquip(int pId) {
 	char *weapon_txt, *armor_txt;
 	weapon_txt = weapon_list[party.member[pId].wId].name;
 	armor_txt = armor_list[party.member[pId].aId].name;
-	putString(0,2,32,24,D_NONE,menu_equip_BL,weapon_txt,armor_txt);
+	putString(0,4,32,24,D_NONE,menu_equip_BL,weapon_txt,armor_txt);
 
-	MenuChoice cursCoords[2] = {{4,3*8+4},{4,6*8+4}};
+	MenuChoice cursCoords[2] = {{4,5*8+4},{4,8*8+4}};
 
 	SpriteEntry *cursor;
 	cursor = initSprite(1, (u8 *)cursorTiles, cursorTilesLen);
@@ -333,13 +327,15 @@ void viewEquip(int pId) {
 			running = false;
 		if(keysDown()&KEY_A) {
 			chooseEquip(pId,selection);
-			delText(0,2,15,24);
+			// update weapon and armor text since we may have changed equipment
+			delText(0,4,15,24);
 			weapon_txt = weapon_list[party.member[pId].wId].name;
 			armor_txt = armor_list[party.member[pId].aId].name;
-			putString(0,2,32,24,D_NONE,menu_equip_BL,weapon_txt,armor_txt);
+			putString(0,4,32,24,D_NONE,menu_equip_BL,weapon_txt,armor_txt);
 		}
 	}
-	delText(0,2,32,20);
+	delText(0,4,15,20);
+	delText(16,0,15,24);
 	// turn off cursor
 	cursor->isHidden = true;
 	oamUpdate(&oamSub);
@@ -357,7 +353,7 @@ void chooseEquip(int pId, int eType) {
 	while(running) {
 		delay(1);
 		cursor->x = 16*8 + 4+((animation++ & 0b10000)>>4);
-		cursor->y = (selection-offset)*8 + 2*8 + 4;
+		cursor->y = (selection-offset)*8 + 4;
 		oamUpdate(&oamSub);
 
 		drawEquip(0,pId,eType);
@@ -400,7 +396,7 @@ void chooseEquip(int pId, int eType) {
 
 void drawEquip(int offset, int pId, int eType) {
 	// NOTE: We can use pId to check if the player can use that kind of weapon/armor
-	delText(16,2,16,22);
+	delText(16,0,16,24);
 	char *empty = "---";
 	char *name;
 	int i;
@@ -413,7 +409,7 @@ void drawEquip(int offset, int pId, int eType) {
 			if(party.armor[i+offset] > 0)
 				name = armor_list[party.armor[i+offset]].name;
 		}
-		putString(17,i+2,32,24,D_NONE,name);
+		putString(17,i,32,24,D_NONE,name);
 			
 	}
 }

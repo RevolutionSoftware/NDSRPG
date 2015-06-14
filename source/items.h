@@ -4,5 +4,9 @@ typedef struct {
 	int cost;
 }Item;
 
+#define I_ITEM		0
+#define I_ARMOR		1
+#define I_WEAPON	2
+
 int findItemPos(int id);
 bool receiveItem(int itemId, int amt);

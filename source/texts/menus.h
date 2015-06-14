@@ -6,11 +6,8 @@ char *menu_Y	=	"\1Items\n"
 					"\1Save\n"
 					"\1Exit";
 
-// Items menu
-//char *menu_items	=	"Sorry, we haven't programmed items into the game yet! Please check back in about 3 months ;)";
-
 // Equipment menu
-char *menu_equipment	=	"It uh.. kinda appears that you are naked. You should really find some armor.";
+char *menu_equip_BL	=	"Weapon:\n %s\n\nArmor:\n %s";
 
 // Stats menu
 char *menu_stats	=	"Character: %s\n"
@@ -51,9 +48,10 @@ char *store_items_txt = "Money:\n%d\n\nYou have:\n%d";
 
 char store_1_hello[] = "What can I do for ya?";
 char store_1_goodbye[] = "That's all you wanted?";
-int store_1_items[]	= {	I_BANANA,
+int store_1_items[]	= {	A_LEG_ARMOR,
+						I_BANANA,
 						I_OATMEAL,
 						I_TENT,
 						I_FLOWER};
 
-Store store_list[] = {{store_1_hello,store_1_goodbye,store_1_items,4}};
+Store store_list[] = {{store_1_hello,store_1_goodbye,store_1_items,5}};

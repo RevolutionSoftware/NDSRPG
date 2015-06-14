@@ -33,8 +33,8 @@ typedef struct {
 typedef struct {
 	Character member[3];
 	Inventory inventory[MAX_ITEMS];
-	Inventory weapons[20][2];
-	Inventory armor[20][2];
+	int weapons[20];
+	int armor[20];
 	int gold;
 }Party;
 

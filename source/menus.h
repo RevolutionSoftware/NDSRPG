@@ -17,8 +17,12 @@ typedef struct {
 
 
 int drawMenu(int x, int y, int w, int h, char *text, int defValue);
-void menuItems();
 void menuMain();
+void menuItems();
+void menuEquip();
+void viewEquip();
+void chooseEquip(int pId, int eType);
+void drawEquip(int offset, int pId, int eType);
 void menuStats();
 void menuStore(int id);
 void buyItem(int storeId, int selected);

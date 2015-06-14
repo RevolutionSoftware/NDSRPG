@@ -111,11 +111,14 @@ extern Store store_list[];
 // menus
 extern char *menu_Y;
 extern char *menu_items;
-extern char *menu_equipment;
 extern char *menu_stats;
 extern char *menu_options;
 extern char *menu_save;
 extern char *yes_or_no;
+
+// equipment texts
+extern char *menu_equip_BL;
+
 
 // store texts
 extern char *store_items_txt;
@@ -139,8 +142,7 @@ void menuMain() {
 				menuItems();
 				break;
 			case 1:
-				drawTextBox(0,0,32,23,D_NONE,menu_equipment);
-				waitAB();
+				menuEquip();
 				break;
 			case 2:
 				menuStats();
@@ -235,10 +237,10 @@ void menuItems() {
 			selection -= 19;
 		}
 
-		if(keys & KEY_A) {
+		if(keys & KEY_B) {
 			running = false;
 		}
-		if(keys & KEY_B) {
+		if(keys & KEY_A) {
 			running = false;
 		}
 	}
@@ -246,6 +248,176 @@ void menuItems() {
 	cursor->isHidden = true;
 	oamUpdate(&oamSub);
 }
+
+/******************
+ * EQUIPMENT
+ ******************/
+
+void menuEquip() {
+	clrSubScreen();
+	drawBox(0,0,11,2);	// party member 1
+	drawBox(11,0,10,2);	// party member 2
+	drawBox(21,0,11,2);	// party member 3
+	drawBox(0,2,16,22);	// equiped weapons
+	drawBox(16,2,16,22);	// unequipped weapons
+	if(party.member[0].active)
+		putString(1,0,32,24,D_NONE,party.member[0].name);
+	if(party.member[1].active)
+		putString(12,0,32,24,D_NONE,party.member[1].name);
+	if(party.member[2].active)
+		putString(22,0,32,24,D_NONE,party.member[2].name);
+
+	SpriteEntry *cursor;
+	cursor = initSprite(0, (u8 *)cursorTiles, cursorTilesLen);
+	cursor->isHidden = false;
+	cursor->y = 4;
+
+	int cursorX[3] = {4,11*8+4,21*8+4};
+	int selPlayer = 0;
+	int animation = 0;
+	bool running = true;
+	while(running) {
+		delay(1);
+		cursor->x = cursorX[selPlayer]+((animation++ & 0b10000)>>4);
+		oamUpdate(&oamSub);
+
+		scanKeys();
+		if(keysDown()& KEY_RIGHT && selPlayer < 2 && party.member[selPlayer+1].active) {
+			selPlayer++;
+		}
+		if(keysDown()& KEY_LEFT && selPlayer > 0) {
+			selPlayer--;
+		}
+		if(keysDown()&KEY_B)
+			running = false;
+		if(keysDown()&KEY_A) {
+			viewEquip(selPlayer);
+		}
+	}
+	// turn off cursor
+	cursor->isHidden = true;
+	oamUpdate(&oamSub);
+}
+
+void viewEquip(int pId) {
+	char *weapon_txt, *armor_txt;
+	weapon_txt = weapon_list[party.member[pId].wId].name;
+	armor_txt = armor_list[party.member[pId].aId].name;
+	putString(0,2,32,24,D_NONE,menu_equip_BL,weapon_txt,armor_txt);
+
+	MenuChoice cursCoords[2] = {{4,3*8+4},{4,6*8+4}};
+
+	SpriteEntry *cursor;
+	cursor = initSprite(1, (u8 *)cursorTiles, cursorTilesLen);
+	cursor->isHidden = false;
+
+	bool running = true;
+	int selection = 0;
+	int animation = 0;
+	while(running) {
+		delay(1);
+		cursor->x = cursCoords[selection].x+((animation++ & 0b10000)>>4);
+		cursor->y = cursCoords[selection].y;
+		oamUpdate(&oamSub);
+
+		drawEquip(0,pId,selection);
+
+		scanKeys();
+		if(keysDown()& KEY_DOWN && selection < 1) {
+			selection++;
+		}
+		if(keysDown()& KEY_UP && selection > 0) {
+			selection--;
+		}
+		if(keysDown()&KEY_B)
+			running = false;
+		if(keysDown()&KEY_A) {
+			chooseEquip(pId,selection);
+			delText(0,2,15,24);
+			weapon_txt = weapon_list[party.member[pId].wId].name;
+			armor_txt = armor_list[party.member[pId].aId].name;
+			putString(0,2,32,24,D_NONE,menu_equip_BL,weapon_txt,armor_txt);
+		}
+	}
+	delText(0,2,32,20);
+	// turn off cursor
+	cursor->isHidden = true;
+	oamUpdate(&oamSub);
+}
+
+void chooseEquip(int pId, int eType) {
+	SpriteEntry *cursor;
+	cursor = initSprite(2, (u8 *)cursorTiles, cursorTilesLen);
+	cursor->isHidden = false;
+
+	bool running = true;
+	int selection = 0;
+	int offset = 0;
+	int animation = 0;
+	while(running) {
+		delay(1);
+		cursor->x = 16*8 + 4+((animation++ & 0b10000)>>4);
+		cursor->y = (selection-offset)*8 + 2*8 + 4;
+		oamUpdate(&oamSub);
+
+		drawEquip(0,pId,eType);
+
+		scanKeys();
+		int keys = keysDownRepeat();
+		if(keys& KEY_DOWN && selection < 19) {
+			selection++;
+		}
+		if(keys& KEY_UP && selection > 0) {
+			selection--;
+		}
+		if(keysDown()&KEY_B)
+			running = false;
+		if(keysDown()&KEY_A) {
+			if(eType == 0) {
+				// swap weapons
+				int curWeapon = party.member[pId].wId;
+				int newWeapon = party.weapons[selection+offset];
+				if(party.weapons[selection+offset] == 0)
+					newWeapon = 0;
+				party.weapons[selection+offset] = curWeapon;
+				party.member[pId].wId = newWeapon;
+			} else {
+				// swap armor
+				int curArmor = party.member[pId].aId;
+				int newArmor = party.armor[selection+offset];
+				if(party.armor[selection+offset] == 0)
+					newArmor = 0;
+				party.armor[selection+offset] = curArmor;
+				party.member[pId].aId = newArmor;
+			}
+			running = false;
+		}
+	}
+	// turn off cursor
+	cursor->isHidden = true;
+	oamUpdate(&oamSub);
+}
+
+void drawEquip(int offset, int pId, int eType) {
+	// NOTE: We can use pId to check if the player can use that kind of weapon/armor
+	delText(16,2,16,22);
+	char *empty = "---";
+	char *name;
+	int i;
+	for(i = 0; i < 20; i++) {
+		name = empty;
+		if(eType == 0) {
+			if(party.weapons[i+offset] > 0)
+				name = weapon_list[party.weapons[i+offset]].name;
+		} else {
+			if(party.armor[i+offset] > 0)
+				name = armor_list[party.armor[i+offset]].name;
+		}
+		putString(17,i+2,32,24,D_NONE,name);
+			
+	}
+}
+
 
 /*****************
  * STATS

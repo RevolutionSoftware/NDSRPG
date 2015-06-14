@@ -9,4 +9,5 @@ typedef struct {
 #define I_WEAPON	2
 
 int findItemPos(int id);
-bool receiveItem(int itemId, int amt);
+bool receiveItem(int itemType, int itemId, int amt);
+int countEquip(int itemType, int itemId);

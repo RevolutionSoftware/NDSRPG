@@ -49,9 +49,12 @@ char *store_items_txt = "Money:\n%d\n\nYou have:\n%d";
 char store_1_hello[] = "What can I do for ya?";
 char store_1_goodbye[] = "That's all you wanted?";
 int store_1_items[]	= {	A_LEG_ARMOR,
+						W_DAGGER,
+						W_SWORD,
+						A_TSHIRT,
 						I_BANANA,
 						I_OATMEAL,
 						I_TENT,
 						I_FLOWER};
 
-Store store_list[] = {{store_1_hello,store_1_goodbye,store_1_items,5}};
+Store store_list[] = {{store_1_hello,store_1_goodbye,store_1_items,8}};

@@ -544,10 +544,16 @@ void buyItem(int storeId, int selected) {
 	int itemPrice = 0;
 	int itemType = store_list[storeId].items[(selected)*2];
 	int itemId = store_list[storeId].items[(selected)*2+1];
-	int itemPos = findItemPos(itemId);
 	int curAmt = 0;
-	if(itemPos != -1)
-		curAmt = party.inventory[itemPos].amt;
+	int max = 99;
+	if(itemType == I_ITEM) {
+		int itemPos = findItemPos(itemId);
+		if(itemPos != -1)
+			curAmt = party.inventory[itemPos].amt;
+	} else {
+		curAmt = countEquip(itemType,-1);
+		max = 20;
+	}
 	switch(itemType) {
 		case 0:		// item
 			itemPrice = item_list[itemId].cost;
@@ -569,7 +575,7 @@ void buyItem(int storeId, int selected) {
 		scanKeys();
 		int keys = keysDownRepeat();
 
-		if(keys & KEY_RIGHT && amt < 99-curAmt && party.gold >= (amt+1)*itemPrice)
+		if(keys & KEY_RIGHT && amt < max-curAmt && party.gold >= (amt+1)*itemPrice)
 			amt++;
 		if(keys & KEY_LEFT && amt > 0)
 			amt--;
@@ -579,7 +585,7 @@ void buyItem(int storeId, int selected) {
 			if(amt > 0) {
 				int choice = drawMenu(0, 20, 32, 3, yes_or_no, 0);
 				if(choice == 0) {
-					if(receiveItem(itemId,amt))
+					if(receiveItem(itemType,itemId,amt))
 						party.gold -= amt*itemPrice;
 					else
 						drawTextBox(0,0,32,24,D_NONE,"ERROR!");
@@ -632,11 +638,15 @@ void drawStore(int storeId, int start, int selected) {
 		// if this is the currently selected item, update the extra menu sections
 		if(i+start == selected) {
 			putString(0,20,31,3,D_NONE,itemDesc);
-			int pos = findItemPos(itemId);
-			int amt = 0;
-			if(pos >= 0)
-				amt = party.inventory[pos].amt;
-			putString(18,0,32,24,D_NONE,store_items_txt,party.gold,amt);
+
+			int curAmt = 0;
+			if(itemType == I_ITEM) {
+				int itemPos = findItemPos(itemId);
+				if(itemPos != -1)
+					curAmt = party.inventory[itemPos].amt;
+			} else
+				curAmt = countEquip(itemType,itemId);
+			putString(18,0,32,24,D_NONE,store_items_txt,party.gold,curAmt);
 		}
 
 	}

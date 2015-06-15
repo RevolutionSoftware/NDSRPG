@@ -1,8 +1,14 @@
 #include <nds.h>
 #include "items.h"
 #include "player.h"
+#include "text.h"
+#include "utilities.h"
+
+// sprites
+#include "cursor.h"
 
 extern Party party;
+extern Item item_list[];
 
 int findItemPos(int id) {
 	int j;
@@ -59,6 +65,16 @@ bool receiveItem(int itemType, int itemId, int amt) {
 
 }
 
+/***********************
+ * COUNT EQUIPMENT
+ * ---------------
+ * counts how many of a certain weapon/armor you have
+ * Input:
+ * -item's type (armor or weapon)
+ * -item's id
+ * Output:
+ * -number of that item in player's inventory
+ ***********************/
 int countEquip(int itemType, int itemId) {
 	int i;
 	int count=0;
@@ -72,4 +88,30 @@ int countEquip(int itemType, int itemId) {
 				count++;
 	}
 	return count;
+}
+
+
+/**********************
+ * USE ITEM
+ * --------
+ * Let's player use an item from their inventory
+ **********************/
+void useItem(int itemPos, int pId) {
+	int itemId = party.inventory[itemPos].id;
+	switch(itemId) {
+		case I_BANANA:	// heals 10 hp for one player
+			if(addHP(pId,10))
+				party.inventory[itemPos].amt--;
+			break;
+		case I_OATMEAL:	// heals 20 hp for one player
+			if(addHP(pId,20))
+				party.inventory[itemPos].amt--;
+			break;
+		case I_TENT:	// heals all hp for all players
+			if(addHP(0,9999) && addHP(1,9999) && addHP(2,9999))
+				party.inventory[itemPos].amt--;
+			break;
+		case I_FLOWER:	// i dunno what this does yet
+			break;
+	}
 }

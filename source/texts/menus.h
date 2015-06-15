@@ -6,6 +6,9 @@ char *menu_Y	=	"\1Items\n"
 					"\1Save\n"
 					"\1Exit";
 
+// Items menu texts
+char *menu_item_player_info	= "%s:\n HP: %d/%d\nState: ";
+
 // Equipment menu
 char *menu_equip_BL	=	"Weapon:\n %s\n\nArmor:\n %s";
 

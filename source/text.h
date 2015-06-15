@@ -21,7 +21,7 @@
 #define S_AID "\x09"
 #define S_STATE "\x0A"
 
-#define STAT(stat) "\2" stat
+#define MOVEX(x) "\2" "x"
 
 
 typedef enum {

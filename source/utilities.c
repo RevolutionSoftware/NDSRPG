@@ -38,10 +38,13 @@ int waitKey() {
 	// first release the keys
 	releaseKeys();
 
-	int keys = keysCurrent();
+	scanKeys();
+
+	int keys = keysDown();
 	
 	while((keys & 0b111111111111) == 0) {
-		keys = keysCurrent();
+		scanKeys();
+		keys = keysDown();
 		delay(1);
 	}
 	return keys;

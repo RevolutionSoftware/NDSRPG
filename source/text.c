@@ -59,7 +59,7 @@ void putString(int x, int y, int w, int h, e_speed flag, const char *text, ...) 
 	for (i = 0; i < text_length; i++) {
 		// check if text goes beyond bottom of the textbox
 		if(y == text_top+h) {
-			// load little blinky thingy
+			// load little blinky thingy telling you there's more text to read
 			SpriteEntry *blinky;
 			blinky = initSprite(0, (u8 *)cursorTiles+64, cursorTilesLen);
 			blinky->isHidden = false;
@@ -109,9 +109,14 @@ void putString(int x, int y, int w, int h, e_speed flag, const char *text, ...) 
 						break;
 				}
 				break;
+			case '\2':					// change x position
+				x = *text++;
+				i++;
+				break;
 			case ' ':
 			case '\1':					// \1 is the menu option character
-				x++;					// shift over one character for the space
+				putChar(&x,y,flag,' '-' ');
+//				x++;					// shift over one character for the space
 				wordWrap(&x, &y, right_edge, left_edge, text);
 				break;
 			default:
@@ -189,7 +194,7 @@ void drawBoxType(int x, int y, int w, int h, int type) {
 	*box_map = BR+type;	
 }
 
-#define ORIG_PALETTE_VAL 0x461D
+#define ORIG_PALETTE_VAL 0x665D
 
 void drawBoxes(Box boxes[], int numBoxes, int selected) {
 	int x,y,w,h,type,i;
@@ -198,11 +203,12 @@ void drawBoxes(Box boxes[], int numBoxes, int selected) {
 		y = boxes[i].y;
 		w = boxes[i].w;
 		h = boxes[i].h;
-		if(i == selected) {
+		if(i == selected || selected == 255) {
+			BG_PALETTE_SUB[3] = ORIG_PALETTE_VAL - (boxes[i].counter/20)*(1<<5);
 			type = 1;
 			if(boxes[i].counter%2 == 0) {
 				boxes[i].counter += 2;
-					if(boxes[i].counter == 100)
+					if(boxes[i].counter == 180)
 						boxes[i].counter--;
 			} else {
 				boxes[i].counter -= 2;
@@ -217,7 +223,6 @@ void drawBoxes(Box boxes[], int numBoxes, int selected) {
 		drawBoxType(x,y,w,h,type);
 	}
 
-	BG_PALETTE_SUB[3] = ORIG_PALETTE_VAL - (boxes[selected].counter/12)*(1<<5);
 	
 }
 

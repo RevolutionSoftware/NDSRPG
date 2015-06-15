@@ -118,6 +118,9 @@ extern char *menu_options;
 extern char *menu_save;
 extern char *yes_or_no;
 
+// item menu texts
+extern char *menu_item_player_info;
+
 // equipment texts
 extern char *menu_equip_BL;
 
@@ -192,29 +195,7 @@ void menuMain() {
  * ITEMS MENU
  ************************/
 void menuItems() {
-	clrSubScreen();
-	drawBox(0,0,16,20);	// main item box
-	drawBox(16,0,16,20);	// main item box
-	drawBox(0,20,32,4);	// item description box
-
-	// display your items
-	int i;
-	for(i = 0; i < MAX_ITEMS; i++) {
-		int itemId,itemAmt;
-		char *iName;
-		int y = i < 19 ? i : i-19;
-		int x = i < 19 ? 1 : 17;
-		itemId = party.inventory[i].id;
-		itemAmt = party.inventory[i].amt;
-		iName = item_list[itemId].name;
-		if(itemAmt > 0) {
-			putString(x,y,32,24,D_NONE,iName);
-			putString(x+9,y,32,24,D_NONE,"*%d",itemAmt);
-		} else {
-			putString(x,y,32,24,D_NONE,"---");
-		}
-	}
-
+	dispItems();
 	// load cursor
 	SpriteEntry *cursor;
 	cursor = initSprite(0, (u8 *)cursorTiles, cursorTilesLen);
@@ -262,16 +243,122 @@ void menuItems() {
 			selection -= 19;
 		}
 
-		if(keys & KEY_B) {
+		if(keysDown() & KEY_B) {
 			running = false;
 		}
-		if(keys & KEY_A) {
-			running = false;
+		if(keysDown() & KEY_A) {
+			cursor->isHidden = true;
+			oamUpdate(&oamSub);
+			int player = 0;
+			while(player >= 0) {
+				player = selectCharacter(selection,player);
+				if(player != -1)
+					useItem(selection,player);
+			}
+			dispItems();
+			cursor->isHidden = false;
 		}
 	}
 	// turn off cursor
 	cursor->isHidden = true;
 	oamUpdate(&oamSub);
+}
+
+void dispItems() {
+	clrSubScreen();
+	drawBox(0,0,16,20);	// main item box
+	drawBox(16,0,16,20);	// main item box
+	drawBox(0,20,32,4);	// item description box
+
+	// display your items
+	int i;
+	for(i = 0; i < MAX_ITEMS; i++) {
+		int itemId,itemAmt;
+		char *iName;
+		int y = i < 19 ? i : i-19;
+		int x = i < 19 ? 1 : 17;
+		itemId = party.inventory[i].id;
+		itemAmt = party.inventory[i].amt;
+		iName = item_list[itemId].name;
+		if(itemAmt > 0) {
+			putString(x,y,32,24,D_NONE,iName);
+			putString(x+9,y,32,24,D_NONE,"*%d",itemAmt);
+		} else {
+			putString(x,y,32,24,D_NONE,"---");
+		}
+	}
+}
+
+/**********************
+ * SELECT CHARACTER
+ * ----------------
+ * Player chooses which character to give the item to
+ **********************/
+int selectCharacter(int itemPos, int selected) {
+	if(party.inventory[itemPos].amt == 0)
+		return -1;
+	clrSubScreen();
+
+	int itemId = party.inventory[itemPos].id;
+	if(item_list[itemId].type == IT_OTHER)
+		return -2;		// this isn't an item to be used on a character (eg. repel, escape rope, ...)
+	int i;
+	Box boxes[3];
+	for(i = 0; i < 3; i++) {
+		boxes[i].x = 0;
+		boxes[i].y = i*8;
+		boxes[i].w = 32;
+		boxes[i].h = 8;
+	}
+	drawBoxes(boxes, 3, -1);
+
+	for(i = 0; i < party.numMembers; i++) {
+		char *name;
+		int hp_max,hp;
+		name = party.member[i].name;
+		hp = party.member[i].hp;
+		hp_max = party.member[i].hp_max;
+		putString(1,i*8,32,8,D_NONE,menu_item_player_info,name,hp,hp_max);
+	}
+
+	// load cursor
+	SpriteEntry *cursor;
+	cursor = initSprite(0, (u8 *)cursorTiles, cursorTilesLen);
+	cursor->isHidden = false;
+
+	int itemType = item_list[itemId].type;
+	bool running = true;
+	keysSetRepeat(16,5);
+	int animation = 0;	// cursor animation
+	while(running) {
+		cursor->x = 3+((animation++ & 0b10000)>>4);
+		if(itemType == IT_ALL)
+			cursor->y = 8*8*(animation%party.numMembers)+4+3*8;
+		else
+			cursor->y = 8*8*selected+4+3*8;
+		oamUpdate(&oamSub);
+
+		delay(1);
+		if(itemType == IT_ALL)
+			drawBoxes(boxes, party.numMembers, 255);
+		else
+			drawBoxes(boxes, party.numMembers, selected);
+		scanKeys();
+		int keys = keysDownRepeat();
+		if (keys & KEY_DOWN && selected < party.numMembers-1) {
+			selected++;
+		}
+		if (keys & KEY_UP && selected > 0) {
+			selected--;
+		}
+		if (keysDown() & KEY_B) {
+			selected = -1;
+			running = false;
+		}
+		if (keysDown() & KEY_A)
+			running = false;
+	}
+	return selected;
 }
 
 /******************
@@ -435,7 +522,6 @@ void drawEquip(int offset, int pId, int eType) {
 				name = armor_list[party.armor[i+offset]].name;
 		}
 		putString(17,i,32,24,D_NONE,name);
-			
 	}
 }
 

@@ -36,9 +36,11 @@ typedef struct {
 	int weapons[20];
 	int armor[20];
 	int gold;
+	int numMembers;
 }Party;
 
 Party party;
 
+bool addHP(int pId, int amt);
 
 #endif // PLAYER_H

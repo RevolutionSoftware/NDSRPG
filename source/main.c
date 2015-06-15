@@ -66,19 +66,21 @@ int main(void) {
 	loadNPCs(0);
 	
 // setup party
-	party.member[0] = (Character) {"add",1,0,60,60,10,19,13,0,1};
+	party.member[0] = (Character) {"add",1,0,260,60,10,19,13,0,1};
 	party.member[1] = (Character) {"chickendude",1,0,50,40,16,15,3,1,0};
-	party.member[2] = (Character) {"NanoWar",90,92860,1650,1645,168,135,83,3,2};
+	party.member[2] = (Character) {"NanoWar",90,92860,1650,1045,168,135,83,3,2};
 
 	party.member[0].active = true;
 	party.member[1].active = true;
 	party.member[2].active = true;
 	
+	party.numMembers = 3;
+	
 	party.gold = 133337;
 
 	for(i = 0; i < 4; i++) {
 		party.inventory[i].id	= i;
-		party.inventory[i].amt	= randNum(2);
+		party.inventory[i].amt	= randNum(2)+2;
 	}
 
 	for(i = 4; i < MAX_ITEMS; i++) {
@@ -149,8 +151,8 @@ int main(void) {
 	REG_BG0HOFS_SUB = -4;
 	REG_BG0VOFS_SUB = -4;
 
-	menuNewGame();
-	clrSubScreen();
+//	menuNewGame();
+//	clrSubScreen();
 
 	while(1) {
 		// Check for keys now
@@ -164,11 +166,8 @@ int main(void) {
 			menuMain();
 		}
 
-		movePlayer();
-
-		// draw tilemap
+		movePlayer();		// handle key input to move player around
 		drawMap();
-
 		animatePC(&player);
 		moveNPCs();
 		animateNPCs();

@@ -59,8 +59,10 @@ int drawMenu(int x, int y, int w, int h, char *text, int defValue) {
 	int selOption = defValue;
 	int animation = 0;
 	keysSetRepeat(16,5);
+
 	// Handle key presses
 	while(running) {
+
 		animation++;
 		cursor->x = choices[selOption].x*8+3+((animation & 0b10000)>>4);
 		cursor->y = choices[selOption].y*8+4;
@@ -124,6 +126,29 @@ extern char *menu_equip_BL;
 extern char *store_items_txt;
 extern char *store_buy_txt;
 extern char *store_items_txt;
+
+/***************
+ * NEW GAME MENU
+ ***************/
+void menuNewGame() {
+
+	putString(2,5,32,24,D_NONE,"New Game");
+	putString(2,11,32,24,D_NONE,"Continue");
+
+	bool running=true;
+	Box boxes[2] = {{1,4,11,4},{1,10,11,4}};
+	int selected = 0;
+	while(running) {
+		delay(1);
+		drawBoxes(boxes,2,selected);
+		scanKeys();
+		if(keysDown()&KEY_A)
+			running = false;
+		if(keysDown()&KEY_DOWN || keysDown()&KEY_UP)
+			selected = (selected+1)%2;
+
+	}
+}
 
 /***************
  * MAIN MENU
@@ -421,21 +446,23 @@ void drawEquip(int offset, int pId, int eType) {
 void menuStats() {
 	drawBox(0,0,32,24);
 	char *name, *weapon, *armor;
-	int hp,hp_max,str,def,agi;
+	int hp,hp_max,weapon_str,str,armor_def,def,agi;
 	int i = 0;
 	bool running = true;
 	while(running) {
 		name = party.member[i].name;
 		hp = party.member[i].hp;
 		hp_max = party.member[i].hp_max;
+		weapon_str = weapon_list[party.member[i].wId].atk;
 		str = party.member[i].str;
+		armor_def = armor_list[party.member[i].aId].def;
 		def = party.member[i].def;
 		agi = party.member[i].agi;
 		weapon = weapon_list[party.member[i].wId].name;
 		armor = armor_list[party.member[i].aId].name;
 
 		// display the stats screen with the stats inserted into it
-		putString(0,0,31,23,D_NONE,menu_stats,name,hp,hp_max,str,def,agi,weapon,armor);
+		putString(0,0,31,23,D_NONE,menu_stats,name,hp,hp_max,str+weapon_str,str,armor_def+def,def,agi,weapon,armor);
 
 		int keys = waitKey();
 

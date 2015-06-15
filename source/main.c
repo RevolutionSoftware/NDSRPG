@@ -149,6 +149,9 @@ int main(void) {
 	REG_BG0HOFS_SUB = -4;
 	REG_BG0VOFS_SUB = -4;
 
+	menuNewGame();
+	clrSubScreen();
+
 	while(1) {
 		// Check for keys now
 		scanKeys();
@@ -175,8 +178,8 @@ int main(void) {
 		oamMain.oamMemory[0].attribute[1] = ATTR1_SIZE_32 | OBJ_X(player.x-Level.x);
 //		oamSet(&oamMain, 0, player.x-Level.x, player.y-Level.y, 1, 0, SpriteSize_32x32, SpriteColorFormat_256Color,
 //			   player.sprite_gfx_mem, -1, false, false, false, false, false);
-		swiWaitForVBlank();
 		oamUpdate(&oamMain);
+		swiWaitForVBlank();
 	}
 
 	return 0;

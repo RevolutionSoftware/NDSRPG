@@ -1,6 +1,9 @@
 #ifndef TEXT_H
 #define TEXT_H
 
+#include "menus.h"
+
+
 /**************
  * \1 marks a menu choie
  * \2 displays character stats
@@ -39,8 +42,12 @@ void putStat(int *x, int *y, e_speed flag, int statId);
 void putInt(int *x, int y, e_speed flag, int num);
 void putChar(int *x, int y, e_speed flag, char c);
 int stringHeight(const char *text);
+// boxes
 void drawBox(int x, int y, int w, int h);
+void drawBoxType(int x, int y, int w, int h, int type);
+void drawBoxes(Box boxes[], int numBoxes, int selected);
 void drawTextBox(int x, int y, int w, int h, e_speed flag, const char *text);
+// erasing stuff
 void delText(int x, int y, int w, int h);
 void delTextBox(int x, int y, int w, int h);
 void clrSubScreen();

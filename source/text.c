@@ -7,6 +7,7 @@
 #include "weapons.h"
 #include "armor.h"
 #include "objects.h"
+#include "menus.h"
 
 // sprites
 #include "cursor.h"
@@ -20,6 +21,8 @@
 #define L	BR+1		// left
 #define R	L+1			//
 #define C	R+1			// center
+
+#define BOX_TILES 9
 
 /*************
  * Performs word wrapping
@@ -148,37 +151,74 @@ int stringHeight(const char *text) {
 
 void drawBox(int x, int y, int w, int h) {
 	delTextBox(x,y,w,h);
+	drawBoxType(x,y,w,h,0);
+}
+
+void drawBoxType(int x, int y, int w, int h, int type) {
+	type *= BOX_TILES;		// if the box is highlighted, use the other tile set
 	u16 *box_map = BG_MAP_RAM_SUB(1);
 	int i,j;
 	box_map += 32*y+x;		// map width is 32
 	// draw top row
-	*box_map = TL;
+	*box_map = TL+type;
 	for(i = 0; i < w-2; i++) {
 		box_map++;
-		*box_map = T;
+		*box_map = T+type;
 	}
 	box_map++;
-	*box_map = TR;
+	*box_map = TR+type;
 	box_map += 33-w;		// move to next line
 	// draw middle area
 	for(j = 0; j < h-2; j++) {
-		*box_map = L;
+		*box_map = L+type;
 		for(i = 0; i < w-2; i++) {
 			box_map++;
-			*box_map = C;
+			*box_map = C+type;
 		}
 		box_map++;
-		*box_map = R;
+		*box_map = R+type;
 		box_map += 33-w;	// move to next line
 	}
 	// draw bottom row
-	*box_map = BL;
+	*box_map = BL+type;
 	for(i = 0; i < w-2; i++) {
 		box_map++;
-		*box_map = B;
+		*box_map = B+type;
 	}
 	box_map++;
-	*box_map = BR;
+	*box_map = BR+type;	
+}
+
+#define ORIG_PALETTE_VAL 0x461D
+
+void drawBoxes(Box boxes[], int numBoxes, int selected) {
+	int x,y,w,h,type,i;
+	for(i = 0; i < numBoxes; i++) {
+		x = boxes[i].x;
+		y = boxes[i].y;
+		w = boxes[i].w;
+		h = boxes[i].h;
+		if(i == selected) {
+			type = 1;
+			if(boxes[i].counter%2 == 0) {
+				boxes[i].counter += 2;
+					if(boxes[i].counter == 100)
+						boxes[i].counter--;
+			} else {
+				boxes[i].counter -= 2;
+					if(boxes[i].counter < 0)
+						boxes[i].counter++;
+			}
+			
+		} else {
+			type = 0;
+			boxes[i].counter = 0;
+		}
+		drawBoxType(x,y,w,h,type);
+	}
+
+	BG_PALETTE_SUB[3] = ORIG_PALETTE_VAL - (boxes[selected].counter/12)*(1<<5);
+	
 }
 
 // draws a box with text inside it

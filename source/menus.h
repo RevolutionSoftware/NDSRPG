@@ -6,6 +6,14 @@
 typedef struct {
     int x;
     int y;
+    int w;
+    int h;
+    int counter;
+} Box;
+
+typedef struct {
+    int x;
+    int y;
 } MenuChoice;
 
 typedef struct {
@@ -17,6 +25,7 @@ typedef struct {
 
 
 int drawMenu(int x, int y, int w, int h, char *text, int defValue);
+void menuNewGame();
 void menuMain();
 void menuItems();
 void menuEquip();

@@ -12,8 +12,8 @@ char *menu_equip_BL	=	"Weapon:\n %s\n\nArmor:\n %s";
 // Stats menu
 char *menu_stats	=	"Character: %s\n"
 						"HP: %d/%d\n"
-						"ATK: %d\n"
-						"DEF: %d\n"
+						"ATK: %d (%d)\n"
+						"DEF: %d (%d)\n"
 						"AGI: %d\n\n"
 						"Weapon: %s\n"
 						"Armor: %s\n"

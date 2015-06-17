@@ -1,3 +1,4 @@
+from PIL import Image
 import pygame
 import tkinter as tk
 import tkinter.filedialog, tkinter.messagebox
@@ -59,11 +60,11 @@ class StatusBar:
 		self.counter = counter
 
 class Tile:
-	def __init__(self,filename,passable=True,bg=0):
-		self.sprite = pygame.image.load(directory+filename).convert()
-		self.filename = filename
+	def __init__(self,sprite,passable=True,bg=0,flag=[0,0,0,0]):
+		self.sprite = pygame.image.fromstring(sprite,(16,16),'RGB').convert()
 		self.passable=passable
 		self.bg=bg
+		self.flag = flag
 
 class Mouse:
 	def __init__(self,spriteL=-1,spriteR=0,x=0,y=0):
@@ -199,11 +200,6 @@ def saveFile():
 				f.write("{} ".format(entry))
 			f.write("{}\n".format(str(map_jump[-1])))
 
-	# save tile data
-	with open(tile_file,"wt") as f:
-		for tile in tiles[:-1]:
-			f.write("{} {} {}\n".format(tile.filename,str(tile.passable),str(tile.bg)))
-
 	if level.filename == '':
 		root = tk.Tk()
 		root.withdraw()
@@ -245,7 +241,7 @@ def exportFile():
 				# export tile data
 				header.write("tile_t {}_tiledata[][2] = {{".format(filename))
 				for t in tiles:
-					header.write("{{{},{}}},\n\t\t".format(str(t.passable).lower(),t.bg))
+					header.write("{{{},{},0b{}{}{}{}}},\n\t\t".format(str(t.passable).lower(),t.bg,t.flag[0],t.flag[1],t.flag[2],t.flag[3]))
 				header.write("};\n\n")
 				# export object data
 				header.write("s16 {}_obj_data[] = {{".format(filename))
@@ -272,7 +268,11 @@ def exportFile():
 		maps.write("};\n\n")
 		
 		# map changes
-		maps.write("u16 map_change_list[{}][{}] = {{".format(len(map_jumps),len(map_jumps[0])-1))	# first value is the hint
+		if len(map_jumps) > 0:
+			mj_len = len(map_jumps)-1
+		else:
+			mj_len = 0
+		maps.write("u16 map_change_list[{}][{}] = {{".format(len(map_jumps),mj_len))	# first value is the hint
 		for map_jump in map_jumps:
 			maps.write("{{{},{},{},{},{}}},\n\t\t".format(map_jump[MJ_MAP],map_jump[MJ_MAPX],map_jump[MJ_MAPY],map_jump[MJ_PLAYERX],map_jump[MJ_PLAYERY]))
 		maps.write("};")
@@ -499,12 +499,19 @@ INPUT = 1
 def editTile(tileid):
 	tile = tiles[tileid]
 	TILE_PROPERTIES = (("Passable?",tile.passable,TF),
-					("Map BGX:",tile.bg,INPUT))
+					("Map BGX:",tile.bg,INPUT),
+					("U",tile.flag[0],TF),
+					("R",tile.flag[1],TF),
+					("D",tile.flag[2],TF),
+					("L",tile.flag[3],TF))
 
 	def updateTile():
 		# save values and quit
-		tile.passable = str(var[0].get() == 1)
+		tile.passable = var[0].get() == 1
 		tile.bg = var[1].get()
+		tile.flag = [var[i].get()==1 for i in range(2,6)]
+		print([var[i].get() for i in range(6)])
+		print(tile.flag)
 		root.destroy()
 
 	def cancelTile(event=''):
@@ -520,13 +527,13 @@ def editTile(tileid):
 	mainframe.columnconfigure(1,pad=1)
 	# grid: rows
 	for i in range(len(TILE_PROPERTIES)+1):
-		mainframe.rowconfigure(i,pad=1)
+		mainframe.rowconfigure(i,pad=0)
 	item_input = list()
 	var = list()
 	i=0
 	for item in TILE_PROPERTIES:
 		item_label = tk.Label(mainframe,text=item[0])
-		item_label.grid(column=0,row=i)
+		item_label.grid(column=0,row=i,stick=tk.E)
 		# True or False box
 		if item[2] == TF:
 			var.append(tk.IntVar())
@@ -678,8 +685,10 @@ BUTTONS = [	('New',0,0,50,16,newFile),
 ### Main ################################################
 def main():
 	global level,level_list
-	d = 'maps/'
-	os.makedirs(d,exist_ok=True)
+	dirs = ('maps/','export/')
+	for d in dirs:
+		os.makedirs(d,exist_ok=True)
+	d = dirs[0]
 	for f in sorted(os.listdir(d)):
 		if f.endswith('.map'):
 			level_list.append(Level(filename=d+f))
@@ -861,21 +870,17 @@ if os.path.isfile(mj_file):
 # load tiles
 tiles = []
 directory = os.path.dirname(os.path.realpath(sys.argv[0]))+'/'
-tile_file = 'tiles.lst'
+im = Image.open(directory+'tiles/tiles.png','r')
+width,height = im.size
 NUMTILES = 0
-if os.path.isfile(tile_file):
-	with open(tile_file,'r') as f:
-		for line in f:
-			line = line.rstrip('\n')
-			filename,passable,bg = line.split(' ')
-			passable = passable in "True"
-			tiles.append(Tile(filename,passable,int(bg)))
-			NUMTILES += 1
-else:
-	for filename in sorted(os.listdir(directory+'tiles/')):
-		tiles.append(Tile('tiles/'+filename))
-		NUMTILES += 1
-tiles.append(Tile('cursor.bmp'))
+for i in range(1,height//16):
+	tile = im.crop((0,i*16,width,i*16+16))
+	data = tile.tostring()
+	tiles.append(Tile(data))
+	NUMTILES += 1
+
+im = Image.open(directory+'cursor.bmp','r')
+tiles.append(Tile(im.tostring()))
 
 mouse = Mouse()
 level = Level()

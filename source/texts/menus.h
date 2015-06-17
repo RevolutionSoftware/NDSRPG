@@ -1,3 +1,5 @@
+#include "../text.h"
+
 // main menu when pressing Y
 char *menu_Y	=	"\1Items\n"
 					"\1Equipment\n"
@@ -10,10 +12,14 @@ char *menu_Y	=	"\1Items\n"
 char *menu_item_player_info	= "%s:\n HP: %d/%d\nState: ";
 
 // Equipment menu
-char *menu_equip_BL	=	"Weapon:\n %s\n\nArmor:\n %s";
+char *menu_equip_BL	=	"Weapon:\n"
+						NEWX"\x8" "%s\n"
+						"\n"
+						"Armor:\n"
+						NEWX"\x8" "%s";
 
 // Stats menu
-char *menu_stats	=	"Character: %s\n"
+const char *menu_stats	=	"Character: %s\n"
 						"HP: %d/%d\n"
 						"ATK: %d (%d)\n"
 						"DEF: %d (%d)\n"
@@ -23,13 +29,13 @@ char *menu_stats	=	"Character: %s\n"
 						"State: ";
 
 // Options menu
-char *menu_options	=	"What do you need options for? Our game is perfect as-is!";
+const char *menu_options	=	"What do you need options for? Our game is perfect as-is!";
 
 // Save menu
-char *menu_save		=	"There is no saving you! MwahAHahHAH!";
+const char *menu_save		=	"There is no saving you! MwahAHahHAH!";
 
 // Confirmation dialog
-char *yes_or_no		=	"Are you sure?\n\1Yes \1No";
+const char *yes_or_no		=	"Are you sure?\n\1Yes \1No";
 
 // Stores
 char *store_buy_txt	= "How many?\n< %d >\n\nPrice:\n%d";
@@ -53,6 +59,26 @@ char store_1_hello[] = "What can I do for ya?";
 char store_1_goodbye[] = "That's all you wanted?";
 int store_1_items[]	= {	A_LEG_ARMOR,
 						W_DAGGER,
+						W_DAGGER,
+						W_SWORD,
+						W_DAGGER,
+						W_SWORD,
+						A_TSHIRT,
+						I_BANANA,
+						I_OATMEAL,
+						I_TENT,
+						W_SWORD,
+						W_DAGGER,
+						W_SWORD,
+						W_DAGGER,
+						W_SWORD,
+						A_TSHIRT,
+						I_BANANA,
+						I_OATMEAL,
+						I_OATMEAL,
+						I_TENT,
+						I_TENT,
+						W_DAGGER,
 						W_SWORD,
 						A_TSHIRT,
 						I_BANANA,
@@ -60,4 +86,4 @@ int store_1_items[]	= {	A_LEG_ARMOR,
 						I_TENT,
 						I_FLOWER};
 
-Store store_list[] = {{store_1_hello,store_1_goodbye,store_1_items,8}};
+Store store_list[] = {{store_1_hello,store_1_goodbye,store_1_items,28}};

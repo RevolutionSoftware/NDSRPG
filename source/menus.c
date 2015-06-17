@@ -14,6 +14,7 @@
 
 #define ITEMS_ON_SCREEN 19
 
+extern u8 LETTER_WIDTH[];
 
 /******************
  * drawMenu: Takes parameters and draws the menu with text inside
@@ -35,18 +36,19 @@ int drawMenu(int x, int y, int w, int h, char *text, int defValue) {
 	while(text[i] != '\0') {
 		switch(text[i]) {
 			case '\n':						// at \n reset x and move to next y value
-				tx = x-1;
+				tx = x;
 				ty++;
 				break;
 			case '\1':
 				choices[numChoices].x = tx;	// load x and y values of menu option
 				choices[numChoices].y = ty;
+				tx += 8;
 				numChoices++;
 				break;
 			default:
+				tx += LETTER_WIDTH[text[i]-' '];
 				break;
 		}
-		tx++;
 		i++;
 	}
 
@@ -64,7 +66,7 @@ int drawMenu(int x, int y, int w, int h, char *text, int defValue) {
 	while(running) {
 
 		animation++;
-		cursor->x = choices[selOption].x*8+3+((animation & 0b10000)>>4);
+		cursor->x = choices[selOption].x+3+((animation & 0b10000)>>4);
 		cursor->y = choices[selOption].y*8+4;
 		oamUpdate(&oamSub);
 
@@ -135,11 +137,11 @@ extern char *store_items_txt;
  ***************/
 void menuNewGame() {
 
-	putString(2,5,32,24,D_NONE,"New Game");
-	putString(2,11,32,24,D_NONE,"Continue");
+	putString(16,40,240,24,D_NONE,"New Game");
+	putString(18,88,240,24,D_NONE,"Continue");
 
 	bool running=true;
-	Box boxes[2] = {{1,4,11,4},{1,10,11,4}};
+	Box boxes[2] = {{1,4,8,4},{1,10,8,4}};
 	int selected = 0;
 	while(running) {
 		delay(1);
@@ -163,7 +165,7 @@ void menuMain() {
 	int selected=0;
 	while(selected != -1) {
 		clrSubScreen();
-		selected = drawMenu(0,0,11,6,menu_Y,selected);		// draw the main menu
+		selected = drawMenu(0,0,8,6,menu_Y,selected);		// draw the main menu
 		clrSubScreen();
 		switch(selected) {							// check which option was chosen
 			case 0:
@@ -216,8 +218,8 @@ void menuItems() {
 		char *iDesc = "---";
 		if(party.inventory[selection].amt > 0)
 			iDesc = item_list[itemId].description;
-		delText(0,20,31,3);
-		putString(0,20,31,3,D_NONE,iDesc);
+		delText(0,160,240,24);
+		putString(0,160,248,3,D_NONE,iDesc);
 
 		delay(1);	// don't waste toooo much battery power!
 
@@ -252,10 +254,11 @@ void menuItems() {
 			int player = 0;
 			while(player >= 0) {
 				player = selectCharacter(selection,player);
-				if(player != -1)
+				if(player != -3)
 					useItem(selection,player);
 			}
-			dispItems();
+			if(player > -2)
+				dispItems();
 			cursor->isHidden = false;
 		}
 	}
@@ -276,15 +279,15 @@ void dispItems() {
 		int itemId,itemAmt;
 		char *iName;
 		int y = i < 19 ? i : i-19;
-		int x = i < 19 ? 1 : 17;
+		int x = i < 19 ? 0+8 : 16*8+8;
 		itemId = party.inventory[i].id;
 		itemAmt = party.inventory[i].amt;
 		iName = item_list[itemId].name;
 		if(itemAmt > 0) {
-			putString(x,y,32,24,D_NONE,iName);
-			putString(x+9,y,32,24,D_NONE,"*%d",itemAmt);
+			putString(x,y*8,32,24,D_NONE,iName);
+			putString(x+71,y*8,32,24,D_NONE,"*%d",itemAmt);
 		} else {
-			putString(x,y,32,24,D_NONE,"---");
+			putString(x,y*8,32,24,D_NONE,"---");
 		}
 	}
 }
@@ -296,12 +299,14 @@ void dispItems() {
  **********************/
 int selectCharacter(int itemPos, int selected) {
 	if(party.inventory[itemPos].amt == 0)
-		return -1;
-	clrSubScreen();
+		return -3;
 
 	int itemId = party.inventory[itemPos].id;
 	if(item_list[itemId].type == IT_OTHER)
 		return -2;		// this isn't an item to be used on a character (eg. repel, escape rope, ...)
+
+	clrSubScreen();
+
 	int i;
 	Box boxes[3];
 	for(i = 0; i < 3; i++) {
@@ -318,7 +323,7 @@ int selectCharacter(int itemPos, int selected) {
 		name = party.member[i].name;
 		hp = party.member[i].hp;
 		hp_max = party.member[i].hp_max;
-		putString(1,i*8,32,8,D_NONE,menu_item_player_info,name,hp,hp_max);
+		putString(8,i*8*8,240,8,D_NONE,menu_item_player_info,name,hp,hp_max);
 	}
 
 	// load cursor
@@ -333,12 +338,12 @@ int selectCharacter(int itemPos, int selected) {
 	while(running) {
 		cursor->x = 3+((animation++ & 0b10000)>>4);
 		if(itemType == IT_ALL)
-			cursor->y = 8*8*(animation%party.numMembers)+4+3*8;
+			cursor->y = 8*8*((animation>>1)%party.numMembers)+4+3*8;
 		else
 			cursor->y = 8*8*selected+4+3*8;
 		oamUpdate(&oamSub);
-
 		delay(1);
+
 		if(itemType == IT_ALL)
 			drawBoxes(boxes, party.numMembers, 255);
 		else
@@ -372,7 +377,7 @@ void menuEquip() {
 	drawBox(16,0,16,24);	// unequipped weapons
 	int i;
 	for(i=0;i<3;i++)
-		putString(1,i,32,24,D_NONE,party.member[i].name);
+		putString(8,i*8,248,24,D_NONE,party.member[i].name);
 
 	SpriteEntry *cursor;
 	cursor = initSprite(0, (u8 *)cursorTiles, cursorTilesLen);
@@ -383,7 +388,7 @@ void menuEquip() {
 	bool running = true;
 	while(running) {
 		delay(1);
-		cursor->x = 4+((animation++ & 0b10000)>>4);
+		cursor->x = 3+((animation++ & 0b10000)>>4);
 		cursor->y = 4+selPlayer*8;
 		oamUpdate(&oamSub);
 
@@ -409,9 +414,9 @@ void viewEquip(int pId) {
 	char *weapon_txt, *armor_txt;
 	weapon_txt = weapon_list[party.member[pId].wId].name;
 	armor_txt = armor_list[party.member[pId].aId].name;
-	putString(0,4,32,24,D_NONE,menu_equip_BL,weapon_txt,armor_txt);
+	putString(0,4*8,31*8,24,D_NONE,menu_equip_BL,weapon_txt,armor_txt);
 
-	MenuChoice cursCoords[2] = {{4,5*8+4},{4,8*8+4}};
+	MenuChoice cursCoords[2] = {{3,5*8+4},{3,8*8+4}};
 
 	SpriteEntry *cursor;
 	cursor = initSprite(1, (u8 *)cursorTiles, cursorTilesLen);
@@ -440,14 +445,14 @@ void viewEquip(int pId) {
 		if(keysDown()&KEY_A) {
 			chooseEquip(pId,selection);
 			// update weapon and armor text since we may have changed equipment
-			delText(0,4,15,24);
+			delText(0,4*8,15*8,23*8);
 			weapon_txt = weapon_list[party.member[pId].wId].name;
 			armor_txt = armor_list[party.member[pId].aId].name;
-			putString(0,4,32,24,D_NONE,menu_equip_BL,weapon_txt,armor_txt);
+			putString(0,32,31*8,23,D_NONE,menu_equip_BL,weapon_txt,armor_txt);
 		}
 	}
-	delText(0,4,15,20);
-	delText(16,0,15,24);
+	delText(0,4*8,15*8,19*8);
+	delText(16*8,0,15*8,23*8);
 	// turn off cursor
 	cursor->isHidden = true;
 	oamUpdate(&oamSub);
@@ -464,7 +469,7 @@ void chooseEquip(int pId, int eType) {
 	int animation = 0;
 	while(running) {
 		delay(1);
-		cursor->x = 16*8 + 4+((animation++ & 0b10000)>>4);
+		cursor->x = 16*8 + 3+((animation++ & 0b10000)>>4);
 		cursor->y = (selection-offset)*8 + 4;
 		oamUpdate(&oamSub);
 
@@ -508,7 +513,7 @@ void chooseEquip(int pId, int eType) {
 
 void drawEquip(int offset, int pId, int eType) {
 	// NOTE: We can use pId to check if the player can use that kind of weapon/armor
-	delText(16,0,16,24);
+	delText(16*8,0,16*8,23*8);
 	char *empty = "---";
 	char *name;
 	int i;
@@ -521,7 +526,7 @@ void drawEquip(int offset, int pId, int eType) {
 			if(party.armor[i+offset] > 0)
 				name = armor_list[party.armor[i+offset]].name;
 		}
-		putString(17,i,32,24,D_NONE,name);
+		putString(17*8,i*8,31*8,24,D_NONE,name);
 	}
 }
 
@@ -548,16 +553,16 @@ void menuStats() {
 		armor = armor_list[party.member[i].aId].name;
 
 		// display the stats screen with the stats inserted into it
-		putString(0,0,31,23,D_NONE,menu_stats,name,hp,hp_max,str+weapon_str,str,armor_def+def,def,agi,weapon,armor);
+		putString(0,0,248,23,D_NONE,menu_stats,name,hp,hp_max,str+weapon_str,str,armor_def+def,def,agi,weapon,armor);
 
 		int keys = waitKey();
 
 		if (keys & KEY_RIGHT && party.member[i+1].active && i < 2) {
-			delText(0,0,31,23);
+			delText(0,0,31*8,23*8);
 			i++;
 		}
 		if (keys & KEY_LEFT && i > 0) {
-			delText(0,0,31,23);
+			delText(0,0,31*8,23*8);
 			i--;
 		}
 		if (keys & KEY_B)
@@ -584,7 +589,6 @@ void menuStore(int id) {
 	cursor = initSprite(1, (u8 *)cursorTiles, cursorTilesLen);
 	cursor->isHidden = false;
 
-
 	int running = true;
 	int selOption = 0;
 	int topOption = 0;
@@ -594,6 +598,8 @@ void menuStore(int id) {
 		itemsOnScreen = numItems;
 	int animation = 0;
 	keysSetRepeat(16,5);
+	// display the store
+	drawStoreItems(id,topOption,selOption);
 	// Handle key presses
 	while(running) {
 		animation++;
@@ -602,28 +608,34 @@ void menuStore(int id) {
 		oamUpdate(&oamSub);
 
 		delay(1);
-		drawStore(id,topOption,selOption);
+		drawItemInfo(id,topOption,selOption);
 
 		scanKeys();
 		int keys = keysDownRepeat();
 
 		if(keys & KEY_DOWN && selOption < numItems - 1) {
 			selOption++;
-			if((selOption > topOption + itemsOnScreen-1) && (topOption + itemsOnScreen < numItems))
+			if((selOption > topOption + itemsOnScreen-1) && (topOption + itemsOnScreen < numItems)) {
 				topOption++;
+				drawStoreItems(id,topOption,selOption);
+			}
 		}
 		else if (keysDown()&KEY_DOWN && selOption == numItems-1) {
 			topOption = 0;
 			selOption = 0;
+			drawStoreItems(id,topOption,selOption);
 		}
 		if(keys & KEY_UP && selOption > 0) {
 			selOption--;
-			if((selOption < topOption) && (topOption > 0))
+			if((selOption < topOption) && (topOption > 0)) {
 				topOption--;
+				drawStoreItems(id,topOption,selOption);
+			}
 		}
 		else if (keysDown()&KEY_UP && selOption == 0) {
 			topOption = numItems-itemsOnScreen;
 			selOption = numItems-1;
+			drawStoreItems(id,topOption,selOption);
 		}
 
 		if(keysDown()&KEY_A) {
@@ -682,8 +694,8 @@ void buyItem(int storeId, int selected) {
 	bool running = true;
 	while(running) {
 		delay(1);
-		delText(18,6,32,24);
-		putString(18,6,32,24,D_NONE,store_buy_txt,amt,amt*itemPrice);
+		delText(144,48,112,14*8);
+		putString(144,48,248,24,D_NONE,store_buy_txt,amt,amt*itemPrice);
 
 		scanKeys();
 		int keys = keysDownRepeat();
@@ -714,11 +726,41 @@ void buyItem(int storeId, int selected) {
 		
 }
 
-void drawStore(int storeId, int start, int selected) {
-	delText(0,0,32,24);
+void drawItemInfo(int storeId, int start, int selected) {
+	int itemType = store_list[storeId].items[selected*2];
+	int itemId = store_list[storeId].items[selected*2+1];
+	char *itemDesc = "";
+	switch(itemType) {
+		case 0:		// item
+			itemDesc = item_list[itemId].description;
+			break;
+		case 1:		// armor
+			itemDesc = armor_list[itemId].description;
+			break;
+		case 2:		// weapon
+			itemDesc = weapon_list[itemId].description;
+			break;
+	}
+	delText(0,160,248,24);
+	putString(0,160,248,3,D_NONE,itemDesc);
+
+	int curAmt = 0;
+	if(itemType == I_ITEM) {
+		int itemPos = findItemPos(itemId);
+		if(itemPos != -1)
+			curAmt = party.inventory[itemPos].amt;
+	} else
+		curAmt = countEquip(itemType,itemId);
+	delText(144,0,100,100);
+	putString(144,0,100,23,D_NONE,store_items_txt,party.gold,curAmt);
+}
+
+void drawStoreItems(int storeId, int start, int selected) {
+	delay(1);
+	delText(0,0,140,154);
 	int i,numItems;
 	numItems = store_list[storeId].numItems;
-	if(numItems + start > ITEMS_ON_SCREEN)
+	if(numItems + start > ITEMS_ON_SCREEN)	// make sure we don't try to draw too many items
 		numItems = ITEMS_ON_SCREEN;
 	for(i = 0; i < numItems; i++) {
 		int itemType = store_list[storeId].items[(i+start)*2];
@@ -744,23 +786,8 @@ void drawStore(int storeId, int start, int selected) {
 				itemPrice = weapon_list[itemId].cost;
 				break;
 		}
-		putString(1,i,32,24,D_NONE,itemName);
-		putString(11,i,32,24,D_NONE,":");
-		putString(17-countDigits(itemPrice),i,32,24,D_NONE,"%d",itemPrice);
-
-		// if this is the currently selected item, update the extra menu sections
-		if(i+start == selected) {
-			putString(0,20,31,3,D_NONE,itemDesc);
-
-			int curAmt = 0;
-			if(itemType == I_ITEM) {
-				int itemPos = findItemPos(itemId);
-				if(itemPos != -1)
-					curAmt = party.inventory[itemPos].amt;
-			} else
-				curAmt = countEquip(itemType,itemId);
-			putString(18,0,32,24,D_NONE,store_items_txt,party.gold,curAmt);
-		}
-
+		putString(8,i*8,256,24,D_NONE,itemName);
+		putString(88,i*8,256,24,D_NONE,":");
+		putString(17*8-intWidth(itemPrice),i*8,256,24,D_NONE,"%d",itemPrice);
 	}
 }

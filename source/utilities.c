@@ -8,15 +8,6 @@ extern Drawable player;
 extern map_t Level;
 extern Party party;
 
-int stringLength(const char *text) {
-	int text_length = 0;
-	while(text[text_length] != '\0') {
-		if(text[text_length] == '\2')
-			text_length++;
-		text_length++;
-	}
-	return text_length;
-}
 
 void delay (u32 sleep_time) {
     u32 i = 0;
@@ -70,14 +61,4 @@ int randNum(int max) {
 	seed =  (seed >> 1) | (bit << 15);
 
 	return seed % max;
-}
-
-int countDigits(int num) {
-	int digits = 1;
-	int i = num / 10;
-	while(i > 0) {
-		i /= 10;
-		digits++;
-	}
-	return digits;
 }

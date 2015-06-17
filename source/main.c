@@ -106,8 +106,8 @@ int main(void) {
 // main character/npcs
 	vramSetBankB(VRAM_B_MAIN_SPRITE_0x06400000);
 // text
-//	vramSetBankC(VRAM_C_SUB_BG);
-	vramSetBankH(VRAM_H_SUB_BG);
+	vramSetBankC(VRAM_C_SUB_BG);
+//	vramSetBankH(VRAM_H_SUB_BG);
 
 	REG_DISPCNT = MODE_0_2D | DISPLAY_SPR_ACTIVE | DISPLAY_SPR_1D | DISPLAY_SPR_1D_SIZE_256 | DISPLAY_BG0_ACTIVE | DISPLAY_BG1_ACTIVE;   // Set mode 0 in 2D mode and enable background 0
 	REG_BG0CNT = REG_BG0CNT_DEFAULT;	// see constants.h
@@ -115,14 +115,18 @@ int main(void) {
 
 // Font stuff for bottom screen
 // Sub screen uses bg1, sub map base 0 and sub tile base 1.
-	REG_DISPCNT_SUB = MODE_0_2D | DISPLAY_SPR_ACTIVE | DISPLAY_SPR_1D | DISPLAY_SPR_1D_SIZE_128 | DISPLAY_BG0_ACTIVE| DISPLAY_BG1_ACTIVE;   // bottom screen, use bg0 and bg1
-	REG_BG0CNT_SUB = BG_PRIORITY_2 | BG_32x32 | BG_COLOR_16 | BG_MAP_BASE(0) | BG_TILE_BASE(1); // text
-	REG_BG1CNT_SUB = BG_PRIORITY_3 | BG_32x32 | BG_COLOR_16 | BG_MAP_BASE(1) | BG_TILE_BASE(1); // textboxes
+	REG_DISPCNT_SUB = MODE_5_2D | DISPLAY_SPR_ACTIVE | DISPLAY_SPR_1D | DISPLAY_SPR_1D_SIZE_128 | DISPLAY_BG0_ACTIVE | DISPLAY_BG2_ACTIVE;   // bottom screen, use bg0 and bg1
+	REG_BG0CNT_SUB = BG_PRIORITY_3 | BG_32x32 | BG_COLOR_256 | BG_MAP_BASE(24) | BG_TILE_BASE(4); // textboxes
 
+	REG_BG2CNT_SUB = BG_PRIORITY_1 | BG_BMP8_256x256;
 
+	REG_BG2PA_SUB = 1 << 8;
+	REG_BG2PB_SUB = 0;
+	REG_BG2PC_SUB = 0;
+	REG_BG2PD_SUB = 1 << 8;
 
 // Copy font data (sprites and palette)
-	dmaCopy(fontTiles, BG_TILE_RAM_SUB(1), fontTilesLen);
+	dmaCopy(fontTiles, BG_TILE_RAM_SUB(4), fontTilesLen);
 	dmaCopy(fontPal, BG_PALETTE_SUB, fontPalLen);
 
 // Sprite data
@@ -148,11 +152,11 @@ int main(void) {
 	REG_BG1VOFS = 0;
 
 	// shift the text a few pixels down and to the right to not collide with the box border
-	REG_BG0HOFS_SUB = -4;
-	REG_BG0VOFS_SUB = -4;
+//	REG_BG0HOFS_SUB = -4;
+//	REG_BG0VOFS_SUB = -4;
 
-//	menuNewGame();
-//	clrSubScreen();
+	menuNewGame();
+	clrSubScreen();
 
 	while(1) {
 		// Check for keys now
@@ -178,6 +182,7 @@ int main(void) {
 //		oamSet(&oamMain, 0, player.x-Level.x, player.y-Level.y, 1, 0, SpriteSize_32x32, SpriteColorFormat_256Color,
 //			   player.sprite_gfx_mem, -1, false, false, false, false, false);
 		oamUpdate(&oamMain);
+
 		swiWaitForVBlank();
 	}
 

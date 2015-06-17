@@ -41,6 +41,7 @@ void menuStats();
 
 void menuStore(int id);
 void buyItem(int storeId, int selected);
-void drawStore(int storeId,int start,int selected);
+void drawItemInfo(int storeId,int start,int selected);
+void drawStoreItems(int storeId,int start,int selected);
 
 #endif // MENUS_H

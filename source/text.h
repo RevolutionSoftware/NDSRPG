@@ -21,7 +21,7 @@
 #define S_AID "\x09"
 #define S_STATE "\x0A"
 
-#define MOVEX(x) "\2" "x"
+#define NEWX "\2"
 
 
 typedef enum {
@@ -36,12 +36,14 @@ typedef struct {
     int layer;
 } coord_t;
 
-//void putString(int x, int y, int w, const char *text, e_speed flag);
 void putString(int x, int y, int w, int h, e_speed flag, const char *text, ...);
+int stringLength(const char *text);
+int stringWidth(const char *text);
 void putStat(int *x, int *y, e_speed flag, int statId);
-void putInt(int *x, int y, e_speed flag, int num);
-void putChar(int *x, int y, e_speed flag, char c);
+int putInt(int x, int y, e_speed flag, int num);
+int putChar(int x, int y, e_speed flag, char c);
 int stringHeight(const char *text);
+int intWidth(int num);
 // boxes
 void drawBox(int x, int y, int w, int h);
 void drawBoxType(int x, int y, int w, int h, int type);

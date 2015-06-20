@@ -8,7 +8,7 @@
 
 // Includes NDS
 #include <nds.h>	// Main NDS equates
-#include <stdio.h>	// For console stuff
+//#include <stdio.h>	// For console stuff
 
 #include "aux_macros.h"
 #include "tilemap.h"
@@ -23,13 +23,14 @@
 #include "armor.h"
 #include "items.h"
 #include "npcs.h"
+#include "battle.h"
 
 // sprite data
 #include "font.h"
 #include "tiles.h"
 #include "character.h"
 #include "cursor.h"
-
+#include "battles.h"
 
 #include "maps/maps.h"		// map data
 #include "texts/texts.h"	// text data
@@ -154,6 +155,8 @@ int main(void) {
 	// shift the text a few pixels down and to the right to not collide with the box border
 //	REG_BG0HOFS_SUB = -4;
 //	REG_BG0VOFS_SUB = -4;
+
+	startBattle();
 
 	menuNewGame();
 	clrSubScreen();

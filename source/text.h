@@ -9,17 +9,6 @@
  * \2 displays character stats
  ***/
 
-#define S_NAME "\x00"
-#define S_LVL "\x01"
-#define S_EXP "\x02"
-#define S_HP_MAX "\x03"
-#define S_HP "\x04"
-#define S_STR "\x05"
-#define S_DEF "\x06"
-#define S_AGI "\x07"
-#define S_WID "\x08"
-#define S_AID "\x09"
-#define S_STATE "\x0A"
 
 #define NEWX "\2"
 

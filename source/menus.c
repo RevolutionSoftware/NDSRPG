@@ -52,7 +52,7 @@ int drawMenu(int x, int y, int w, int h, char *text, int defValue) {
 		i++;
 	}
 
-    drawTextBox(x, y, w, h, D_NONE, text);
+    drawTextBox(x, y, w, h, 0, D_NONE, text);
 
 	// turn on cursor
 	cursor->isHidden = false;
@@ -178,11 +178,11 @@ void menuMain() {
 				menuStats();
 				break;
 			case 3:
-				drawTextBox(0,0,32,23,D_NONE,menu_options);
+				drawTextBox(0,0,32,23,0,D_NONE,menu_options);
 				waitAB();
 				break;
 			case 4:
-				drawTextBox(0,0,32,23,D_NONE,menu_save);
+				drawTextBox(0,0,32,23,0,D_NONE,menu_save);
 				waitAB();
 				break;
 			default:
@@ -218,7 +218,7 @@ void menuItems() {
 		char *iDesc = "---";
 		if(party.inventory[selection].amt > 0)
 			iDesc = item_list[itemId].description;
-		delText(0,160,240,24);
+		delText(0,160,248,24);
 		putString(0,160,248,3,D_NONE,iDesc);
 
 		delay(1);	// don't waste toooo much battery power!
@@ -575,7 +575,7 @@ void menuStats() {
  *********************/
 void menuStore(int id) {
 	// display the text!
-	drawTextBox(0,0,32,2,D_SLOW,store_list[id].hello);
+	drawTextBox(0,0,32,2,0,D_SLOW,store_list[id].hello);
 	waitAB();				// wait for player to press [A] or [B]
 	clrSubScreen();
 
@@ -653,7 +653,7 @@ void menuStore(int id) {
 	oamUpdate(&oamSub);
 
 	// display the text!
-	drawTextBox(0,20,32,3,D_SLOW,store_list[id].goodbye);
+	drawTextBox(0,20,32,3,0,D_SLOW,store_list[id].goodbye);
 	waitAB();				// wait for player to press [A] or [B]
 	clrSubScreen();
 
@@ -713,7 +713,7 @@ void buyItem(int storeId, int selected) {
 					if(receiveItem(itemType,itemId,amt))
 						party.gold -= amt*itemPrice;
 					else
-						drawTextBox(0,0,32,24,D_NONE,"ERROR!");
+						drawTextBox(0,0,32,24,0,D_NONE,"ERROR!");
 				}
 			}
 			running = false;

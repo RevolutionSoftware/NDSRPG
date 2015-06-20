@@ -12,7 +12,7 @@
 // sprites
 #include "cursor.h"
 
-#define TL	'~'-' '+1	// top left (this is the tile id)
+#define TL	'~'+7-' '+1	// top left (this is the tile id)
 #define T	TL+1		// top
 #define TR	T+1			// top right
 #define BL	TR+1		// bottom left
@@ -35,7 +35,13 @@ u8 LETTER_WIDTH[] = {2,2,4,6,6,8,6,2,3,3,4,6,3,5,2,6,
 //					` a b c d e f g h i j k l m n o
 					3,5,5,6,5,5,5,5,5,2,4,5,3,6,5,5,
 //					p q r s t u v w x y z { | } ~
-					5,5,5,5,5,5,5,6,5,5,5,4,2,4,5};
+					5,5,5,5,5,5,5,6,5,5,5,4,2,4,5,
+// battle box		BL BC BR U L R D
+					4, 2, 4, 8,8,8,8};
+
+int letterWidth(int letter) {
+	return LETTER_WIDTH[letter-' '];
+}
 
 /*************
  * Performs word wrapping
@@ -208,6 +214,32 @@ int putChar(int x, int y, e_speed flag, char c) {
 	return x + LETTER_WIDTH[spriteId];		// advance x
 }
 
+int putCharMask(int x, int y, char c) {
+	int spriteId = c-' ';
+	u16 *vram = BG_MAP_RAM_SUB(0);
+	u8 *sprite = (u8 *)fontTiles + (spriteId)*64;
+
+	int i,j;
+	for(i=0;i<8;i++) {
+		for(j=0;j<4;j++) {
+			u16 sprite1 = *sprite++;
+			u16 sprite2 = *sprite++;
+			if(x%2 == 0) {
+				if(sprite1 != 0)
+					vram[(y+i)*128+x/2+j] = (vram[(y+i)*128+x/2+j]&0xFF00) + sprite1;
+				if(sprite2 != 0)
+					vram[(y+i)*128+x/2+j] = (vram[(y+i)*128+x/2+j]&0x00FF) + (sprite2<<8);
+			} else {
+			//	if(sprite1 != 0)
+//					vram[(y+i)*128+x/2+j] = (vram[(y+i)*128+x/2+j]&0xFF00) + sprite1;
+		//		if(sprite2 != 0)
+	//				vram[(y+i)*128+x/2+j+1] = (vram[(y+i)*128+x/2+j+1]&0x00FF) + (sprite2<<8);
+			}
+		}
+	}
+	return x + LETTER_WIDTH[spriteId];		// advance x
+}
+
 int stringHeight(const char *text) {
 	int i,h;
 	i = 0;
@@ -222,12 +254,12 @@ int stringHeight(const char *text) {
 
 void drawBox(int x, int y, int w, int h) {
 	delTextBox(x,y,w,h);
-	drawBoxType(x,y,w,h,0);
+	drawBoxType(x,y,w,h,0,0);
 }
 
-void drawBoxType(int x, int y, int w, int h, int type) {
+void drawBoxType(int x, int y, int w, int h, int type, int bg) {
 	type *= BOX_TILES;		// if the box is highlighted, use the other tile set
-	u16 *box_map = BG_MAP_RAM_SUB(24);
+	u16 *box_map = BG_MAP_RAM_SUB(24+bg);
 	int i,j;
 	box_map += 32*y+x;		// map width is 32
 	// draw top row
@@ -286,16 +318,19 @@ void drawBoxes(Box boxes[], int numBoxes, int selected) {
 			type = 0;
 			boxes[i].counter = 0;
 		}
-		drawBoxType(x,y,w,h,type);
+		drawBoxType(x,y,w,h,type,0);
 	}
 
 	
 }
 
 // draws a box with text inside it
-void drawTextBox(int x, int y, int w, int h, e_speed flag, const char *text) {
-    drawBox(x,y,w,h+1);
-    putString(x*8,y*8,(w-1)*8,h,flag,text);
+void drawTextBox(int x, int y, int w, int h, int type, e_speed flag, const char *text) {
+    drawBoxType(x,y,w,h+1,type,0);
+	x*=8;
+    if(type == 2)
+		x+=4;
+    putString(x,y*8,(w-1)*8,h,flag,text);
 }
 
 void delText(int x, int y, int w, int h) {
@@ -317,17 +352,21 @@ void delText(int x, int y, int w, int h) {
 
 void delTextBox(int x, int y, int w, int h) {
 	delText(x*8,y*8,(w-1)*8,(h-1)*8);
-    u16 *box_map = BG_MAP_RAM_SUB(24)+32*y+x;
-    int i,j;
+	u16 *box_map_bg0 = BG_MAP_RAM_SUB(24)+32*y+x;
+	u16 *box_map_bg1 = BG_MAP_RAM_SUB(25)+32*y+x;
+	int i,j;
 
-    // erase box by overwriting it with 0s
-    for(j = 0; j < h; j++) {
-        for(i = 0; i < w; i++) {
-            *box_map = 0;
-            box_map++;
-        }
-        box_map += 32-w;	// move to next line
-    }
+	// erase box by overwriting it with 0s
+	for(j = 0; j < h; j++) {
+		for(i = 0; i < w; i++) {
+			*box_map_bg0 = 0;
+			*box_map_bg1 = 0;
+			box_map_bg0++;
+			box_map_bg1++;
+		}
+		box_map_bg0 += 32-w;	// move to next line
+		box_map_bg1 += 32-w;	// move to next line
+	}
 }
 
 void clrSubScreen() {

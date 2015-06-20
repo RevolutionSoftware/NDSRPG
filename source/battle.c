@@ -2,6 +2,7 @@
 #include "battle.h"
 #include "utilities.h"
 #include "player.h"
+#include "text.h"
 
 // equates
 #include "constants.h"
@@ -10,6 +11,18 @@
 #include "battlePlayer.h"
 //#include "battleEnemy.h"
 //#include "battle8x8.h"
+
+// box that actions are put into
+#define BL	'~'+1
+#define BC	BL+1
+#define BR	BC+1
+// arrows that fill the box
+#define AU	BR+1
+#define AL	AU+1
+#define AR	AL+1
+#define AD	AR+1
+
+
 
 void startBattle() {
 	int i;
@@ -24,26 +37,66 @@ void startBattle() {
 		b_player[i].x = 180;
 		b_player[i].y = i*35+20;
 	}
+
 	bool running = true;
 	while(running) {
 		delay(1);
+		for(i=0; i<party.numMembers; i++) {
+			int action = battleMenu(i);
+			switch(action) {
+				case 0:			// [up] / fight!
+					if(!inputAttack(i))
+						i--;
+					break;
+				case 1:
+					break;
+				case 2:
+					break;
+				case 3:
+					running = false;
+					i = party.numMembers;
+				}
+		}
+		// now load enemy attacks
+		// then order by speed
+		// then attack!
+	}
+	for(i=0;i<10;i++)
+		oamMain.oamMemory[i].isHidden = true;
+	clrSubScreen();
+}
+
+int battleMenu(int pId) {
+	putString(40,5,255,1,D_NONE,party.member[pId].name);
+	putString(13*8+5,3*8,100,1,D_NONE,"Fight");
+	putString(9*8+7,4*8,100,1,D_NONE,"Skill");
+	putString(17*8+7,4*8,100,1,D_NONE,"Item");
+	putString(13*8+8,5*8,100,1,D_NONE,"Flee");
+
+	int selection = -1;
+	while(selection < 0) {
+		delay(1);
+		scanKeys();
+		int keys = keysHeld();
+
+		drawBoxType(13,3,5,1,2+((keys&KEY_UP)>0),0);
+		drawBoxType(9,4,5,1,2+((keys&KEY_LEFT)>0),1);
+		drawBoxType(17,4,5,1,2+((keys&KEY_RIGHT)>0),1);
+		drawBoxType(13,5,5,1,2+((keys&KEY_DOWN)>0),0);
+
+
 		drawPlayers();
 		drawEnemies();
-		scanKeys();
-		if(keysDown()&(KEY_A|KEY_B))
-			running = false;
-		if(keysDown()&KEY_DOWN)
-			b_player[0].state = A_KICK_L;
-		else if(keysDown()&KEY_UP)
-			b_player[0].state = A_KICK_H;
-		else if(keysDown()&KEY_RIGHT)
-			b_player[0].state = A_PUNCH_R;
-		else if(keysDown()&KEY_LEFT)
-			b_player[0].state = A_PUNCH_L;
-		else
-			b_player[0].state = A_STAND;
-
+		if(keysUp()&KEY_UP)
+			selection++;
+		else if(keysUp()&KEY_LEFT)
+			selection = 1;
+		else if(keysUp()&KEY_RIGHT)
+			selection = 2;
+		else if(keysUp()&KEY_DOWN)
+			selection = 3;
 	}
+	return selection;
 }
 
 void loadEnemies() {
@@ -102,4 +155,59 @@ void drawEnemies() {
 		oamMain.oamMemory[i+3].isHidden = false;
 	}
 	oamUpdate(&oamMain);
+}
+
+int inputAttack(int pId) {
+	clrSubScreen();
+	putString(40,5,255,1,D_NONE,party.member[pId].name);
+	int atkBarLen = 41;
+	drawAttackBar(atkBarLen);
+
+	int atkBarPos = 0;
+	bool running = true;
+	while(running) {
+		delay(1);
+		drawPlayers();	// keep animating players and enemies
+		drawEnemies();
+		scanKeys();
+		int keys = keysDown();
+
+		if(atkBarPos+letterWidth(AU) < atkBarLen) {
+			if(keys&KEY_UP) {
+				atkBarPos = putCharMask(18+atkBarPos,104,AU)-18;
+			}
+			else if(keys&KEY_LEFT) {
+				atkBarPos = putCharMask(18+atkBarPos,104,AL)-18;
+			}
+			else if(keys&KEY_RIGHT) {
+				atkBarPos = putCharMask(18+atkBarPos,104,AR)-18;
+			}
+			else if(keys&KEY_DOWN) {
+				atkBarPos = putCharMask(18+atkBarPos,104,AD)-18;
+			}
+		}
+		if(keys&KEY_B) {
+			if(atkBarPos == 0)
+				running = false;
+			drawAttackBar(atkBarLen);
+			atkBarPos = 0;
+		}
+		else if(keys&KEY_A)
+			if(atkBarPos > 0)
+				running = false;
+	}
+	clrSubScreen();
+	return atkBarPos;
+}
+
+void drawAttackBar(int length) {
+	char atkBar[70] = {0};
+	int i;
+	atkBar[0] = BL;
+	for(i=1;i<=length/2;i++) {
+		atkBar[i] = BC;
+	}
+	atkBar[i] = BR;
+	delText(10,100,length,8);
+	putString(10,100,255,1,D_NONE,atkBar);
 }

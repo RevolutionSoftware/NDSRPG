@@ -13,6 +13,7 @@ typedef struct {
 	int frame;
 	int x;
 	int y;
+	int attackList[15];
 }BattlePlayer;
 
 typedef struct {
@@ -34,6 +35,10 @@ BattlePlayer b_player[3];
 Enemy enemy;
 
 void startBattle();
+int battleMenu(int pId);
 void loadEnemies();
 void drawPlayers();
 void drawEnemies();
+
+int inputAttack(int pId);
+void drawAttackBar(int length);

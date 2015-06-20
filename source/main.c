@@ -115,8 +115,9 @@ int main(void) {
 
 // Font stuff for bottom screen
 // Sub screen uses bg1, sub map base 0 and sub tile base 1.
-	REG_DISPCNT_SUB = MODE_5_2D | DISPLAY_SPR_ACTIVE | DISPLAY_SPR_1D | DISPLAY_SPR_1D_SIZE_128 | DISPLAY_BG0_ACTIVE | DISPLAY_BG2_ACTIVE;   // bottom screen, use bg0 and bg1
+	REG_DISPCNT_SUB = MODE_5_2D | DISPLAY_SPR_ACTIVE | DISPLAY_SPR_1D | DISPLAY_SPR_1D_SIZE_128 | DISPLAY_BG0_ACTIVE | DISPLAY_BG1_ACTIVE | DISPLAY_BG2_ACTIVE;   // bottom screen, use bg0 and bg1
 	REG_BG0CNT_SUB = BG_PRIORITY_3 | BG_32x32 | BG_COLOR_256 | BG_MAP_BASE(24) | BG_TILE_BASE(4); // textboxes
+	REG_BG1CNT_SUB = BG_PRIORITY_3 | BG_32x32 | BG_COLOR_256 | BG_MAP_BASE(25) | BG_TILE_BASE(4); // textboxes
 
 	REG_BG2CNT_SUB = BG_PRIORITY_1 | BG_BMP8_256x256;
 
@@ -138,7 +139,7 @@ int main(void) {
 	oamUpdate(&oamMain);
 
 	initPC(&player, (u8 *)characterTiles);
-	dmaCopy(characterPal, SPRITE_PALETTE, 512);
+//	dmaCopy(characterPal, SPRITE_PALETTE, 512);		// moved after startBattle() call for now
 
 	// load menu cursor palette
 	dmaCopy(cursorPal, SPRITE_PALETTE_SUB, cursorPalLen);	// copy palette for sub engine (should only have one for the entire engine)
@@ -156,6 +157,9 @@ int main(void) {
 //	REG_BG0VOFS_SUB = -4;
 
 	startBattle();
+
+	dmaCopy(characterPal, SPRITE_PALETTE, 512);
+
 
 	menuNewGame();
 	clrSubScreen();

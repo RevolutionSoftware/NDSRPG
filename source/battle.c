@@ -57,13 +57,15 @@ void startBattle() {
 					i = party.numMembers;
 				}
 		}
-		// now load enemy attacks
+		if(running) {
+			// now load enemy attacks
 		
-		// then order by speed
+			// then order by speed
 		
-		// then attack!
-		for(i=0; i<party.numMembers; i++) {
-			playerAttack(i);
+			// then attack!
+			for(i=0; i<party.numMembers; i++) {
+				playerAttack(i);
+			}
 		}
 	}
 	for(i=0;i<10;i++)
@@ -177,6 +179,7 @@ int inputAttack(int pId) {
 	// receive attack bar input
 	int atkBarPos = 0;
 	bool running = true;
+	int numAtk = 0;
 	while(running) {
 		delay(1);
 		drawPlayers();	// keep animating players and enemies
@@ -184,22 +187,21 @@ int inputAttack(int pId) {
 		scanKeys();
 		int keys = keysDown();
 
-		int numAtk = 0;
 		if(atkBarPos+letterWidth(AU) < atkBarLen) {
 			if(keys&KEY_UP) {
-				b_player[pId].attackList[numAtk] = 0;
+				b_player[pId].attackList[numAtk++] = A_KICK_H;
 				atkBarPos = putCharMask(18+atkBarPos,104,AU)-18;
 			}
 			else if(keys&KEY_LEFT) {
-				b_player[pId].attackList[numAtk] = 1;
+				b_player[pId].attackList[numAtk++] = A_PUNCH_L;
 				atkBarPos = putCharMask(18+atkBarPos,104,AL)-18;
 			}
 			else if(keys&KEY_RIGHT) {
-				b_player[pId].attackList[numAtk] = 2;
+				b_player[pId].attackList[numAtk++] = A_PUNCH_R;
 				atkBarPos = putCharMask(18+atkBarPos,104,AR)-18;
 			}
 			else if(keys&KEY_DOWN) {
-				b_player[pId].attackList[numAtk] = 3;
+				b_player[pId].attackList[numAtk++] = A_KICK_L;
 				atkBarPos = putCharMask(18+atkBarPos,104,AD)-18;
 			}
 		}
@@ -238,22 +240,41 @@ void playerAttack(int pId) {
 	int target = b_player[pId].target;
 	b_player[pId].state = A_WALK;	// put player in walking state
 	target = 1;
+	int startX = b_player[pId].x;
+	int startY = b_player[pId].y;
 	int tX = enemy.list[target].x;
 	int tY = enemy.list[target].y*10;
 	int pX = b_player[pId].x;
 	int pY = b_player[pId].y*10;
 	int dY;
-	while(b_player[pId].x > tX+32) {
+	// make player run over to the target enemy
+	while(b_player[pId].x > tX+30) {
 		delay(1);
 		drawPlayers();
 		b_player[pId].frame++;		// make player run "faster"
 		drawEnemies();
-		dY = (tY - pY)/(pX-(tX+32));
-		if(dY != 0)
-			pY += dY*2;
+		dY = (tY - pY)/(pX-(tX+30));
+		pY += dY*2;
 		pX-=2;
 		b_player[pId].y = pY/10;
 		b_player[pId].x = pX;
 	}
+	bool running = true;
+	int atkNum = -1;
+	b_player[pId].frame = -2;
+	// run through list of attacks
+	while(running) {
+		delay(1);
+		drawPlayers();
+		b_player[pId].frame++;
+		drawEnemies();
+		if(b_player[pId].frame%(ANIMATION_SPEED*4*2) == 0) {
+			b_player[pId].state = b_player[pId].attackList[++atkNum];
+			if(b_player[pId].attackList[atkNum] == -1)
+				running = false;
+		}
+	}
 	b_player[pId].state = A_STAND;
+	b_player[pId].x = startX;		// restore player to orig position
+	b_player[pId].y = startY;
 }

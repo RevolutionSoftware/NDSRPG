@@ -44,22 +44,27 @@ void startBattle() {
 		for(i=0; i<party.numMembers; i++) {
 			int action = battleMenu(i);
 			switch(action) {
-				case 0:			// [up] / fight!
-					if(!inputAttack(i))
+				case 0:					// [up] / fight!
+					if(!inputAttack(i))	// will return 0 if user cancelled attack
 						i--;
 					break;
 				case 1:
 					break;
 				case 2:
 					break;
-				case 3:
+				case 3:					// [down] / flee!
 					running = false;
 					i = party.numMembers;
 				}
 		}
 		// now load enemy attacks
+		
 		// then order by speed
+		
 		// then attack!
+		for(i=0; i<party.numMembers; i++) {
+			playerAttack(i);
+		}
 	}
 	for(i=0;i<10;i++)
 		oamMain.oamMemory[i].isHidden = true;
@@ -158,11 +163,18 @@ void drawEnemies() {
 }
 
 int inputAttack(int pId) {
-	clrSubScreen();
+	int atkBarLen = party.member[pId].atkBarLen;
+	int i;
+	// clear the attack list
+	for(i = 0; i <= atkBarLen/7; i++) {
+		b_player[pId].attackList[i] = -1;
+	}
+	clrSubScreen();		// clear the screen, display player's name, and draw empty attack bar
 	putString(40,5,255,1,D_NONE,party.member[pId].name);
-	int atkBarLen = 41;
+	
 	drawAttackBar(atkBarLen);
 
+	// receive attack bar input
 	int atkBarPos = 0;
 	bool running = true;
 	while(running) {
@@ -172,25 +184,35 @@ int inputAttack(int pId) {
 		scanKeys();
 		int keys = keysDown();
 
+		int numAtk = 0;
 		if(atkBarPos+letterWidth(AU) < atkBarLen) {
 			if(keys&KEY_UP) {
+				b_player[pId].attackList[numAtk] = 0;
 				atkBarPos = putCharMask(18+atkBarPos,104,AU)-18;
 			}
 			else if(keys&KEY_LEFT) {
+				b_player[pId].attackList[numAtk] = 1;
 				atkBarPos = putCharMask(18+atkBarPos,104,AL)-18;
 			}
 			else if(keys&KEY_RIGHT) {
+				b_player[pId].attackList[numAtk] = 2;
 				atkBarPos = putCharMask(18+atkBarPos,104,AR)-18;
 			}
 			else if(keys&KEY_DOWN) {
+				b_player[pId].attackList[numAtk] = 3;
 				atkBarPos = putCharMask(18+atkBarPos,104,AD)-18;
 			}
 		}
+		// if B was pressed, remove attacks/return to previous screen if no attacks were input
 		if(keys&KEY_B) {
-			if(atkBarPos == 0)
+			if(atkBarPos == 0)			// if no attacks, return
 				running = false;
-			drawAttackBar(atkBarLen);
-			atkBarPos = 0;
+			drawAttackBar(atkBarLen);	// redraw the attack bar (erasing arrow sprites)
+			atkBarPos = 0;				// set the sprite pointer to start of attack bar
+			numAtk = 0;					// restart the attack counter
+			// remove attacks from the attack list
+			for(i = 0; i < numAtk; i++)
+				b_player[pId].attackList[i] = -1;
 		}
 		else if(keys&KEY_A)
 			if(atkBarPos > 0)
@@ -210,4 +232,28 @@ void drawAttackBar(int length) {
 	atkBar[i] = BR;
 	delText(10,100,length,8);
 	putString(10,100,255,1,D_NONE,atkBar);
+}
+
+void playerAttack(int pId) {
+	int target = b_player[pId].target;
+	b_player[pId].state = A_WALK;	// put player in walking state
+	target = 1;
+	int tX = enemy.list[target].x;
+	int tY = enemy.list[target].y*10;
+	int pX = b_player[pId].x;
+	int pY = b_player[pId].y*10;
+	int dY;
+	while(b_player[pId].x > tX+32) {
+		delay(1);
+		drawPlayers();
+		b_player[pId].frame++;		// make player run "faster"
+		drawEnemies();
+		dY = (tY - pY)/(pX-(tX+32));
+		if(dY != 0)
+			pY += dY*2;
+		pX-=2;
+		b_player[pId].y = pY/10;
+		b_player[pId].x = pX;
+	}
+	b_player[pId].state = A_STAND;
 }

@@ -66,9 +66,9 @@ int main(void) {
 	loadNPCs(0);
 	
 // setup party
-	party.member[0] = (Character) {"add",1,0,260,60,10,19,13,0,1};
-	party.member[1] = (Character) {"chickendude",1,0,50,40,16,15,3,1,0};
-	party.member[2] = (Character) {"NanoWar",90,92860,1650,1045,168,135,83,3,2};
+	party.member[0] = (Character) {"add",1,0,260,60,10,19,13,0,1,40};
+	party.member[1] = (Character) {"chickendude",1,0,50,40,16,15,3,1,0,35};
+	party.member[2] = (Character) {"NanoWar",90,92860,1650,1045,168,135,83,3,2,70};
 
 	party.member[0].active = true;
 	party.member[1].active = true;

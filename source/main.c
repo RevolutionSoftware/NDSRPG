@@ -30,7 +30,6 @@
 #include "tiles.h"
 #include "character.h"
 #include "cursor.h"
-#include "battles.h"
 
 #include "maps/maps.h"		// map data
 #include "texts/texts.h"	// text data

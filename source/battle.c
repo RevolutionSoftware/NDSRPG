@@ -237,6 +237,7 @@ void drawAttackBar(int length) {
 }
 
 void playerAttack(int pId) {
+	Damage atkDmg[20] = {0,0};
 	int target = b_player[pId].target;
 	b_player[pId].state = A_WALK;	// put player in walking state
 	target = 1;
@@ -273,8 +274,15 @@ void playerAttack(int pId) {
 			if(b_player[pId].attackList[atkNum] == -1)
 				running = false;
 		}
+		if(b_player[pId].state == b_player[pId].attackList[atkNum] && (b_player[pId].frame/(ANIMATION_SPEED*4))%2 == 1) {
+			enemy.list[target].state = 1;
+			enemy.list[target].frame = ANIMATION_SPEED*3;
+			atkDmg[atkNum].dmg = getAtk(pId);
+			atkDmg[atkNum].counter = 16;
+		}
 	}
 	b_player[pId].state = A_STAND;
 	b_player[pId].x = startX;		// restore player to orig position
 	b_player[pId].y = startY;
+	enemy.list[target].state = 0;
 }

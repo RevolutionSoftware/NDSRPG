@@ -43,5 +43,6 @@ typedef struct {
 Party party;
 
 bool addHP(int pId, int amt);
+int getAtk(int pId);
 
 #endif // PLAYER_H

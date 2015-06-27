@@ -653,6 +653,7 @@ void menuStore(int id) {
 	oamUpdate(&oamSub);
 
 	// display the text!
+	delText(0,160,256,24);
 	drawTextBox(0,20,32,3,0,D_SLOW,store_list[id].goodbye);
 	waitAB();				// wait for player to press [A] or [B]
 	clrSubScreen();
@@ -767,22 +768,18 @@ void drawStoreItems(int storeId, int start, int selected) {
 		int itemId = store_list[storeId].items[(i+start)*2+1];
 		int itemPrice = 0;
 		char *itemName = "";
-		char *itemDesc = "";
 
 		switch(itemType) {
 			case 0:		// item
 				itemName = item_list[itemId].name;
-				itemDesc = item_list[itemId].description;
 				itemPrice = item_list[itemId].cost;
 				break;
 			case 1:		// armor
 				itemName = armor_list[itemId].name;
-				itemDesc = armor_list[itemId].description;
 				itemPrice = armor_list[itemId].cost;
 				break;
 			case 2:		// weapon
 				itemName = weapon_list[itemId].name;
-				itemDesc = weapon_list[itemId].description;
 				itemPrice = weapon_list[itemId].cost;
 				break;
 		}

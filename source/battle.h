@@ -31,6 +31,10 @@ typedef struct {
 	int numEnemies;
 }Enemy;
 
+typedef struct {
+	int dmg;
+	int counter;
+}Damage;			// display the amount of damage done
 
 BattlePlayer b_player[3];
 Enemy enemy;

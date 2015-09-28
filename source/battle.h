@@ -13,6 +13,8 @@ typedef struct {
 	int frame;
 	int x;
 	int y;
+	int target;
+	int attackList[15];
 }BattlePlayer;
 
 typedef struct {
@@ -29,11 +31,20 @@ typedef struct {
 	int numEnemies;
 }Enemy;
 
+typedef struct {
+	int dmg;
+	int counter;
+}Damage;			// display the amount of damage done
 
 BattlePlayer b_player[3];
 Enemy enemy;
 
 void startBattle();
+int battleMenu(int pId);
 void loadEnemies();
 void drawPlayers();
 void drawEnemies();
+
+int inputAttack(int pId);
+void drawAttackBar(int length);
+void playerAttack(int pId);

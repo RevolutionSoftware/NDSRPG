@@ -1,3 +1,5 @@
+#ifndef BATTLE_H
+#define BATTLE_H
 typedef enum {
     A_STAND,
     A_WALK,
@@ -48,3 +50,4 @@ void drawEnemies();
 int inputAttack(int pId);
 void drawAttackBar(int length);
 void playerAttack(int pId);
+#endif

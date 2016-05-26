@@ -19,6 +19,7 @@ typedef struct {
 	int aId;			// same as above
 
 // misc
+	int atkBarLen;
 	int state;			// poison, paralyze, etc.
 	bool active;		// if the character is in the party or not
 }Character;
@@ -42,5 +43,6 @@ typedef struct {
 Party party;
 
 bool addHP(int pId, int amt);
+int getAtk(int pId);
 
 #endif // PLAYER_H

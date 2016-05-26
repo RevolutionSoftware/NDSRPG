@@ -9,17 +9,6 @@
  * \2 displays character stats
  ***/
 
-#define S_NAME "\x00"
-#define S_LVL "\x01"
-#define S_EXP "\x02"
-#define S_HP_MAX "\x03"
-#define S_HP "\x04"
-#define S_STR "\x05"
-#define S_DEF "\x06"
-#define S_AGI "\x07"
-#define S_WID "\x08"
-#define S_AID "\x09"
-#define S_STATE "\x0A"
 
 #define NEWX "\2"
 
@@ -36,19 +25,21 @@ typedef struct {
     int layer;
 } coord_t;
 
+int letterWidth(int letter);
 void putString(int x, int y, int w, int h, e_speed flag, const char *text, ...);
 int stringLength(const char *text);
 int stringWidth(const char *text);
 void putStat(int *x, int *y, e_speed flag, int statId);
 int putInt(int x, int y, e_speed flag, int num);
 int putChar(int x, int y, e_speed flag, char c);
+int putCharMask(int x, int y, char c);
 int stringHeight(const char *text);
 int intWidth(int num);
 // boxes
 void drawBox(int x, int y, int w, int h);
-void drawBoxType(int x, int y, int w, int h, int type);
+void drawBoxType(int x, int y, int w, int h, int type, int bg);
 void drawBoxes(Box boxes[], int numBoxes, int selected);
-void drawTextBox(int x, int y, int w, int h, e_speed flag, const char *text);
+void drawTextBox(int x, int y, int w, int h, int type, e_speed flag, const char *text);
 // erasing stuff
 void delText(int x, int y, int w, int h);
 void delTextBox(int x, int y, int w, int h);

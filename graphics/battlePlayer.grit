@@ -1,9 +1,16 @@
 # exclude map from output
 -m!
+
+# include a palette
+-p
+# select transparent color
+-gT 00FF00
 # bit depth 8
--GB8
+-gB8
+# tile the image
+-gt
 # meta tile width
--Mw2
+-Mw4
 # meta tile height
 -Mh4
 # create header file with declarations

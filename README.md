@@ -17,7 +17,7 @@ Code should have a prefix-comment
 
 e.g:
 
-`
+```
 
 // fun does-this-and-that ...
 
@@ -29,5 +29,5 @@ int fun(void) {
 
 }
 
-`
+```
 

@@ -8,16 +8,22 @@
 #include "npcs.h"
 #include "menus.h"
 
-extern map_t map_list[];
-extern u16 map_change_list[][5];
-extern char* text_list[];
-extern Drawable player;		// main character
-extern map_t Level;			// map and tile data
-extern NPC npcs[];			// list of npcs on the current map
+// Variables declared elsewhere
+extern map_t map_list[];				// contains pointers to map information [maps/maps.h]
+extern u16 map_change_list[][5];		// data to switch between maps (map id and coordinates) [maps/maps.h]
+extern char* text_list[];				// pointers to texts [texts/texts.h]
+extern Drawable player;					// main character [main.c]
+extern map_t Level;						// map and tile data [main.c]
+extern NPC npcs[];						// list of npcs on the current map [main.c]
 
+/* drawTile:
+ * Takes a pointer to tilemap (in VRAM) and the id of the tile to draw
+ * Tiles are 16x16, so we draw 4 8x8 tiles, so tiles are arranged 4 tiles
+ *	in a row.
+ */
 void drawTile(u16 *tilemap, int tileId) {
-	*tilemap = tileId*4;
-	tilemap++;
+	*tilemap = tileId*4;	// store the tile id into background
+	tilemap++;				// update pointer
 	*tilemap = tileId*4+1;
 	tilemap += 31;
 	*tilemap = tileId*4+2;
@@ -26,38 +32,39 @@ void drawTile(u16 *tilemap, int tileId) {
 }
 
 
-/* This draws a 17x13 tilemap, with 1 extra tile on the right and bottom
+/* drawMap:
+ * This draws a 17x13 tilemap, with 1 extra tile on the right and bottom
  * to make scrolling easier.
  */
 void drawMap() {
     // Our map will get stored at map base 0
     int w = Level.w;
-    int x = Level.x >> 4;
+    int x = Level.x >> 4;				// divide by 16
     int y = Level.y >> 4;
-    u16 *tilemap_bg = BG_MAP_RAM(0);
-    u16 *tilemap_fg = BG_MAP_RAM(2);
+    u16 *tilemap_bg = BG_MAP_RAM(0);	// tilemap pointers. background is in bank A
+    u16 *tilemap_fg = BG_MAP_RAM(2);	// use map base 0 and 2, each map base is 2kb
     int i;
     int row;
     int start = x+y*w;
     for(row = 0; row < 13; row++) {
         for(i = start; i < start+16; i++) {
-			int tileId = Level.map[i]+1;			// the first tile is just a transparent tile
+			int tileId = Level.map[i]+1;				// the first tile is just a transparent tile
 			int tileBG,tileFG;
-			if(Level.tiles[(tileId-1)*3].bgId == 0) {
+			if(Level.tiles[(tileId-1)*3].bgId == 0) {	// check if tile should be drawn to fg or bg
 				tileBG = tileId;
-				tileFG = 0;
+				tileFG = 0;					// tile 0 is transparent
 			} else {
-				tileBG = 1;
+				tileBG = 1;					// tile 1 is ground tile
 				tileFG = tileId;
 			}
-			drawTile(tilemap_bg,tileBG);
+			drawTile(tilemap_bg,tileBG);	// draw the tiles
 			drawTile(tilemap_fg,tileFG);
-			tilemap_bg+=2;
+			tilemap_bg+=2;					// each tile is 16x16, so skip two bytes
 			tilemap_fg+=2;
         }
-		tilemap_bg += 32;	// jump to next row in tilemap base
-		tilemap_fg += 32;	// jump to next row in tilemap base
-		start += w;		// jump to next row in the tilemap
+		tilemap_bg += 32;					// jump to next row in tilemap base
+		tilemap_fg += 32;					// jump to next row in tilemap base
+		start += w;							// jump to next row in the tilemap
     }
 
     // Jump to map_base 1/3 to draw last column of sprites (just off screen)
@@ -111,7 +118,7 @@ void checkTile(int type) {
 			return;
 		}
 	}
-	
+
 	int x = player.x;
 	int y = player.y+16;	// +15 lets the player overlap the tile a bit
 	int x2 = x;
@@ -164,7 +171,7 @@ void checkTile(int type) {
 
 	int action = -1;
 	int i = 0;
-	int flag=0;
+	int flag = 0;
 	int tile;
 
 	while(Level.objs[i] != '\0') {

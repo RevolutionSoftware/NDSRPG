@@ -1,7 +1,7 @@
 # NDSRPG
 An free/open-source RPG written in C/ARM assembly for the Nintendo DS
 
-To get the entire project you need to use `git submodule init` and `git submodule update` after cd'ing into the cloned directory.
+To clone the _entire_ project you need to use `git clone --recursive https://github.com/RevolutionSoftware/NDSRPG.git`.
 
 Coding-style:
 

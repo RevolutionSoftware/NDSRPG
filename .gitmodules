@@ -1,0 +1,3 @@
+[submodule "NDSRPGMapEditor"]
+	path = NDSRPGMapEditor
+	url = git@github.com:RevolutionSoftware/NDSRPGMapEditor.git

@@ -1,6 +1,8 @@
 # NDSRPG
 An free/open-source RPG written in C/ARM assembly for the Nintendo DS
 
+To get the entire project you need to use `git submodule init` and `git submodule update` after cd'ing into the cloned directory.
+
 Coding-style:
 
 C Standard: C99
@@ -30,4 +32,3 @@ int fun(void) {
 }
 
 ```
-

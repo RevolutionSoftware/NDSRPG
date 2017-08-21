@@ -1,0 +1,8 @@
+#+TITLE: TODO for NDSRPG
+#+STARTUP: showeverything
+
+* Code
+** Engine
+** Graphics
+** Texts
+*** [#B] Formatting of dialog in files

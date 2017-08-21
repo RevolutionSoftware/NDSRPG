@@ -24,7 +24,7 @@ e.g:
 #include <stdint.h>
 
 // function `fun` does _this_ and ~that~ ...
-int fun(uint32_t limit)
+int32_t fun(uint32_t limit)
 {
 	for(int32_t i = 0; i < limit; ++i) {
 		if (i % 2 == 0) {

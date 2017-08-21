@@ -5,7 +5,7 @@ To clone the _entire_ project you need to use `git clone --recursive https://git
 
 Coding-style:
 
-C Standard: C99
+C Standard: C11
 
 C++ Standard: C++11
 
@@ -20,15 +20,20 @@ Code should have a prefix-comment
 e.g:
 
 ```
+#include <stdio.h>
+#include <stdint.h>
 
-// fun does-this-and-that ...
-
-int fun(void) {
-
-	x++;
-
+// function `fun` does _this_ and ~that~ ...
+int fun(uint32_t limit)
+{
+	for(int32_t i = 0; i < limit; ++i) {
+		if (i % 2 == 0) {
+			printf("%d is even\n", i);
+		} else {
+			printf("%d is odd\n", i);
+		}
+	}
 	return 0;
-
 }
 
 ```

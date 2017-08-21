@@ -62,9 +62,9 @@ int main(void) {
 	Level = map_list[0];
 	Level.x = 0;
 	Level.y = 0;
-	
+
 	loadNPCs(0);
-	
+
 // setup party
 	party.member[0] = (Character) {"add",1,0,260,60,10,19,13,0,1,40};
 	party.member[1] = (Character) {"chickendude",1,0,50,40,16,15,3,1,0,35};
@@ -73,9 +73,9 @@ int main(void) {
 	party.member[0].active = true;
 	party.member[1].active = true;
 	party.member[2].active = true;
-	
+
 	party.numMembers = 3;
-	
+
 	party.gold = 133337;
 
 	for(i = 0; i < 4; i++) {
@@ -156,7 +156,8 @@ int main(void) {
 //	REG_BG0HOFS_SUB = -4;
 //	REG_BG0VOFS_SUB = -4;
 
-	startBattle();
+// testing the new battle mechanic
+//	startBattle();
 
 	dmaCopy(characterPal, SPRITE_PALETTE, 512);
 
